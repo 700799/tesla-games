@@ -4,35 +4,83 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tesla Games</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
 <style>
-  :root { --bg:#1d1c2b; --card:#2a2940; --accent:#ff4d6d; }
-  body { margin:0; min-height:100vh; background:var(--bg); color:#fff;
-    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
-  main { max-width:1100px; margin:0 auto; padding:48px 24px; }
-  h1 { font-size:52px; margin:0 0 8px; }
-  p { opacity:.75; font-size:20px; margin:0 0 36px; }
-  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:24px; }
-  a.game { display:block; background:var(--card); border-radius:24px; padding:28px; color:inherit; text-decoration:none;
-    transition:transform .15s; }
-  a.game:active, a.game:hover { transform:scale(1.03); }
-  .thumb { height:150px; border-radius:16px; margin-bottom:18px; display:grid; place-items:center;
-    background:radial-gradient(circle at 50% 55%, #000 0 34px, var(--accent) 35px 40px, transparent 41px),
-               linear-gradient(135deg,#a3d18a,#7cc56c 50%,#bcb9c9 50%,#bcb9c9); }
-  h2 { margin:0 0 6px; font-size:30px; }
-  span { opacity:.7; font-size:18px; }
+  :root { --ink:#1d1b26; --paper:#fffaf0; --accent:#ff4d6d; --yellow:#ffd23f;
+    --toon:"Luckiest Guy","Comic Sans MS","Chalkboard SE",system-ui,sans-serif; }
+  * { box-sizing:border-box; }
+  body { margin:0; min-height:100vh; color:var(--ink); font-family:Nunito,system-ui,sans-serif; font-weight:800;
+    background:#2b2a4a radial-gradient(circle at 20% 10%, #3d3b6b 0, transparent 40%), radial-gradient(circle at 85% 80%, #3a2f5c 0, transparent 45%); }
+  main { max-width:1180px; margin:0 auto; padding:36px 22px 60px; }
+  h1 { font-family:var(--toon); font-weight:400; font-size:clamp(46px,8vw,80px); margin:0; color:var(--yellow); letter-spacing:2px;
+    -webkit-text-stroke:3px var(--ink); paint-order:stroke; text-shadow:6px 6px 0 var(--ink); transform:rotate(-2deg); display:inline-block; }
+  .sub { color:#fff; font-size:20px; margin:14px 0 30px; opacity:.9; }
+  h2 { font-family:var(--toon); font-weight:400; color:#fff; font-size:30px; margin:34px 0 14px; letter-spacing:1px;
+    -webkit-text-stroke:2px var(--ink); paint-order:stroke; text-shadow:3px 3px 0 var(--ink); }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:22px; }
+  a.game { display:block; background:var(--paper); border:3px solid var(--ink); border-radius:22px; box-shadow:6px 6px 0 var(--ink);
+    padding:16px 18px 18px; color:inherit; text-decoration:none; transition:transform .12s; }
+  a.game:hover { transform:translateY(-3px) rotate(-.5deg); }
+  a.game:active { transform:translate(3px,3px); box-shadow:3px 3px 0 var(--ink); }
+  .thumb { height:140px; border-radius:14px; border:3px solid var(--ink); margin-bottom:12px; display:grid; place-items:center;
+    font-size:64px; position:relative; overflow:hidden; }
+  .tag { position:absolute; top:8px; left:8px; background:var(--yellow); border:2px solid var(--ink); border-radius:999px;
+    font-size:12px; padding:2px 10px; letter-spacing:1px; }
+  h3 { font-family:var(--toon); font-weight:400; font-size:28px; margin:0 0 4px; letter-spacing:1px; color:var(--accent); }
+  p { margin:0; font-size:16px; line-height:1.35; }
+  a.game.soon { opacity:.6; cursor:default; position:relative; }
+  a.game.soon:hover { transform:none; }
+  a.game.soon::after { content:'COMING SOON'; position:absolute; top:24px; right:24px; background:var(--accent); color:#fff;
+    border:2px solid var(--ink); border-radius:999px; padding:3px 12px; font-size:13px; letter-spacing:1px; transform:rotate(4deg); }
+  .note { color:#fff; opacity:.7; margin-top:40px; font-size:15px; }
 </style>
 </head>
 <body>
 <main>
-  <h1>Tesla Games</h1>
-  <p>Touch-friendly browser games for the big screen. Park first!</p>
+  <h1>TESLA GAMES</h1>
+  <p class="sub">Cartoon games for the big screen, starring Captain Pup. Park first, then play!</p>
+
+  <h2>🎮 Arcade</h2>
   <div class="grid">
     <a class="game" href="hole/">
-      <div class="thumb"></div>
-      <h2>Hole City</h2>
-      <span>Be the hungriest monster: gobble the city in 2 minutes.</span>
+      <div class="thumb" style="background:linear-gradient(135deg,#b5e48c,#80d96a 50%,#cdc6ee 50%)">👾<span class="tag">8 LEVELS</span></div>
+      <h3>Hole City</h3>
+      <p>Be the hungriest monster! Gobble the city, dodge bombs, grab power-ups and beat Grumblor.</p>
     </a>
   </div>
+
+  <h2>🧠 Learning Quests</h2>
+  <div class="grid">
+    <a class="game soon" data-href="martian-jump/">
+      <div class="thumb" style="background:linear-gradient(#f7c59f,#e07a5f 65%,#b5452f 65%)">🚀<span class="tag">GRAVITY</span></div>
+      <h3>The Martian Jump</h3>
+      <p>Mission 01: your rover is stranded on Mars. Master Martian gravity to jump the crater.</p>
+    </a>
+    <a class="game soon" data-href="planet-explorer/">
+      <div class="thumb" style="background:radial-gradient(circle at 70% 35%,#ffd6a5 0 16%,transparent 17%),linear-gradient(#1b1846,#3d2c7a)">🪐<span class="tag">SPACE</span></div>
+      <h3>Planet Explorer</h3>
+      <p>Visit Mars, Jupiter, Saturn and Europa. Learn each world's secret to unlock new gear.</p>
+    </a>
+    <a class="game soon" data-href="science-lab/">
+      <div class="thumb" style="background:linear-gradient(135deg,#9fe7f5,#4cc9f0)">🧪<span class="tag">LAB</span></div>
+      <h3>The Science Lab</h3>
+      <p>Mix elements, solve gravity puzzles, melt and boil things, and crack the mystery substance.</p>
+    </a>
+    <a class="game soon" data-href="time-travel/">
+      <div class="thumb" style="background:linear-gradient(135deg,#ffe1a8,#f4a261)">⏳<span class="tag">HISTORY</span></div>
+      <h3>Time Travel Quest</h3>
+      <p>Ancient Egypt, Rome, the Mongol Empire and the Renaissance. How did people change the world?</p>
+    </a>
+    <a class="game soon" data-href="epic-voyage/">
+      <div class="thumb" style="background:linear-gradient(#a8e6ff,#4895ef 60%,#2a6fdb 60%)">⛵<span class="tag">LITERATURE</span></div>
+      <h3>Homer's Epic Voyage</h3>
+      <p>Sail with Odysseus, meet the heroes of the Iliad, and collect the big themes of Homer's epics.</p>
+    </a>
+  </div>
+
+  <p class="note">All games work on the car screen, tablets, phones and computers. Progress saves in this browser.</p>
 </main>
 </body>
 </html>
