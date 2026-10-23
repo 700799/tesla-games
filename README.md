@@ -13,6 +13,10 @@ Every game is plain HTML/JS with no build step and no dependencies.
 - **Touch / mouse:** drag anywhere on the screen (floating joystick)
 - **Keyboard:** WASD or arrow keys
 
+**8-level campaign** (First Bites → Grumblor's City) with goals and 1–3 stars per level; levels unlock as you earn stars. Plus Free Play on Easy / Normal / Hard.
+
+Challenges: timed bonus missions, 💣 bombs that shrink you, ✨ golden treasure worth 5x, combo multiplier, power-ups (⚡ speed, 🧲 magnet, 🍔 mega mouth, 🛡️ shield), a red danger warning when a bigger monster is near, a final-30-second FRENZY, and the boss monster Grumblor. Original suspenseful soundtrack synthesized live in the browser (no audio files).
+
 Objects only fall in once they're small enough for your hole (start with people and cones, then cars, buses, houses, shops, office blocks, skyscrapers). Gobbling a rival monster steals part of its size; if you get swallowed you respawn after 3 seconds at half size. Your best score is saved in the browser.
 
 ## Running locally
