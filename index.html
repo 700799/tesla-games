@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tesla Games</title>
+<style>
+  :root { --bg:#1d1c2b; --card:#2a2940; --accent:#ff4d6d; }
+  body { margin:0; min-height:100vh; background:var(--bg); color:#fff;
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  main { max-width:1100px; margin:0 auto; padding:48px 24px; }
+  h1 { font-size:52px; margin:0 0 8px; }
+  p { opacity:.75; font-size:20px; margin:0 0 36px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:24px; }
+  a.game { display:block; background:var(--card); border-radius:24px; padding:28px; color:inherit; text-decoration:none;
+    transition:transform .15s; }
+  a.game:active, a.game:hover { transform:scale(1.03); }
+  .thumb { height:150px; border-radius:16px; margin-bottom:18px; display:grid; place-items:center;
+    background:radial-gradient(circle at 50% 55%, #000 0 34px, var(--accent) 35px 40px, transparent 41px),
+               linear-gradient(135deg,#a3d18a,#7cc56c 50%,#bcb9c9 50%,#bcb9c9); }
+  h2 { margin:0 0 6px; font-size:30px; }
+  span { opacity:.7; font-size:18px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Tesla Games</h1>
+  <p>Touch-friendly browser games for the big screen. Park first!</p>
+  <div class="grid">
+    <a class="game" href="hole/">
+      <div class="thumb"></div>
+      <h2>Hole City</h2>
+      <span>Swallow the city and become the biggest hole in 2 minutes.</span>
+    </a>
+  </div>
+</main>
+</body>
+</html>
