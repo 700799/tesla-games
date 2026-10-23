@@ -7,13 +7,13 @@ Every game is plain HTML/JS with no build step and no dependencies.
 
 | Game | Path | Description |
 |------|------|-------------|
-| **Hole City** | [`hole/`](hole/) | A hole.io-style game: you're a hole in a city. Swallow people, cars, trees and eventually skyscrapers to grow, and be the biggest hole when the 2-minute timer runs out. Six AI rival holes compete with you, and bigger holes can swallow smaller ones. |
+| **Hole City** | [`hole/`](hole/) | A hole.io-style game starring hungry cute monsters. Your monster's open mouth is the hole: gobble people, cars, trees and eventually skyscrapers to grow, and be the biggest monster when the 2-minute timer runs out. Six AI rival monsters compete with you, and bigger monsters can gobble smaller ones. |
 
 ### Hole City controls
 - **Touch / mouse:** drag anywhere on the screen (floating joystick)
 - **Keyboard:** WASD or arrow keys
 
-Objects only fall in once they're small enough for your hole (start with people and cones, then cars, buses, houses, shops, office blocks, skyscrapers). Swallowing a rival hole steals part of its size; if you get swallowed you respawn after 3 seconds at half size. Your best score is saved in the browser.
+Objects only fall in once they're small enough for your hole (start with people and cones, then cars, buses, houses, shops, office blocks, skyscrapers). Gobbling a rival monster steals part of its size; if you get swallowed you respawn after 3 seconds at half size. Your best score is saved in the browser.
 
 ## Running locally
 

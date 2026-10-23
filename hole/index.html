@@ -63,7 +63,7 @@
 <div id="menu" class="overlay">
   <div class="card">
     <h1>HOLE<span>CITY</span></h1>
-    <p>Swallow the city. Start small, grow huge, and be the biggest hole when the clock runs out.</p>
+    <p>You're a hungry little monster. Gobble the city, grow huge, and be the biggest monster when the clock runs out.</p>
     <button class="big" id="play">Play</button>
     <p class="hint">Drag anywhere to move · or WASD / arrow keys</p>
     <p class="hint" id="best"></p>
@@ -304,13 +304,16 @@ function query(x, y, r, fn) {
 }
 
 // ---------- holes ----------
-const BOTS = [['Nova', '#4cc9f0'], ['Sinkhole Sam', '#80ed99'], ['Vortex', '#b388ff'],
-              ['Crater', '#ffb703'], ['Mx. Void', '#f72585'], ['Gulp', '#ff8fab']];
+// each monster: [name, ui colour, body colour, head style]
+const BOTS = [['Nova', '#4cc9f0', '#a8e6ff', 'antenna'], ['Blinky', '#80ed99', '#b9f3a8', 'cyclops'],
+              ['Vortex', '#b388ff', '#d9c2ff', 'horns'],   ['Crater', '#ffd23f', '#fff1a3', 'ears'],
+              ['Mx. Void', '#f72585', '#ffb8d6', 'horns'], ['Gulp', '#ff9f43', '#ffd0a6', 'antenna']];
+const INK = '#1d1b26';
 const holeR = m => 16 * Math.sqrt(1 + m / 24);
 const BOT_SPEED = 0.6;
 
-function makeHole(name, color, isPlayer) {
-  return { name, color, isPlayer, x: 0, y: 0, vx: 0, vy: 0, mass: 0, score: 0, r: 16,
+function makeHole(name, color, isPlayer, body, kind) {
+  return { name, color, isPlayer, body, kind, blink: rand(1, 4), x: 0, y: 0, vx: 0, vy: 0, mass: 0, score: 0, r: 16,
     alive: true, respawn: 0, shield: 2, think: 0, tx: 0, ty: 0, skill: rand(0.5, 1) };
 }
 function spawnSpot() {
@@ -332,9 +335,9 @@ function placeHole(h) {
 
 function setupHoles(withPlayer) {
   holes = [];
-  if (withPlayer) { player = makeHole('You', '#ff4d6d', true); holes.push(player); }
+  if (withPlayer) { player = makeHole('You', '#ff6fa0', true, '#fbfbfb', 'pup'); holes.push(player); }
   else player = null;
-  for (const [n, c] of BOTS) holes.push(makeHole(n, c, false));
+  for (const [n, c, b, k] of BOTS) holes.push(makeHole(n, c, false, b, k));
   for (const h of holes) placeHole(h);
 }
 
@@ -430,7 +433,7 @@ function endGame() {
   state = 'over';
   joy.active = false;
   const r = ranked(), place = r.indexOf(player) + 1;
-  $('place').textContent = place === 1 ? 'You are the biggest hole! 🏆' : `You placed #${place}`;
+  $('place').textContent = place === 1 ? 'You are the biggest monster! 🏆' : `You placed #${place}`;
   $('ranks').innerHTML = r.map((h, i) =>
     `<li class="${h.isPlayer ? 'me' : ''}"><span>${i + 1}. ${h.name}</span><b>${h.score}</b></li>`).join('');
   const best = getBest();
@@ -531,8 +534,8 @@ function holeVsHole() {
       a.mass += gain; a.score += gain;
       b.mass *= 0.5;
       if (state === 'play') {
-        if (b.isPlayer) toast(`${a.name} swallowed you! Respawning…`);
-        else if (a.isPlayer) { toast(`You swallowed ${b.name}! +${gain}`); pop(40); }
+        if (b.isPlayer) toast(`${a.name} gobbled you up! Respawning…`);
+        else if (a.isPlayer) { toast(`You gobbled ${b.name}! +${gain}`); pop(40); }
       }
     }
   }
@@ -604,7 +607,7 @@ function updateCamera(dt) {
   const base = Math.min(W, H * 1.4);
   if (state !== 'menu' && player) {
     tx = player.x; ty = player.y;
-    tz = clamp(base / (player.r * 10 + 420), 0.16, 2.2);
+    tz = clamp(base / (player.r * 14 + 460), 0.14, 2.0);
   } else {
     menuT += dt * 0.08;
     tx = WORLD / 2 + Math.cos(menuT) * 900; ty = WORLD / 2 + Math.sin(menuT * 1.3) * 700;
@@ -788,18 +791,138 @@ function shade(hex, amt) {
   return v;
 }
 
-function drawHole(h) {
-  const { x, y, r } = h;
-  ctx.fillStyle = 'rgba(0,0,0,.25)';
-  ctx.beginPath(); ctx.arc(x, y + r * 0.06, r * 1.08, 0, TAU); ctx.fill();
-  const g = ctx.createRadialGradient(x, y - r * 0.2, r * 0.1, x, y, r);
-  g.addColorStop(0, '#000'); g.addColorStop(0.7, '#0c0a16'); g.addColorStop(1, '#2b2442');
-  ctx.fillStyle = g;
-  ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill();
-  ctx.globalAlpha = h.shield > 0 ? 0.4 + 0.4 * Math.sin(performance.now() / 80) : 1;
-  ctx.strokeStyle = h.color; ctx.lineWidth = Math.max(3, r * 0.1);
-  ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.stroke();
+// Monsters: the mouth is the hole (radius r). The body sits around and above it.
+function ell(x, y, rx, ry, rot = 0) { ctx.beginPath(); ctx.ellipse(x, y, rx, ry, rot, 0, TAU); }
+function shieldAlpha(h) { return h.shield > 0 ? 0.55 + 0.35 * Math.sin(performance.now() / 70) : 1; }
+
+// ground layer: shadow, feet, arms, body, open mouth
+function drawMonsterBase(h) {
+  const { x, y, r } = h, lw = Math.max(2, r * 0.09);
+  ctx.globalAlpha = shieldAlpha(h);
+  ctx.fillStyle = 'rgba(20,10,40,.22)'; ell(x + r * 0.3, y + r * 1.2, r * 1.45, r * 0.38); ctx.fill();
+  ctx.lineWidth = lw; ctx.strokeStyle = INK; ctx.lineJoin = 'round';
+  if (h.kind === 'pup') {   // floppy black ears hang behind the body
+    ctx.fillStyle = '#1f1d22';
+    for (const sd of [-1, 1]) { ell(x + sd * r * 1.25, y - r * 0.85, r * 0.42, r * 0.85, sd * 0.25); ctx.fill(); }
+  }
+  ctx.fillStyle = h.body;
+  for (const sd of [-1, 1]) { ell(x + sd * r * 0.55, y + r * 1.15, r * 0.34, r * 0.24); ctx.fill(); ctx.stroke(); }
+  for (const sd of [-1, 1]) { ell(x + sd * r * 1.32, y + r * 0.1, r * 0.22, r * 0.5, -sd * 0.3); ctx.fill(); ctx.stroke(); }
+  ell(x, y - r * 0.5, r * 1.38, r * 1.72); ctx.fill(); ctx.stroke();
+  const g = ctx.createRadialGradient(x, y - r * 0.15, r * 0.1, x, y, r);
+  g.addColorStop(0, '#000'); g.addColorStop(0.65, '#14060c'); g.addColorStop(1, '#4a1424');
+  ctx.fillStyle = g; ell(x, y, r, r); ctx.fill();
   ctx.globalAlpha = 1;
+}
+
+// drawn after things falling in: teeth, tongue, lip
+function drawMouthFront(h) {
+  const { x, y, r } = h, lw = Math.max(2, r * 0.09);
+  ctx.globalAlpha = shieldAlpha(h);
+  ctx.fillStyle = '#fff'; ctx.strokeStyle = INK; ctx.lineWidth = Math.max(1, lw * 0.45); ctx.lineJoin = 'round';
+  const tooth = (a, da, len) => {
+    ctx.beginPath();
+    ctx.moveTo(x + Math.cos(a - da) * r * 0.99, y + Math.sin(a - da) * r * 0.99);
+    ctx.lineTo(x + Math.cos(a) * (r - len), y + Math.sin(a) * (r - len));
+    ctx.lineTo(x + Math.cos(a + da) * r * 0.99, y + Math.sin(a + da) * r * 0.99);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+  };
+  if (h.kind === 'pup') {
+    tooth(-Math.PI / 2 - 0.45, 0.13, r * 0.2); tooth(-Math.PI / 2 + 0.45, 0.13, r * 0.2);
+  } else {
+    const n = clamp(Math.round(r / 6), 4, 8);
+    for (let i = 0; i < n; i++) tooth(Math.PI * (1.18 + 0.64 * (i + 0.5) / n), 0.32 / n * 4, r * 0.3);
+    for (let i = 0; i < n - 1; i++) tooth(Math.PI * (0.22 + 0.56 * (i + 0.5) / (n - 1)), 0.3 / n * 4, r * 0.24);
+  }
+  ctx.strokeStyle = INK; ctx.lineWidth = lw; ell(x, y, r, r); ctx.stroke();
+  if (h.kind === 'pup') {   // happy pink tongue hanging over the bottom lip
+    ctx.fillStyle = '#ff8fb1'; ctx.lineWidth = lw * 0.7;
+    ctx.beginPath();
+    ctx.moveTo(x - r * 0.32, y + r * 0.62);
+    ctx.lineTo(x - r * 0.3, y + r * 1.05);
+    ctx.quadraticCurveTo(x, y + r * 1.42, x + r * 0.3, y + r * 1.05);
+    ctx.lineTo(x + r * 0.32, y + r * 0.62);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = '#e0607f'; ctx.lineWidth = lw * 0.4;
+    ctx.beginPath(); ctx.moveTo(x, y + r * 0.75); ctx.lineTo(x, y + r * 1.12); ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+}
+
+// top layer, always visible over buildings: head decorations and eyes
+function drawMonsterFace(h, now) {
+  const { x, y, r } = h, lw = Math.max(2, r * 0.09);
+  ctx.globalAlpha = shieldAlpha(h);
+  ctx.lineWidth = lw; ctx.strokeStyle = INK; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  const top = y - r * 2.2, eyeY = y - r * 1.45;
+  if (h.kind === 'horns' || h.kind === 'ears') {
+    for (const sd of [-1, 1]) {
+      ctx.fillStyle = h.body;
+      ctx.beginPath();
+      ctx.moveTo(x + sd * r * 0.45, top + r * 0.12);
+      ctx.lineTo(x + sd * r * (h.kind === 'horns' ? 0.95 : 1.15), top - r * (h.kind === 'horns' ? 0.6 : 0.5));
+      ctx.lineTo(x + sd * r * 1.12, top + r * 0.55);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      if (h.kind === 'horns') {
+        ctx.fillStyle = '#fff8e1';
+        ctx.beginPath();
+        ctx.moveTo(x + sd * r * 0.88, top - r * 0.38); ctx.lineTo(x + sd * r * 0.95, top - r * 0.6); ctx.lineTo(x + sd * r * 1.0, top - r * 0.33);
+        ctx.closePath(); ctx.fill();
+      }
+    }
+  } else if (h.kind === 'antenna') {
+    for (const sd of [-1, 1]) {
+      ctx.beginPath(); ctx.moveTo(x + sd * r * 0.35, top + r * 0.08); ctx.lineTo(x + sd * r * 0.7, top - r * 0.55); ctx.stroke();
+      ctx.fillStyle = h.color; ell(x + sd * r * 0.72, top - r * 0.6, r * 0.17, r * 0.17); ctx.fill(); ctx.stroke();
+    }
+  }
+  // redraw the head dome so decorations tuck behind it
+  ctx.fillStyle = h.body;
+  ctx.beginPath(); ctx.ellipse(x, y - r * 0.5, r * 1.38, r * 1.72, 0, Math.PI * 1.08, Math.PI * 1.92); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(x, y - r * 0.5, r * 1.38, r * 1.72, 0, Math.PI * 1.08, Math.PI * 1.92); ctx.stroke();
+
+  // eyes look where the monster is heading, and blink now and then
+  const sp = Math.hypot(h.vx, h.vy) || 1, lx = h.vx / sp * Math.min(1, sp / 60), ly = h.vy / sp * Math.min(1, sp / 60);
+  const blinking = (h.blink - now / 1000 % 4.2 + 4.2) % 4.2 < 0.12;
+  const eye = (ex, er, pupil) => {
+    if (blinking) { ctx.beginPath(); ctx.moveTo(ex - er * 0.8, eyeY); ctx.quadraticCurveTo(ex, eyeY + er * 0.5, ex + er * 0.8, eyeY); ctx.stroke(); return; }
+    ctx.fillStyle = '#fff'; ell(ex, eyeY, er, er); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = pupil; ell(ex + lx * er * 0.35, eyeY + ly * er * 0.35, er * 0.5, er * 0.5); ctx.fill();
+    ctx.fillStyle = '#fff'; ell(ex + lx * er * 0.35 + er * 0.18, eyeY + ly * er * 0.35 - er * 0.2, er * 0.16, er * 0.16); ctx.fill();
+  };
+  if (h.kind === 'pup') {
+    // black eye patches with a white blaze down the middle, brown eyes, button nose, whiskers
+    ctx.fillStyle = '#1f1d22';
+    for (const sd of [-1, 1]) { ell(x + sd * r * 0.68, eyeY - r * 0.08, r * 0.46, r * 0.6, sd * 0.4); ctx.fill(); }
+    ctx.fillStyle = '#8a5a3a';
+    for (const sd of [-1, 1]) { ell(x + sd * r * 0.55, eyeY + r * 0.22, r * 0.12, r * 0.08); ctx.fill(); }
+    ctx.strokeStyle = '#3a2a22';
+    for (const sd of [-1, 1]) {
+      const ex = x + sd * r * 0.55, er = r * 0.26;
+      if (blinking) { ctx.beginPath(); ctx.moveTo(ex - er, eyeY); ctx.quadraticCurveTo(ex, eyeY + er * 0.6, ex + er, eyeY); ctx.stroke(); continue; }
+      ctx.fillStyle = '#6b3d22'; ell(ex, eyeY, er, er); ctx.fill();
+      ctx.fillStyle = '#120a08'; ell(ex + lx * er * 0.3, eyeY + ly * er * 0.3, er * 0.55, er * 0.55); ctx.fill();
+      ctx.fillStyle = '#fff'; ell(ex + lx * er * 0.3 + er * 0.25, eyeY + ly * er * 0.3 - er * 0.28, er * 0.22, er * 0.22); ctx.fill();
+    }
+    ctx.fillStyle = '#3b3436'; ell(x, y - r * 1.12, r * 0.22, r * 0.15); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,.5)'; ell(x - r * 0.07, y - r * 1.16, r * 0.07, r * 0.04); ctx.fill();
+    ctx.strokeStyle = 'rgba(40,30,30,.55)'; ctx.lineWidth = Math.max(1, r * 0.03);
+    ctx.beginPath();
+    for (const sd of [-1, 1]) for (const k of [-1, 0, 1]) {
+      ctx.moveTo(x + sd * r * 0.3, y - r * 1.02 + k * r * 0.06);
+      ctx.lineTo(x + sd * r * 1.05, y - r * 1.1 + k * r * 0.16);
+    }
+    ctx.stroke();
+  } else if (h.kind === 'cyclops') {
+    ctx.strokeStyle = INK; eye(x, r * 0.48, INK);
+  } else {
+    ctx.strokeStyle = INK; for (const sd of [-1, 1]) eye(x + sd * r * 0.5, r * 0.34, INK);
+  }
+  if (h.kind !== 'pup') {   // rosy cheeks
+    ctx.fillStyle = 'rgba(255,120,150,.35)';
+    for (const sd of [-1, 1]) { ell(x + sd * r * 0.95, y - r * 0.95, r * 0.2, r * 0.12); ctx.fill(); }
+  }
+  ctx.globalAlpha = 1; ctx.lineCap = 'butt';
 }
 
 function render() {
@@ -823,7 +946,7 @@ function render() {
   ctx.strokeStyle = '#15141c'; ctx.lineWidth = 16; ctx.strokeRect(-8, -8, WORLD + 16, WORLD + 16);
 
   // holes, then whatever is sinking into them
-  for (const h of holes) if (h.alive) drawHole(h);
+  for (const h of holes) if (h.alive) drawMonsterBase(h);
   for (const h of holes) {
     if (!h.alive) continue;
     let any = false;
@@ -848,6 +971,7 @@ function render() {
     }
     ctx.restore();
   }
+  for (const h of holes) if (h.alive) drawMouthFront(h);
 
   // standing objects, back to front
   const vis = [];
@@ -861,12 +985,16 @@ function render() {
   for (const o of vis) drawShadow(o);
   for (const o of vis) drawObj(o);
 
+  // monster faces stay on top so you can always spot everyone
+  const now = performance.now();
+  for (const h of holes) if (h.alive) drawMonsterFace(h, now);
+
   // names
   ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
   ctx.font = `800 ${15 / z}px system-ui, sans-serif`;
   for (const h of holes) {
     if (!h.alive) continue;
-    const ly = h.y - h.r - 6 / z;
+    const ly = h.y - h.r * (h.kind === 'antenna' ? 3.05 : 2.85) - 6 / z;
     ctx.lineWidth = 4 / z; ctx.strokeStyle = 'rgba(0,0,0,.6)'; ctx.strokeText(h.name, h.x, ly);
     ctx.fillStyle = h.isPlayer ? '#fff' : h.color; ctx.fillText(h.name, h.x, ly);
   }
