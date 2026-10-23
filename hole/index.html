@@ -89,6 +89,20 @@
   #ranks { list-style:none; padding:0; margin:10px auto; font-size:18px; text-align:left; max-width:360px; }
   #ranks li { display:flex; justify-content:space-between; gap:24px; padding:3px 10px; border-radius:8px; }
   #ranks li.me { background:#ffe8a3; color:#d62828; }
+  #quiz .card { max-width:min(720px,94vw); }
+  #qTopic { display:inline-block; background:var(--blue); border:3px solid var(--ink); border-radius:999px; padding:4px 14px 0;
+    font-family:var(--toon); font-size:18px; letter-spacing:1px; color:#fff; -webkit-text-stroke:1px var(--ink); paint-order:stroke; }
+  #qText { font-size:26px !important; margin:14px 0 !important; line-height:1.25; }
+  #qAns { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  #qAns button { background:#fff; border:3px solid var(--ink); border-radius:16px; box-shadow:0 5px 0 var(--ink);
+    font-size:21px; padding:16px 10px; min-height:64px; }
+  #qAns button:active { transform:translateY(3px); box-shadow:0 2px 0 var(--ink); }
+  #qAns button.right { background:#c7f9e5; }
+  #qAns button.wrong { background:#ffd6dc; }
+  #qWhy { font-size:19px !important; min-height:24px; }
+  #fact { background:#fff4c2; border:3px dashed var(--ink); border-radius:16px; padding:10px 14px; margin:10px auto; max-width:560px; text-align:left; }
+  .lvl .br { font-size:14px; }
+  @media (max-width:700px) { #qAns { grid-template-columns:1fr; } #qText { font-size:21px !important; } }
   @media (max-width:700px) { .levels { grid-template-columns:repeat(2,1fr); } h1 { font-size:50px; } }
 </style>
 </head>
@@ -96,7 +110,7 @@
 <canvas id="c"></canvas>
 
 <div id="hud" hidden>
-  <div id="stats" class="panel"><span id="score" class="toon">0</span><small>points</small><span id="combo"></span></div>
+  <div id="stats" class="panel"><span id="score" class="toon">0</span><small>points</small><span id="combo"></span><span id="brainHud" style="display:block;font-size:15px">🧠 0</span></div>
   <div id="goal" class="goalbox panel" hidden>
     <div class="lbl"><span>⭐ LEVEL GOAL</span><span id="gNum"></span></div>
     <div id="gText" class="txt"></div>
@@ -128,9 +142,19 @@
       <button class="btn go" id="play">Play</button>
     </div>
     <div class="legend">
-      <span>⚡ Speed</span><span>🧲 Magnet</span><span>🍔 Mega mouth</span><span>🛡️ Shield</span><span>✨ Gold = 5x</span><span>💣 Bombs shrink you!</span>
+      <span>⚡ Speed</span><span>🧲 Magnet</span><span>🍔 Mega mouth</span><span>🛡️ Shield</span><span>✨ Gold = 5x</span><span>💣 Bombs shrink you!</span><span>🧠 Brain Bubble = quiz for a power-up</span>
     </div>
     <p class="hint">Drag anywhere to move · or WASD / arrow keys · <span id="best"></span></p>
+  </div>
+</div>
+
+<div id="quiz" class="overlay" hidden>
+  <div class="card panel">
+    <span id="qTopic">🧠 BRAIN BUBBLE</span>
+    <p id="qText"></p>
+    <div id="qAns"></div>
+    <p id="qWhy"></p>
+    <button class="btn go" id="qGo" hidden>Keep gobbling ▶</button>
   </div>
 </div>
 
@@ -139,6 +163,8 @@
     <h2 id="place" class="toon">Time's up!</h2>
     <div id="stars"></div>
     <p id="goalRes"></p>
+    <p id="brainRes"></p>
+    <div id="fact"></div>
     <ol id="ranks"></ol>
     <p id="overBest" class="hint"></p>
     <div>
@@ -180,6 +206,7 @@ const TYPES = {
   tower:   { w: 120, d: 120, h: 200, pts: 130 },
   bomb:    { w: 11,  d: 11,  h: 12,  pts: 0 },
   power:   { w: 18,  d: 18,  h: 18,  pts: 0 },
+  brain:   { w: 18,  d: 18,  h: 18,  pts: 0 },
 };
 for (const k in TYPES) TYPES[k].s = Math.hypot(TYPES[k].w, TYPES[k].d) / 2 * 0.85;
 
@@ -199,31 +226,149 @@ try { if (DIFF[localStorage.getItem('holecity.diff')]) difficulty = localStorage
 
 // The campaign. Stars: 1 = level goal done, 2 = goal + top 3, 3 = goal + finish #1.
 const LEVELS = [
-  { name: 'First Bites', time: 90, rivals: 3, bot: 0.48, focus: 0.3, bombs: 0, gold: 0.03, traffic: 1, power: 14,
+  { name: 'First Bites', theme: 'math', brains: 9, time: 90, rivals: 3, bot: 0.48, focus: 0.3, bombs: 0, gold: 0.03, traffic: 1, power: 14,
     goal: { kind: 'score', n: 150, text: n => `Reach ${n} points` } },
-  { name: 'Snack Attack', time: 90, rivals: 4, bot: 0.52, focus: 0.35, bombs: 30, gold: 0.03, traffic: 1, power: 16,
+  { name: 'Snack Attack', theme: 'body', brains: 9, time: 90, rivals: 4, bot: 0.52, focus: 0.35, bombs: 30, gold: 0.03, traffic: 1, power: 16,
     goal: { kind: 'eat', n: 40, text: n => `Gobble ${n} people`, match: o => o.type === 'person' } },
-  { name: 'Rush Hour', time: 100, rivals: 4, bot: 0.55, focus: 0.38, bombs: 40, gold: 0.03, traffic: 2.2, power: 16,
+  { name: 'Rush Hour', theme: 'motion', brains: 9, time: 100, rivals: 4, bot: 0.55, focus: 0.38, bombs: 40, gold: 0.03, traffic: 2.2, power: 16,
     goal: { kind: 'eat', n: 15, text: n => `Gobble ${n} cars, trucks or buses`, match: o => VEH.includes(o.type) } },
-  { name: 'Gold Fever', time: 100, rivals: 5, bot: 0.56, focus: 0.4, bombs: 50, gold: 0.08, traffic: 1, power: 18,
+  { name: 'Gold Fever', theme: 'space', brains: 9, time: 100, rivals: 5, bot: 0.56, focus: 0.4, bombs: 50, gold: 0.08, traffic: 1, power: 18,
     goal: { kind: 'eat', n: 6, text: n => `Find ${n} golden treasures`, match: o => o.gold } },
-  { name: 'Monster Mash', time: 110, rivals: 6, bot: 0.58, focus: 0.4, bombs: 50, gold: 0.03, traffic: 1, power: 24,
+  { name: 'Monster Mash', theme: 'history', brains: 9, time: 110, rivals: 6, bot: 0.58, focus: 0.4, bombs: 50, gold: 0.03, traffic: 1, power: 24,
     goal: { kind: 'rival', n: 2, text: n => `Gobble ${n} rival monsters` } },
-  { name: 'Sky High', time: 120, rivals: 6, bot: 0.6, focus: 0.42, bombs: 60, gold: 0.03, traffic: 1, power: 22,
+  { name: 'Sky High', theme: 'build', brains: 9, time: 120, rivals: 6, bot: 0.6, focus: 0.42, bombs: 60, gold: 0.03, traffic: 1, power: 22,
     goal: { kind: 'eat', n: 1, text: () => 'Get HUGE and gobble a skyscraper', match: o => o.type === 'tower' } },
-  { name: 'Bomb Alley', time: 120, rivals: 6, bot: 0.6, focus: 0.45, bombs: 190, gold: 0.03, traffic: 1, power: 22,
+  { name: 'Bomb Alley', theme: 'chem', brains: 9, time: 120, rivals: 6, bot: 0.6, focus: 0.45, bombs: 190, gold: 0.03, traffic: 1, power: 22,
     goal: { kind: 'score', n: 1500, text: n => `Score ${n} — dodge the bombs!` } },
-  { name: "Grumblor's City", time: 120, rivals: 6, boss: true, bot: 0.63, focus: 0.5, bombs: 80, gold: 0.03, traffic: 1, power: 22,
+  { name: "Grumblor's City", theme: 'mixed', brains: 9, time: 120, rivals: 6, boss: true, bot: 0.63, focus: 0.5, bombs: 80, gold: 0.03, traffic: 1, power: 22,
     goal: { kind: 'rank1', n: 1, text: () => 'Finish #1 and beat Grumblor!' } },
 ];
+// ---------- Brain Bubble questions ----------
+// q: question, a: [correct, wrong, wrong, wrong] (shuffled when shown), why: short explanation
+const TOPICS = { math: '🔢 MATH', body: '🫀 YOUR BODY', motion: '🚗 FORCES & MOTION', space: '🪐 SPACE',
+                 history: '🏛️ ANCIENT WORLD', build: '🏗️ ENGINEERING', chem: '🧪 CHEMISTRY' };
+const QUESTIONS = {
+  body: [
+    { q: 'Where does digestion begin?', a: ['In the mouth', 'In the stomach', 'In the liver', 'In the lungs'], why: 'Chewing breaks food into small pieces and saliva starts breaking down starches.' },
+    { q: 'Which tube carries food from your mouth to your stomach?', a: ['The esophagus', 'The windpipe', 'The large intestine', 'A blood vessel'], why: 'Muscles in the esophagus squeeze food down to the stomach.' },
+    { q: 'Where are most nutrients absorbed into your blood?', a: ['The small intestine', 'The stomach', 'The mouth', 'The kidneys'], why: 'The small intestine is long and lined with tiny finger-like villi that soak up nutrients.' },
+    { q: 'Which organ makes bile to help digest fats?', a: ['The liver', 'The heart', 'The lungs', 'The brain'], why: 'The liver makes bile, and the gallbladder stores it until a fatty meal arrives.' },
+    { q: 'Which is the largest organ INSIDE your body?', a: ['The liver', 'The heart', 'The stomach', 'The appendix'], why: 'The liver is the biggest internal organ. (Your skin is the biggest organ overall!)' },
+    { q: 'What does the large intestine mostly do?', a: ['Absorbs water', 'Pumps blood', 'Makes bile', 'Chews food'], why: 'It soaks up water from leftover food, and helpful bacteria live there too.' },
+    { q: 'What does the stomach use to help break down food?', a: ['Acid and enzymes', 'Sand and rocks', 'Air bubbles only', 'Electricity'], why: 'Stomach acid and enzymes churn food into a soupy mix.' },
+    { q: 'Which nutrient is the body\'s main building material for muscles?', a: ['Protein', 'Sugar', 'Water', 'Fibre'], why: 'Proteins help build and repair muscles and other tissues.' },
+    { q: 'Which organ helps control blood sugar by making insulin?', a: ['The pancreas', 'The liver', 'The tongue', 'The esophagus'], why: 'The pancreas makes insulin and also sends digestive enzymes into the small intestine.' },
+    { q: 'What do your kidneys do?', a: ['Filter your blood', 'Help you see', 'Digest food', 'Pump air'], why: 'Kidneys clean waste from your blood and make urine.' },
+    { q: 'Why is fibre good for you?', a: ['It keeps food moving through your gut', 'It makes you taller instantly', 'It turns into bones', 'It stops you from needing water'], why: 'Fibre from plants helps digestion run smoothly.' },
+    { q: 'Which flap stops food from going down your windpipe?', a: ['The epiglottis', 'The eyelid', 'The kneecap', 'The tonsil'], why: 'When you swallow, the epiglottis covers the windpipe.' },
+  ],
+  motion: [
+    { q: 'What force slows a rolling toy car down?', a: ['Friction', 'Magnetism', 'Sunlight', 'Sound'], why: 'Friction between the wheels, ground and air works against the motion.' },
+    { q: 'A car drives 120 km in 2 hours. What is its average speed?', a: ['60 km/h', '240 km/h', '122 km/h', '30 km/h'], why: 'Speed = distance ÷ time = 120 ÷ 2 = 60 km/h.' },
+    { q: 'Why do we wear seat belts?', a: ['Your body keeps moving when the car suddenly stops', 'To make the car faster', 'To stay warm', 'To steer the car'], why: 'That\'s inertia! The belt applies the force that stops you safely.' },
+    { q: 'Same push on an empty cart and a full cart. Which speeds up more?', a: ['The empty cart', 'The full cart', 'They speed up equally', 'Neither moves'], why: 'Less mass + same force = more acceleration (F = m × a).' },
+    { q: 'Which is heavier: 1 kg of feathers or 1 kg of bricks?', a: ['They weigh the same', 'The bricks', 'The feathers', 'It depends on the color'], why: 'A kilogram is a kilogram! The feathers just take up more space.' },
+    { q: 'When you push on a wall, the wall...', a: ['Pushes back on you equally', 'Does nothing', 'Pulls you in', 'Gets lighter'], why: 'Every action has an equal and opposite reaction.' },
+    { q: 'What pulls things toward the ground?', a: ['Gravity', 'Friction', 'Wind', 'Light'], why: 'Earth\'s gravity pulls everything toward its center.' },
+    { q: 'Ignoring air, a bowling ball and a tennis ball are dropped together. Which lands first?', a: ['They land together', 'The bowling ball', 'The tennis ball', 'Neither falls'], why: 'Without air resistance, gravity speeds up all objects at the same rate.' },
+  ],
+  space: [
+    { q: 'How long does Earth take to travel around the Sun?', a: ['About 365 days', 'One day', 'One month', 'About 10 years'], why: 'One trip around the Sun is one year.' },
+    { q: 'What causes day and night?', a: ['Earth spinning', 'The Sun switching off', 'The Moon blocking the Sun', 'Clouds'], why: 'Earth spins once about every 24 hours, so your side faces the Sun, then away.' },
+    { q: 'Why is Mars called the Red Planet?', a: ['Its dust has rusty iron in it', 'It is very hot', 'It is covered in lava', 'Its sky is on fire'], why: 'Iron oxide (rust) in the soil and dust makes Mars look reddish.' },
+    { q: 'Which is the largest planet in our solar system?', a: ['Jupiter', 'Saturn', 'Earth', 'Neptune'], why: 'Jupiter is so big that more than 1,000 Earths could fit inside it.' },
+    { q: 'The Sun is a...', a: ['Star', 'Planet', 'Moon', 'Comet'], why: 'The Sun is a star, the closest one to Earth.' },
+    { q: 'Why does the Moon shine at night?', a: ['It reflects sunlight', 'It burns fuel', 'It is a star', 'It has city lights'], why: 'The Moon makes no light of its own; it bounces back light from the Sun.' },
+    { q: 'Gold\'s chemical symbol is...', a: ['Au', 'Go', 'Gd', 'Gl'], why: 'Au comes from "aurum", the Latin word for gold.' },
+    { q: 'Mars has about what share of Earth\'s gravity?', a: ['About 38%', 'About 100%', 'About 250%', 'Zero'], why: 'Mars is smaller, so it pulls less: about 38% as strongly as Earth.' },
+    { q: 'What are Saturn\'s rings made of?', a: ['Pieces of ice and rock', 'Solid gold', 'Gas clouds', 'Rainbows'], why: 'Countless chunks of ice and rock orbit Saturn like tiny moons.' },
+  ],
+  history: [
+    { q: 'Which river made farming possible in ancient Egypt?', a: ['The Nile', 'The Amazon', 'The Thames', 'The Mississippi'], why: 'The Nile flooded each year and left rich, fertile soil behind.' },
+    { q: 'Roman aqueducts carried...', a: ['Water', 'Soldiers', 'Letters', 'Gold'], why: 'Aqueducts brought fresh water to Roman cities and towns.' },
+    { q: 'What moved the water along a Roman aqueduct?', a: ['Gravity, on a gentle downhill slope', 'Electric pumps', 'Horses', 'Wind'], why: 'The channel sloped gently downhill the whole way, so gravity did the work.' },
+    { q: 'Ancient Egyptians wrote on a paper-like material made from a river plant called...', a: ['Papyrus', 'Bamboo', 'Plastic', 'Leather'], why: 'Papyrus reeds grew along the Nile.' },
+    { q: 'Who is traditionally said to have composed the Iliad and the Odyssey?', a: ['Homer', 'Shakespeare', 'Julius Caesar', 'Cleopatra'], why: 'The poems are credited to Homer and were first shared by singing and storytelling.' },
+    { q: 'Mongol messengers crossed huge distances using relay stations called the...', a: ['Yam', 'Forum', 'Pyramid', 'Colosseum'], why: 'At Yam stations, riders swapped tired horses for fresh ones.' },
+    { q: 'How did Gutenberg\'s printing press (mid-1400s) change the world?', a: ['Books could be copied fast, so ideas spread', 'It invented the internet', 'It made paper from rocks', 'It painted pictures'], why: 'Movable type made many copies quickly instead of copying by hand.' },
+    { q: 'Leonardo da Vinci was a famous artist and also...', a: ['An inventor and scientist', 'A pharaoh', 'A Roman emperor', 'An astronaut'], why: 'He filled notebooks with inventions, anatomy and nature studies.' },
+  ],
+  build: [
+    { q: 'Why do skyscrapers need deep foundations?', a: ['To spread their weight and stay stable', 'To store pizza', 'To make elevators faster', 'For decoration only'], why: 'Foundations carry the huge weight down into strong ground.' },
+    { q: 'Which shape is used in bridges and towers because it holds its shape under force?', a: ['Triangle', 'Circle', 'Star', 'Heart'], why: 'Triangles don\'t squish easily, which makes strong frames called trusses.' },
+    { q: 'Tall buildings are designed to sway a little in strong wind. Why?', a: ['Bending a little helps them not break', 'To make people dizzy', 'It means they\'re broken', 'To dance'], why: 'A building that can flex safely handles wind better than a stiff one.' },
+    { q: 'A ramp is which simple machine?', a: ['Inclined plane', 'Lever', 'Pulley', 'Screw'], why: 'A ramp lets you lift things with less force by going a longer distance.' },
+    { q: 'How many centimeters are in 1 meter?', a: ['100', '10', '1,000', '12'], why: '"Centi" means one hundredth.' },
+    { q: 'A seesaw is an example of a...', a: ['Lever', 'Pulley', 'Wedge', 'Wheel and axle'], why: 'A lever turns around a pivot called a fulcrum.' },
+    { q: 'Roman builders used a strong material that still stands in buildings today. What was it?', a: ['Concrete', 'Plastic', 'Glass bricks', 'Cardboard'], why: 'Roman concrete is famous for lasting thousands of years.' },
+    { q: 'What do pulleys help you do?', a: ['Lift heavy things with less effort', 'Make light', 'Cool food', 'Measure time'], why: 'More supporting ropes means less pulling force (but more rope to pull).' },
+  ],
+  chem: [
+    { q: 'At sea level, water boils at...', a: ['100 °C', '0 °C', '50 °C', '200 °C'], why: 'And it freezes at 0 °C.' },
+    { q: 'Ice melting into water is a change of...', a: ['State', 'Element', 'Planet', 'Mass'], why: 'Solid → liquid. It\'s still water, just in a different state.' },
+    { q: 'H₂O is the formula for...', a: ['Water', 'Salt', 'Gold', 'Oxygen gas'], why: 'Two hydrogen atoms + one oxygen atom.' },
+    { q: 'Baking soda + vinegar fizzes. What are the bubbles?', a: ['Carbon dioxide gas', 'Oxygen', 'Helium', 'Steam'], why: 'The reaction makes carbon dioxide (CO₂) gas.' },
+    { q: 'Iron rusts when it reacts with...', a: ['Oxygen and water', 'Sunlight only', 'Sugar', 'Sand'], why: 'Rust is iron oxide, formed with oxygen (water speeds it up).' },
+    { q: 'Which of these is a gas at room temperature?', a: ['Oxygen', 'Iron', 'Salt', 'Ice'], why: 'We breathe oxygen gas all the time.' },
+    { q: 'What gives fireworks their different colors?', a: ['Different metal elements', 'Paint', 'Light bulbs', 'Food coloring'], why: 'For example, strontium glows red and copper compounds glow blue-green.' },
+    { q: 'What is the smallest unit of an element that still acts like that element?', a: ['An atom', 'A cell', 'A grain', 'A drop'], why: 'Everything around you is built from atoms.' },
+    { q: 'When a reaction happens, the total mass...', a: ['Stays the same', 'Disappears', 'Doubles', 'Turns into light'], why: 'Atoms just rearrange; none are created or destroyed.' },
+  ],
+};
+function mathQuestion() {
+  const hard = levelIdx >= 4 || (cfg.free && difficulty === 'hard'), easy = cfg.free && difficulty === 'easy';
+  const r = Math.random();
+  let q, ans;
+  if (easy || r < 0.45) {
+    const a = 2 + (Math.random() * (easy ? 4 : 9) | 0), b = 2 + (Math.random() * (easy ? 8 : 10) | 0);
+    q = `${a} × ${b} = ?`; ans = a * b;
+  } else if (r < 0.65) {
+    const a = 20 + (Math.random() * 80 | 0), b = 10 + (Math.random() * 60 | 0);
+    q = `${a} + ${b} = ?`; ans = a + b;
+  } else if (r < 0.8 || !hard) {
+    const b = 2 + (Math.random() * 8 | 0), ans0 = 2 + (Math.random() * 10 | 0);
+    q = `${b * ans0} ÷ ${b} = ?`; ans = ans0;
+  } else {
+    const d = pick([2, 4, 5, 10]), n = d * (2 + (Math.random() * 10 | 0));
+    q = `What is 1/${d} of ${n}?`; ans = n / d;
+  }
+  const wrong = new Set();
+  while (wrong.size < 3) { const w = ans + pick([-10, -2, -1, 1, 2, 10, 3, -3]); if (w > 0 && w !== ans) wrong.add(w); }
+  return { topic: TOPICS.math, q: q.replace('= ?', '= ?'), a: [String(ans), ...[...wrong].map(String)], why: `${q.replace('= ?', '=')} ${ans}. Nice mental math!`.replace('?', '') };
+}
+const recentQ = [];
+function nextQuestion() {
+  let theme = cfg.theme || 'mixed';
+  if (theme === 'mixed') theme = pick(['math', 'body', 'motion', 'space', 'history', 'build', 'chem']);
+  else if (Math.random() < 0.25) theme = pick(['math', 'body', 'motion', 'space', 'history', 'build', 'chem']);  // a little variety
+  if (theme === 'math') return mathQuestion();
+  const pool = QUESTIONS[theme].filter(x => !recentQ.includes(x));
+  const q = pick(pool.length ? pool : QUESTIONS[theme]);
+  recentQ.push(q); if (recentQ.length > 20) recentQ.shift();
+  return { topic: TOPICS[theme], q: q.q, a: q.a, why: q.why };
+}
+const FACTS = {
+  math: 'A monster that doubles its size 10 times gets 1,024 times bigger. That\'s 2 × 2 × 2 × 2 × 2 × 2 × 2 × 2 × 2 × 2!',
+  body: 'Your small intestine is about 6 meters (20 feet) long in an adult, folded up neatly inside your belly!',
+  motion: 'A car\'s brakes work using friction, turning motion energy into heat.',
+  space: 'Jupiter\'s gravity is about 2.4 times Earth\'s, so a 30 kg kid would feel like they weighed over 70 kg there.',
+  history: 'Some Roman aqueducts sloped downhill so gently that the drop was only a few centimeters for every 100 meters.',
+  build: 'Many skyscrapers have huge weights near the top that swing to cancel out swaying in the wind.',
+  chem: 'Water is one of very few substances that expands when it freezes, which is why ice floats.',
+  mixed: 'Scientists, historians and engineers all ask questions, test ideas and learn from mistakes, just like you!',
+};
+
 function freeCfg(d) {
   const D = DIFF[d];
   return { name: 'Free Play', free: true, time: 120, rivals: 6, bot: D.bot, focus: D.focus, frenzy: D.frenzy,
-    bombs: 70, gold: 0.025, traffic: 1, power: 20, boss: d === 'hard', goal: null };
+    bombs: 70, gold: 0.025, traffic: 1, power: 20, boss: d === 'hard', goal: null, theme: 'mixed', brains: 9 };
 }
+let brainRight = 0, brainTotal = 0, quizOpen = null;
 let cfg = freeCfg('normal'), levelIdx = -1, goalCount = 0, goalDone = false, powerCooldown = 0;
 function getStars() { try { return JSON.parse(localStorage.getItem('holecity.stars')) || []; } catch (_) { return []; } }
 function saveStars(i, n) { const st = getStars(); st[i] = Math.max(st[i] || 0, n); try { localStorage.setItem('holecity.stars', JSON.stringify(st)); } catch (_) {} }
+function getBrains() { try { return JSON.parse(localStorage.getItem('holecity.brains')) || []; } catch (_) { return []; } }
+function saveBrain(i) { const b = getBrains(); b[i] = 1; try { localStorage.setItem('holecity.brains', JSON.stringify(b)); } catch (_) {} }
 const unlocked = i => i === 0 || (getStars()[i - 1] || 0) >= 1;
 
 const SHIRTS = ['#ef476f','#ffd166','#06d6a0','#118ab2','#f78c6b','#9b5de5','#f15bb5','#00bbf9','#fee440','#ffffff'];
@@ -401,15 +546,16 @@ function genWorld(c = cfg) {
   // a few golden treasures worth 5x
   for (const o of objs) if (o.type !== 'bomb' && Math.random() < c.gold) makeGold(o);
   for (let n = 0; n < c.power; n++) spawnPower();
+  for (let n = 0; n < (c.brains || 0); n++) spawnPower('brain');
 }
 const POWERS = { speed: ['⚡', '#ffd23f', 'Speed boost!'], magnet: ['🧲', '#ff6b6b', 'Magnet mouth!'],
                  mega: ['🍔', '#9b5de5', 'MEGA mouth!'], shield: ['🛡️', '#4cc9f0', 'Shield up!'] };
-function spawnPower() {
+function spawnPower(type = 'power') {
   const rc = (Math.random() * (N + 1) | 0) * CELL + ROAD / 2;
   const along = rand(ROAD + 30, WORLD - ROAD - 30);
   const kind = pick(Object.keys(POWERS));
   const [x, y] = Math.random() < 0.5 ? [along, rc] : [rc, along];
-  mk('power', x, y, { kind, phase: rand(0, TAU) });
+  mk(type, x, y, { kind, phase: rand(0, TAU) });
 }
 function makeGold(o) { if (!o.gold && o.type !== 'bomb') { o.gold = true; o.pts *= 5; o.phase = rand(0, TAU); } }
 
@@ -705,6 +851,7 @@ function startRound(c, li) {
   genWorld(c);
   setupHoles(true, c);
   timeLeft = c.time; milestone = 0; goalCount = 0; goalDone = false; powerCooldown = 3;
+  brainRight = 0; brainTotal = 0; quizOpen = null; $('quiz').hidden = true; $('brainHud').textContent = '🧠 0';
   mission = null; missionWait = 4; combo = 0; danger = 0; shake = 0; frenzy = false; clock = 0; lastEat = -9;
   $('mission').hidden = true; $('frenzy').hidden = true; $('powers').innerHTML = '';
   $('goal').hidden = !c.goal; $('goal').classList.remove('done');
@@ -746,6 +893,10 @@ function endGame() {
     if (player.score > best) { setBest(player.score); $('overBest').textContent = 'New best score!'; }
     else $('overBest').textContent = `Best score: ${best}`;
   }
+  $('brainRes').textContent = brainTotal ? `🧠 Brain Bubbles: ${brainRight} of ${brainTotal} correct${brainRight >= 3 ? ' — Brain Badge earned!' : ''}` : '🧠 Tip: gobble pink Brain Bubbles for quiz power-ups!';
+  if (levelIdx >= 0 && brainRight >= 3) saveBrain(levelIdx);
+  $('fact').innerHTML = `<b>💡 Did you know?</b> ${FACTS[cfg.theme || 'mixed']}`;
+  $('quiz').hidden = true;
   $('hud').hidden = true; $('over').hidden = false;
   setTimeout(() => happy ? sfx.victory() : sfx.lose(), 600);
 }
@@ -755,7 +906,7 @@ function renderLevels() {
   $('levels').innerHTML = LEVELS.map((L, i) => {
     const open = unlocked(i), n = st[i] || 0;
     return `<button class="lvl ${open ? '' : 'locked'}" data-i="${i}">
-      <b>${open ? i + 1 : '🔒'}</b><em>${L.name}</em>
+      <b>${open ? i + 1 : '🔒'}</b><em>${L.name}</em><span class="br">${TOPICS[L.theme] || '🎲 MIXED'}${getBrains()[i] ? ' ✔' : ''}</span>
       <span class="st">${[0, 1, 2].map(k => k < n ? '★' : '<span class="off">★</span>').join('')}</span></button>`;
   }).join('');
   $('levels').querySelectorAll('.lvl').forEach(b => b.onclick = () => {
@@ -833,7 +984,7 @@ function botThink(b) {
   }
   const lim = b.r * EDIBLE;
   query(b.x, b.y, 200 + 180 * b.skill, o => {
-    if (o.s >= lim || o.type === 'bomb') return;
+    if (o.s >= lim || o.type === 'bomb' || o.type === 'brain') return;
     const sc = (o.type === 'power' ? 22 : o.pts) / (Math.hypot(o.x - b.x, o.y - b.y) + 40);
     if (sc > bs) { bs = sc; best = o; }
   });
@@ -891,6 +1042,55 @@ function holeVsHole() {
   }
 }
 
+function openQuiz() {
+  const q = nextQuestion();
+  const correct = q.a[0];
+  const opts = q.a.slice().sort(() => Math.random() - 0.5);
+  state = 'quiz'; joy.active = false; keys.clear();
+  $('qTopic').textContent = q.topic;
+  $('qText').textContent = q.q;
+  $('qWhy').textContent = ''; $('qGo').hidden = true;
+  $('qAns').innerHTML = '';
+  for (const o of opts) {
+    const b = document.createElement('button');
+    b.textContent = o;
+    b.onclick = () => answerQuiz(b, o === correct, correct, q.why);
+    $('qAns').appendChild(b);
+  }
+  quizOpen = q; brainTotal++;
+  $('quiz').hidden = false;
+  sfx.blip();
+}
+function answerQuiz(btn, ok, correct, why) {
+  if (!quizOpen) return;
+  quizOpen = null;
+  for (const b of $('qAns').children) {
+    b.disabled = true;
+    if (b.textContent === correct) b.classList.add('right');
+  }
+  if (ok) {
+    brainRight++;
+    const kind = pick(Object.keys(POWERS)), bonus = 25 + Math.round(player.mass * 0.05);
+    player.score += bonus; player.mass += 15;
+    $('qWhy').innerHTML = `<b>✅ Correct! +${bonus} and a ${POWERS[kind][0]} power-up!</b><br>${why}`;
+    sfx.win();
+    $('qGo').onclick = () => closeQuiz(kind);
+  } else {
+    btn.classList.add('wrong');
+    $('qWhy').innerHTML = `<b>Not quite! The answer is: ${correct}</b><br>${why}`;
+    sfx.fail();
+    $('qGo').onclick = () => closeQuiz(null);
+  }
+  $('qGo').hidden = false;
+}
+function closeQuiz(kind) {
+  $('quiz').hidden = true;
+  state = 'play';
+  last = performance.now();
+  if (kind) applyPower(player, kind);
+  burst(player.x, player.y - player.r * 2.3, kind ? 'SMART!' : 'TRY AGAIN!', kind ? '#ffafcc' : '#bdb2ff');
+  $('brainHud').textContent = `🧠 ${brainRight}`;
+}
 function applyPower(h, kind) {
   const dur = { speed: 6, magnet: 7, mega: 7, shield: 7 }[kind];
   h.fx[kind] = dur;
@@ -1037,8 +1237,9 @@ function update(dt) {
   powerCooldown -= dt;
   if (powerCooldown <= 0) {
     powerCooldown = 3;
-    let n = 0; for (const o of objs) if (o.type === 'power' && !o.dead) n++;
+    let n = 0, nb = 0; for (const o of objs) if (!o.dead) { if (o.type === 'power') n++; else if (o.type === 'brain') nb++; }
     if (n < cfg.power) spawnPower();
+    if (nb < (cfg.brains || 0)) spawnPower('brain');
   }
 
   // falling objects
@@ -1052,6 +1253,7 @@ function update(dt) {
       if (!h.alive) continue;
       if (o.type === 'bomb') { explode(h); continue; }
       if (o.type === 'power') { applyPower(h, o.kind); continue; }
+      if (o.type === 'brain') { if (h.isPlayer && state === 'play' && !autopilot) openQuiz(); continue; }
       h.mass += o.pts;
       let pts = o.pts;
       if (h.isPlayer && state === 'play') {
@@ -1181,8 +1383,8 @@ function drawShadow(o) {
   }
   ctx.fillStyle = 'rgba(20,10,40,.2)';
   const t = o.type;
-  if (t === 'person' || t === 'cone' || t === 'hydrant' || t === 'lamp' || t === 'tree' || t === 'bush' || t === 'power' || t === 'bomb') {
-    const r = t === 'tree' ? 11 : t === 'bush' || t === 'power' ? 8 : t === 'bomb' ? 5 : 3.5;
+  if (t === 'person' || t === 'cone' || t === 'hydrant' || t === 'lamp' || t === 'tree' || t === 'bush' || t === 'power' || t === 'bomb' || t === 'brain') {
+    const r = t === 'tree' ? 11 : t === 'bush' || t === 'power' || t === 'brain' ? 8 : t === 'bomb' ? 5 : 3.5;
     ctx.beginPath(); ctx.ellipse(o.x + o.h * 0.18, o.y + 1, r + o.h * 0.15, r * 0.6, 0, 0, TAU); ctx.fill();
   } else {
     ctx.fillRect(o.x - o.w / 2, o.y - o.d / 2, o.w + o.h * 0.35, o.d);
@@ -1220,6 +1422,17 @@ function drawObj(o) {
       ctx.fillStyle = blink ? '#ffdd55' : '#ff5a36'; ctx.beginPath(); ctx.arc(x + 4, by - 10.5, blink ? 2.2 : 1.5, 0, TAU); ctx.fill();
       ctx.strokeStyle = 'rgba(255,60,60,' + (blink ? 0.9 : 0.4) + ')'; ctx.lineWidth = 1.5;
       ctx.beginPath(); ctx.arc(x, y, 9, 0, TAU); ctx.stroke();
+      break;
+    }
+    case 'brain': {
+      const by = y - 12 - Math.sin(clock * 2.5 + o.phase) * 4;
+      ctx.fillStyle = '#ffafcc'; ctx.strokeStyle = INK; ctx.lineWidth = 2.2;
+      ctx.beginPath(); ctx.arc(x, by, 12, 0, TAU); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,.65)'; ctx.beginPath(); ctx.arc(x - 4.5, by - 4.5, 3.2, 0, TAU); ctx.fill();
+      ctx.font = '14px system-ui, "Apple Color Emoji", "Segoe UI Emoji", sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('🧠', x, by + 1);
+      ctx.strokeStyle = 'rgba(255,175,204,' + (0.4 + 0.4 * Math.sin(clock * 4 + o.phase)) + ')'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(x, by, 16, 0, TAU); ctx.stroke();
       break;
     }
     case 'power': {
@@ -1667,11 +1880,11 @@ function render() {
 }
 
 // ---------- loop ----------
-let last = performance.now();
+var last = performance.now();
 function frame(now) {
   const dt = Math.min(0.05, (now - last) / 1000);
   last = now;
-  if (state !== 'over') update(dt);
+  if (state === 'play' || state === 'menu') update(dt);
   updateCamera(dt);
   shake = Math.max(0, shake - dt * 40);
   if (state !== 'play') clock += state === 'over' ? dt : 0;
@@ -1688,7 +1901,8 @@ requestAnimationFrame(frame);
 // tiny hook for automated testing
 window.__hole = { get state() { return state; }, get player() { return player; }, get holes() { return holes; },
   get objs() { return objs; }, start: startGame, level: i => startLevel(i), get goal() { return [goalCount, goalDone]; }, setTime: t => { timeLeft = t; },
-  sim: secs => { for (let i = 0; i < secs * 60; i++) update(1 / 60); },
+  sim: secs => { for (let i = 0; i < secs * 60; i++) { if (state === 'quiz') closeQuiz(null); update(1 / 60); } },
+  quiz: () => openQuiz(),
   autopilot: on => { autopilot = on; if (player) player.skill = 1; } };
 </script>
 </body>
