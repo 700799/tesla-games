@@ -1,0 +1,2240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The Iliad: Heroes of Troy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+:root { --ink:#1d1b26; --paper:#fffaf0; --accent:#ff4d6d; --yellow:#ffd23f; --green:#06d6a0; --blue:#4cc9f0; --purple:#9b5de5; --orange:#ff9f1c;
+  --toon:"Luckiest Guy","Comic Sans MS","Chalkboard SE",system-ui,sans-serif; --bg:#2b2a4a; }
+* { box-sizing:border-box; }
+html,body { margin:0; height:100%; overflow:hidden; background:var(--bg); color:var(--ink);
+  font-family:Nunito,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; font-weight:800;
+  user-select:none; -webkit-user-select:none; -webkit-tap-highlight-color:transparent; }
+button { font:inherit; cursor:pointer; border:0; color:inherit; }
+a { color:inherit; }
+.toon { font-family:var(--toon); font-weight:400; letter-spacing:1px; }
+.panel { background:var(--paper); border:3px solid var(--ink); border-radius:18px; box-shadow:4px 4px 0 var(--ink); }
+.screen { position:fixed; inset:0; display:flex; flex-direction:column; }
+.screen[hidden] { display:none; }
+.bgc { position:absolute; inset:0; width:100%; height:100%; display:block; }
+
+.btn { background:var(--accent); color:#fff; font-family:var(--toon); font-weight:400; font-size:clamp(20px,2.3vw,28px); min-height:60px;
+  padding:12px 28px 6px; border-radius:999px; border:3px solid var(--ink); box-shadow:0 6px 0 var(--ink); letter-spacing:1px;
+  display:inline-flex; align-items:center; justify-content:center; gap:8px; text-decoration:none; line-height:1.1; }
+.btn:active { transform:translateY(4px); box-shadow:0 2px 0 var(--ink); }
+.btn.alt { background:#fff; color:var(--ink); }
+.btn.go { background:var(--green); color:var(--ink); }
+.btn.y { background:var(--yellow); color:var(--ink); }
+.btn.b { background:var(--blue); color:var(--ink); }
+.btn.p { background:var(--purple); }
+.btn.sm { font-size:clamp(17px,1.8vw,22px); padding:10px 18px 4px; }
+.btn[disabled] { opacity:.45; pointer-events:none; }
+.btn.pulse { animation:pulse 1s infinite; }
+@keyframes pulse { 50% { transform:scale(1.06); } }
+.round { width:60px; height:60px; border-radius:50%; font-size:26px; display:grid; place-items:center; padding:0; background:#fff; }
+
+h1.big { margin:0; font-family:var(--toon); font-weight:400; font-size:clamp(44px,7vw,96px); line-height:.95; color:var(--yellow);
+  -webkit-text-stroke:3px var(--ink); paint-order:stroke; text-shadow:5px 5px 0 var(--ink); transform:rotate(-2deg); letter-spacing:2px; }
+h1.big small { display:block; font-size:.45em; color:#fff; margin-top:8px; }
+h2.t { margin:0 0 8px; font-family:var(--toon); font-weight:400; font-size:clamp(28px,3.4vw,44px); color:var(--accent); line-height:1.05;
+  -webkit-text-stroke:2px var(--ink); paint-order:stroke; text-shadow:3px 3px 0 var(--ink); letter-spacing:1px; }
+h3 { font-family:var(--toon); font-weight:400; margin:0 0 6px; font-size:clamp(20px,2.2vw,28px); letter-spacing:1px; }
+
+/* title */
+#title { align-items:center; justify-content:center; text-align:center; overflow:hidden; }
+#title .tbox { position:relative; z-index:2; display:flex; flex-direction:column; align-items:center; gap:14px; padding:16px; max-width:96vw; }
+#title .tag { color:#fff; font-size:clamp(17px,1.8vw,24px); text-shadow:2px 2px 0 var(--ink); max-width:760px; margin:0; }
+#title .row { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
+#title .corner { position:absolute; z-index:3; display:flex; gap:10px; align-items:center; }
+#title .tl { top:14px; left:14px; } #title .tr { top:14px; right:14px; } #title .br { bottom:14px; right:14px; }
+.other { font-size:16px; background:#fff; border:3px solid var(--ink); border-radius:999px; padding:12px 18px; box-shadow:0 5px 0 var(--ink);
+  text-decoration:none; min-height:56px; display:inline-flex; align-items:center; }
+#starsTotal { font-family:var(--toon); color:var(--yellow); -webkit-text-stroke:1.5px var(--ink); paint-order:stroke; font-size:30px; text-shadow:2px 2px 0 var(--ink); }
+
+/* top bar */
+.bar { position:relative; z-index:5; display:flex; align-items:center; gap:10px; padding:10px 12px; flex-wrap:nowrap; }
+.bar .grow { flex:1; min-width:0; }
+.bar .ttl { color:#fff; font-family:var(--toon); font-size:clamp(20px,2.4vw,30px); -webkit-text-stroke:1.5px var(--ink); paint-order:stroke;
+  text-shadow:2px 2px 0 var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; letter-spacing:1px; }
+.chip { background:var(--yellow); border:3px solid var(--ink); border-radius:999px; padding:6px 14px 4px; font-family:var(--toon); font-size:20px;
+  white-space:nowrap; box-shadow:2px 2px 0 var(--ink); }
+.chip.calm { background:#c7f9e5; font-family:Nunito,system-ui,sans-serif; font-weight:900; font-size:16px; }
+
+/* map */
+#map { background:#4cc9f0; }
+#mapWrap { position:relative; flex:1; min-height:0; }
+.stop { position:absolute; transform:translate(-50%,-50%); min-width:64px; min-height:64px; border-radius:999px; border:3px solid var(--ink);
+  background:#fff; box-shadow:0 5px 0 var(--ink); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:4px 12px 2px;
+  font-size:15px; line-height:1.05; z-index:3; }
+.stop b { font-family:var(--toon); font-weight:400; font-size:18px; letter-spacing:.5px; }
+.stop .st { color:#f4a100; font-size:15px; letter-spacing:1px; -webkit-text-stroke:.5px var(--ink); }
+.stop .st .off { color:#d8d0bd; }
+.stop.locked { background:#e7e0cf; color:#8d8577; border-color:#8d8577; box-shadow:0 5px 0 #8d8577; }
+.stop.next { background:var(--yellow); animation:bob 1.4s ease-in-out infinite; }
+.stop.done { background:#c7f9e5; }
+@keyframes bob { 50% { transform:translate(-50%,-58%); } }
+.stop:active { box-shadow:0 2px 0 var(--ink); }
+
+/* mission */
+#mission { background:#2b2a4a; }
+.tracker { display:flex; gap:6px; flex-wrap:nowrap; overflow:hidden; }
+.tracker > span { background:#fff; border:3px solid var(--ink); border-radius:999px; padding:5px 10px 3px; font-size:15px; white-space:nowrap; opacity:.6; }
+.tracker > span.on { background:var(--yellow); opacity:1; transform:scale(1.06); }
+.tracker > span.ok { background:var(--green); opacity:1; }
+.mbody { flex:1; min-height:0; display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); gap:14px; padding:0 14px 14px; }
+.mbody.full { grid-template-columns:1fr; }
+.stage { position:relative; min-height:0; overflow:hidden; border-radius:18px; }
+.stage > canvas { position:absolute; inset:0; width:100%; height:100%; display:block; }
+.side { min-height:0; overflow:auto; padding:18px 20px; display:flex; flex-direction:column; gap:12px; touch-action:pan-y; }
+.side p { margin:0; font-size:clamp(17px,1.7vw,22px); line-height:1.35; }
+.prompt { font-size:clamp(19px,1.9vw,25px) !important; }
+.opts { display:flex; flex-direction:column; gap:10px; }
+.opt { background:#fff; border:3px solid var(--ink); border-radius:16px; box-shadow:0 5px 0 var(--ink); padding:12px 16px; min-height:60px;
+  text-align:left; font-size:clamp(16px,1.6vw,21px); line-height:1.25; }
+.opt:active { transform:translateY(3px); box-shadow:0 2px 0 var(--ink); }
+.opt.good { background:#c7f9e5; } .opt.bad { background:#ffd6dc; } .opt.tried { border-style:dashed; }
+.res { border:3px dashed var(--ink); border-radius:16px; padding:12px 14px; background:#fff3c4; font-size:clamp(16px,1.6vw,21px); line-height:1.35; }
+.res.good { background:#c7f9e5; } .res.bad { background:#ffe1e6; }
+.res[hidden] { display:none; }
+.nav { display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap; margin-top:auto; padding-top:6px; }
+.cards { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.dcard { background:#fff; border:3px solid var(--ink); border-radius:16px; box-shadow:0 5px 0 var(--ink); padding:8px; text-align:left; min-height:120px;
+  display:flex; flex-direction:column; gap:6px; }
+.dcard canvas { width:100%; height:110px; border-radius:10px; border:2px solid var(--ink); display:block; }
+.dcard .cap { font-family:var(--toon); font-size:19px; letter-spacing:.5px; }
+.dcard .txt { font-size:clamp(15px,1.4vw,18px); line-height:1.3; }
+.dcard.hid .txt { display:none; }
+.dcard.hid .tap { display:block; }
+.dcard .tap { display:none; font-size:15px; opacity:.7; }
+.tchip { display:inline-block; background:var(--purple); color:#fff; border:2px solid var(--ink); border-radius:999px; padding:2px 10px; font-size:14px; margin-top:2px; }
+.meters { display:flex; flex-direction:column; gap:8px; }
+.meter { display:grid; grid-template-columns:110px 1fr 40px; gap:8px; align-items:center; font-size:16px; }
+.meter .mb { height:22px; border:3px solid var(--ink); border-radius:12px; background:#e9e2cf; overflow:hidden; }
+.meter .mb i { display:block; height:100%; width:50%; background:var(--green); transition:width .5s, background .5s; }
+.qa { display:flex; flex-direction:column; gap:10px; }
+.qnum { font-size:15px; opacity:.7; }
+.lesson { background:#fff8dc; border:4px solid var(--ink); border-radius:22px; box-shadow:6px 6px 0 var(--ink); padding:18px 20px; position:relative; }
+.lesson .moral { font-family:var(--toon); font-size:clamp(24px,2.6vw,34px); line-height:1.15; color:var(--ink); letter-spacing:.5px; margin:6px 0 10px; }
+.lesson .today { background:#e3f6ff; border:3px solid var(--ink); border-radius:14px; padding:10px 14px; font-size:clamp(16px,1.6vw,21px); line-height:1.35; }
+.ribbon { display:inline-block; background:var(--accent); color:#fff; font-family:var(--toon); font-size:18px; padding:4px 14px 2px;
+  border:3px solid var(--ink); border-radius:10px; transform:rotate(-2deg); letter-spacing:1px; }
+.starsBig { font-size:clamp(48px,6vw,70px); color:#f4a100; letter-spacing:6px; line-height:1; -webkit-text-stroke:2px var(--ink); text-align:center; }
+.starsBig .off { color:#e7e0cf; }
+.earned { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+.mini-card { width:130px; background:#fff; border:3px solid var(--ink); border-radius:14px; box-shadow:3px 3px 0 var(--ink); padding:6px; text-align:center; font-size:14px; }
+.mini-card canvas { width:100%; height:80px; display:block; }
+.mini-card b { font-family:var(--toon); font-weight:400; font-size:16px; display:block; letter-spacing:.5px; }
+
+/* mini-game */
+.mg { position:absolute; inset:0; width:100%; height:100%; display:block; touch-action:none; }
+.mghud { position:absolute; top:10px; left:10px; right:10px; display:flex; gap:8px; align-items:flex-start; justify-content:space-between; pointer-events:none; z-index:2; }
+.mghud .chip { pointer-events:none; }
+.mgmeter { background:#fff; border:3px solid var(--ink); border-radius:14px; padding:4px 10px; font-size:15px; min-width:150px; }
+.mgmeter .mb { height:14px; border:2px solid var(--ink); border-radius:8px; background:#e9e2cf; overflow:hidden; margin-top:2px; }
+.mgmeter .mb i { display:block; height:100%; background:var(--green); }
+.mgov { position:absolute; inset:0; display:grid; place-items:center; background:rgba(30,20,60,.45); z-index:4; padding:12px; }
+.mgov[hidden] { display:none; }
+.mgov .panel { padding:18px 22px; text-align:center; max-width:560px; display:flex; flex-direction:column; gap:10px; align-items:center; max-height:96%; overflow:auto; }
+.mgov p { margin:0; font-size:clamp(17px,1.7vw,22px); line-height:1.3; }
+.mgctl { position:absolute; bottom:12px; left:12px; right:12px; display:flex; justify-content:space-between; gap:12px; z-index:3; pointer-events:none; }
+.mgctl .btn { pointer-events:auto; min-width:96px; min-height:76px; font-size:26px; touch-action:none; }
+
+/* pup narrator */
+.pupsay { display:flex; gap:10px; align-items:center; }
+.pupsay canvas { width:84px; height:84px; flex:0 0 84px; }
+.pupsay .bub { position:relative; background:#fff; border:3px solid var(--ink); border-radius:16px; padding:8px 12px; font-size:clamp(15px,1.5vw,19px); line-height:1.3; }
+.pupsay .bub::before { content:''; position:absolute; left:-12px; top:50%; margin-top:-8px; border:8px solid transparent; border-right:12px solid var(--ink); border-left:0; }
+
+/* overlays */
+.overlay { position:fixed; inset:0; display:grid; place-items:center; background:rgba(30,20,60,.55); z-index:20; padding:12px; }
+.overlay[hidden] { display:none; }
+.overlay > .panel { padding:20px 24px; max-width:min(860px,96vw); max-height:94vh; overflow:auto; display:flex; flex-direction:column; gap:12px; touch-action:pan-y; }
+.overlay p { margin:0; font-size:clamp(17px,1.7vw,22px); line-height:1.35; }
+
+/* book */
+#book, #review { background:#3a2f5c; }
+.tabs { display:flex; gap:8px; }
+.tabs .btn { font-size:20px; }
+.tabs .btn.on { background:var(--yellow); color:var(--ink); }
+.scroll { flex:1; min-height:0; overflow:auto; padding:6px 14px 20px; touch-action:pan-y; }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:14px; }
+.tcard { background:var(--paper); border:3px solid var(--ink); border-radius:18px; box-shadow:4px 4px 0 var(--ink); padding:10px; display:flex; flex-direction:column; gap:4px; }
+.tcard canvas { width:100%; height:110px; border-radius:12px; border:2px solid var(--ink); display:block; }
+.tcard b { font-family:var(--toon); font-weight:400; font-size:22px; letter-spacing:.5px; }
+.tcard i { font-style:normal; color:#7a4dc9; font-size:15px; }
+.tcard p { margin:0; font-size:16px; line-height:1.3; }
+.tcard.lock { opacity:.55; filter:grayscale(1); }
+.tcard .from { font-size:14px; opacity:.75; }
+.wis { background:#fff8dc; }
+.wis .m { font-family:var(--toon); font-size:21px; line-height:1.15; letter-spacing:.3px; }
+
+/* review */
+.match { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.col { display:flex; flex-direction:column; gap:10px; }
+.mitem { background:#fff; border:3px solid var(--ink); border-radius:14px; box-shadow:0 4px 0 var(--ink); padding:10px 12px; min-height:60px; text-align:left;
+  font-size:clamp(15px,1.5vw,19px); line-height:1.25; }
+.mitem.sel { background:var(--yellow); }
+.mitem.done { background:#c7f9e5; opacity:.75; box-shadow:none; transform:translateY(3px); }
+.mitem.shake { animation:shake .35s; background:#ffd6dc; }
+@keyframes shake { 25% { transform:translateX(-6px); } 75% { transform:translateX(6px); } }
+
+/* burst */
+.burst { position:fixed; z-index:50; pointer-events:none; width:220px; height:150px; margin:-75px 0 0 -110px; animation:pop .9s ease-out forwards; }
+.burst svg { position:absolute; inset:0; }
+.burst span { position:absolute; inset:0; display:grid; place-items:center; font-family:var(--toon); font-size:34px; color:#fff;
+  -webkit-text-stroke:2px var(--ink); paint-order:stroke; letter-spacing:1px; padding-top:6px; }
+@keyframes pop { 0% { transform:scale(.2) rotate(-10deg); opacity:0; } 20% { transform:scale(1.15) rotate(3deg); opacity:1; }
+  35% { transform:scale(1) rotate(-2deg); } 80% { opacity:1; } 100% { transform:scale(1.05) translateY(-20px); opacity:0; } }
+
+@media (max-aspect-ratio: 1/1) {
+  .mbody { grid-template-columns:1fr; grid-template-rows:minmax(150px,34%) minmax(0,1fr); }
+  .mbody.full { grid-template-rows:1fr; }
+  .tracker span .lbl { display:none; }
+  .match { grid-template-columns:1fr 1fr; gap:8px; }
+}
+@media (max-width:700px) {
+  .cards { grid-template-columns:1fr 1fr; gap:8px; }
+  .dcard canvas { height:76px; }
+  .side { padding:12px 12px; }
+  .bar { padding:8px; gap:6px; }
+  .tracker > span { padding:4px 8px 2px; font-size:13px; }
+  .meter { grid-template-columns:84px 1fr 34px; font-size:14px; }
+  .pupsay canvas { width:64px; height:64px; flex-basis:64px; }
+  .grid { grid-template-columns:1fr 1fr; gap:10px; }
+  .tcard canvas { height:80px; }
+  .tcard b { font-size:18px; }
+  .tcard p { font-size:14px; }
+  .bar .ttl { font-size:20px; }
+}
+
+/* ===== visual-first redesign ===== */
+.mbody.story { grid-template-columns:1fr !important; grid-template-rows:1fr !important; }
+.mbody.story .stage { display:none; }
+.tiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; }
+.tile { background:#fff; border:3px solid var(--ink); border-radius:18px; box-shadow:0 6px 0 var(--ink); padding:6px; display:flex; flex-direction:column; gap:4px; align-items:stretch; min-height:64px; }
+.tile canvas { width:100%; aspect-ratio:16/10; height:auto; border-radius:12px; border:2px solid var(--ink); display:block; background:#eee; }
+.tile .lb { font-family:var(--toon); font-weight:400; font-size:clamp(17px,1.7vw,23px); line-height:1.05; text-align:center; padding:4px 2px 2px; letter-spacing:.5px; }
+.tile.txtonly .lb { font-family:Nunito,system-ui,sans-serif; font-weight:900; font-size:clamp(17px,1.8vw,23px); padding:12px 6px; }
+.tile.good { background:#c7f9e5; } .tile.bad { background:#ffe1e6; } .tile.dim { opacity:.6; }
+.tile.wig { animation:wig .5s; }
+@keyframes wig { 20% { transform:rotate(-4deg); } 40% { transform:rotate(4deg); } 60% { transform:rotate(-3deg); } 80% { transform:rotate(2deg); } }
+.tile:active { transform:translateY(4px); box-shadow:0 2px 0 var(--ink); }
+.spk { width:54px; height:54px; min-width:54px; min-height:54px; border-radius:50%; background:var(--blue); border:3px solid var(--ink); box-shadow:0 4px 0 var(--ink); display:grid; place-items:center; padding:0; }
+.spk svg { width:28px; height:28px; display:block; }
+.spk:active { transform:translateY(3px); box-shadow:0 1px 0 var(--ink); }
+.spk.talk { background:var(--yellow); }
+.pupsay .bub { display:flex; align-items:center; gap:10px; font-size:clamp(18px,1.9vw,25px); line-height:1.25; flex:1; }
+.pupsay .bub .bt { flex:1; }
+.pupsay.pop .bub { animation:bpop .35s; }
+@keyframes bpop { 0% { transform:scale(.92); } 60% { transform:scale(1.04); } }
+.strip { display:grid; grid-template-columns:repeat(var(--n,4),minmax(0,1fr)); gap:14px; }
+.cpanel { position:relative; background:#fff; border:3px solid var(--ink); border-radius:16px; box-shadow:4px 4px 0 var(--ink); overflow:hidden; display:flex; flex-direction:column; padding:0; text-align:left; }
+.cpanel canvas { width:100%; aspect-ratio:4/3; height:auto; display:block; border-bottom:3px solid var(--ink); }
+.cpanel .cap { display:flex; align-items:center; gap:8px; padding:8px 10px; font-size:clamp(15px,1.5vw,20px); line-height:1.25; }
+.cpanel .cap .ct { flex:1; }
+.cpanel.hid .cap, .cpanel.hid .extra { visibility:hidden; }
+.cpanel .num { position:absolute; top:8px; left:8px; width:36px; height:36px; border-radius:50%; background:var(--yellow); border:3px solid var(--ink); display:grid; place-items:center; font-family:var(--toon); font-size:20px; padding-top:3px; }
+.cpanel .extra { display:flex; gap:6px; flex-wrap:wrap; align-items:center; padding:0 10px 10px; }
+.more { background:#fff; border:2px dashed var(--ink); border-radius:999px; padding:4px 12px; font-size:15px; min-height:44px; }
+.moretxt { font-size:15px; line-height:1.3; flex-basis:100%; }
+.lesson .moral { display:flex; align-items:center; gap:10px; }
+.lesson .moral span { flex:1; }
+.lesson .today { display:flex; align-items:center; gap:10px; }
+.lesson .today canvas { width:70px; height:70px; flex:0 0 70px; }
+.lesson .today .tt { flex:1; }
+.dots { display:flex; gap:6px; } .dots i { width:16px; height:16px; border-radius:50%; border:3px solid var(--ink); background:#fff; } .dots i.on { background:var(--yellow); } .dots i.ok { background:var(--green); }
+#fxc { position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:60; }
+.demo { width:min(420px,80vw); aspect-ratio:16/10; border:3px solid var(--ink); border-radius:16px; display:block; }
+.mtile { display:flex; gap:8px; align-items:center; }
+.mtile canvas { width:96px; height:64px; flex:0 0 96px; border:2px solid var(--ink); border-radius:10px; }
+.tcard .row { display:flex; gap:8px; align-items:center; }
+.tcard .row p { flex:1; }
+.toggle { font-size:16px; }
+@media (max-aspect-ratio: 1/1) {
+  .strip { --n:2 !important; gap:8px; }
+  .cpanel .cap { font-size:15px; padding:6px; gap:4px; }
+  .cpanel .spk, .pupsay .spk { width:46px; height:46px; min-width:46px; min-height:46px; }
+  .tiles { grid-template-columns:repeat(auto-fit,minmax(104px,1fr)); gap:8px; }
+  .tile .lb { font-size:16px; }
+  .mtile canvas { width:64px; height:44px; flex-basis:64px; }
+  .lesson .today canvas { width:50px; height:50px; flex-basis:50px; }
+}
+
+.side[hidden] { display:none !important; }
+.tracker > span .lbl { display:inline; }
+.muteBtn svg { width:30px; height:30px; display:block; }
+.autoBtn { gap:8px; } .autoBtn svg { width:26px; height:26px; } .autoBtn.on { background:var(--yellow); }
+@media (max-aspect-ratio: 1/1) { .tracker > span .lbl { display:none; } .autoBtn span { display:none; } }
+
+.rot { position:absolute; left:50%; bottom:16px; transform:translateX(-50%); z-index:5; background:var(--yellow); border:3px solid var(--ink); border-radius:999px; padding:8px 14px; font-size:15px; white-space:nowrap; box-shadow:3px 3px 0 var(--ink); pointer-events:none; }
+.rot span { display:inline-block; animation:spin 1.5s linear infinite; font-size:20px; }
+@keyframes spin { to { transform:rotate(360deg); } }
+@media (max-aspect-ratio: 1/1) {
+  #title .tl { top:10px; left:10px; } #title .tr { top:10px; right:10px; flex-direction:column; align-items:flex-end; gap:6px; }
+  #title .tr #starsTotal { order:3; font-size:22px; }
+  .autoBtn { padding:8px 10px 4px; }
+  .mgctl .btn { min-width:80px; min-height:68px; font-size:20px; }
+}
+
+.tile.meh { background:#fff3c4; }
+
+#mapWrap { touch-action:none; cursor:pointer; }
+.qbar { position:absolute; top:8px; left:8px; right:8px; z-index:3; display:flex; gap:8px; align-items:center; flex-wrap:wrap; pointer-events:none; }
+.qbar .pupsay { flex:1; min-width:240px; pointer-events:auto; }
+.qbar .pupsay canvas { width:64px; height:64px; flex-basis:64px; }
+.mgov.low { place-items:end center; background:rgba(30,20,60,.25); }
+.mgov.low .panel { width:min(720px,100%); }
+
+@media (max-aspect-ratio: 1/1) { #bookCount { display:none; } #book .tabs .btn { font-size:16px; padding:8px 10px 4px; } }
+
+</style>
+</head>
+<body>
+
+<section id="title" class="screen">
+  <canvas id="titleCv" class="bgc"></canvas>
+  <div class="corner tl"><a class="btn alt sm" href="../">⬅ Games</a></div>
+  <div class="corner tr"><span id="starsTotal"></span><button class="btn b sm autoBtn toggle"></button><button class="btn round muteBtn" aria-label="Sound on">♪</button></div>
+  <div class="tbox">
+    <h1 class="big" id="gTitle"></h1>
+    <p class="tag" id="gTag"></p>
+    <div class="row">
+      <button class="btn go" id="playBtn" style="font-size:clamp(26px,3vw,38px);padding:16px 40px 10px">Play</button>
+    </div>
+    <div class="row">
+      <button class="btn y sm" id="homerBtn">Who was Homer?</button>
+      <button class="btn b sm" id="bookBtn">Book of Wisdom</button>
+      <button class="btn p sm" id="reviewBtn">Epic Review</button>
+    </div>
+  </div>
+  <div class="corner br"><a class="other" id="otherLink" href="#"></a></div>
+</section>
+
+<section id="map" class="screen" hidden>
+  <canvas id="mapCv" class="bgc"></canvas>
+  <div class="bar">
+    <button class="btn alt sm" id="mapBack">◀ Title</button>
+    <div class="grow ttl" id="mapTitle"></div>
+    <span class="chip" id="mapStars">★ 0</span>
+    <button class="btn b sm" id="mapBook">Book</button>
+    <button class="btn p sm" id="mapReview">Review</button>
+  </div>
+  <div id="mapWrap"></div>
+  <div id="mapSay" class="panel" style="position:relative;z-index:4;margin:0 12px 12px;padding:8px 12px;align-self:flex-start;max-width:min(640px,calc(100vw - 24px))"></div>
+</section>
+
+<section id="mission" class="screen" hidden>
+  <div class="bar">
+    <button class="btn alt sm" id="mBack">◀ Map</button>
+    <div class="tracker grow" id="tracker"></div>
+    <span class="chip calm" id="tchip" hidden></span>
+    <button class="btn round muteBtn" aria-label="Sound on">♪</button>
+  </div>
+  <div class="mbody" id="mbody">
+    <div class="stage panel" id="stage"><canvas id="sceneCv"></canvas></div>
+    <div class="side panel" id="side"></div>
+  </div>
+</section>
+
+<section id="book" class="screen" hidden>
+  <div class="bar">
+    <button class="btn alt sm" id="bookBack">◀ Title</button>
+    <div class="tabs" id="bookTabs">
+      <button class="btn alt sm" data-tab="themes">Theme Cards</button>
+      <button class="btn alt sm" data-tab="wisdom">Book of Wisdom</button>
+    </div>
+    <div class="grow"></div>
+    <span class="chip" id="bookCount"></span>
+    <button class="btn go sm" id="bookMap">Map ▶</button>
+  </div>
+  <div class="scroll"><div class="grid" id="bookGrid"></div></div>
+</section>
+
+<section id="review" class="screen" hidden>
+  <div class="bar">
+    <button class="btn alt sm" id="revBack">◀ Map</button>
+    <div class="grow ttl">Epic Themes Review</div>
+  </div>
+  <div class="scroll"><div id="reviewBox" class="panel" style="padding:16px;max-width:1000px;margin:0 auto;display:flex;flex-direction:column;gap:12px"></div></div>
+</section>
+
+<div id="ov" class="overlay" hidden><div id="ovp" class="panel"></div></div>
+
+<script>
+'use strict';
+// ================= shared engine (copied into each game) =================
+const TAU = Math.PI * 2, INK = '#1d1b26';
+const COL = { ink: INK, paper: '#fffaf0', accent: '#ff4d6d', yellow: '#ffd23f', green: '#06d6a0', blue: '#4cc9f0', purple: '#9b5de5', orange: '#ff9f1c' };
+const $ = s => document.querySelector(s);
+const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+const rand = (a, b) => a + Math.random() * (b - a);
+const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+const lerp = (a, b, k) => a + (b - a) * k;
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+
+// ---------- canvas helpers ----------
+function E(c, x, y, rx, ry, rot = 0) { c.beginPath(); c.ellipse(x, y, Math.abs(rx), Math.abs(ry), rot, 0, TAU); }
+function fs(c, fill, lw = 3) { if (fill) { c.fillStyle = fill; c.fill(); } if (lw) { c.lineWidth = lw; c.strokeStyle = INK; c.lineJoin = 'round'; c.lineCap = 'round'; c.stroke(); } }
+function RR(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
+function P(c, pts, close = true) { c.beginPath(); c.moveTo(pts[0], pts[1]); for (let i = 2; i < pts.length; i += 2) c.lineTo(pts[i], pts[i + 1]); if (close) c.closePath(); }
+function L(c, x1, y1, x2, y2, lw = 3, col = INK) { c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.lineWidth = lw; c.strokeStyle = col; c.lineCap = 'round'; c.stroke(); }
+function txt(c, s, x, y, size = 20, fill = '#fff', align = 'center', stroke = 4) {
+  if (window.NOTXT) return;
+  c.font = `${size}px "Luckiest Guy","Comic Sans MS",system-ui,sans-serif`; c.textAlign = align; c.textBaseline = 'middle';
+  if (stroke) { c.lineWidth = stroke; c.strokeStyle = INK; c.lineJoin = 'round'; c.strokeText(s, x, y); }
+  c.fillStyle = fill; c.fillText(s, x, y);
+}
+// contain a virtual VWxVH box inside w x h (centered)
+function virt(c, w, h, VW, VH) { const s = Math.min(w / VW, h / VH); c.translate((w - VW * s) / 2, (h - VH * s) / 2); c.scale(s, s); return s; }
+function bigRect(c, fill) { c.fillStyle = fill; c.fillRect(-3000, -3000, 7000, 7000); }
+
+// ---------- live canvases: redrawn every frame (or once per resize) ----------
+const live = new Set();
+function addLive(cv, fn, once = false) { const o = { cv, fn, once, w: 0, h: 0, dirty: true }; live.add(o); return o; }
+function frame(now) {
+  const t = now / 1000;
+  for (const o of live) {
+    if (!o.cv.isConnected) { live.delete(o); continue; }
+    const r = o.cv.getBoundingClientRect();
+    if (r.width < 2 || r.height < 2) continue;
+    const d = Math.min(2, window.devicePixelRatio || 1);
+    const sizeChanged = Math.abs(r.width - o.w) > .5 || Math.abs(r.height - o.h) > .5;
+    if (o.once && !sizeChanged && !o.dirty) continue;
+    if (sizeChanged) { o.w = r.width; o.h = r.height; o.cv.width = Math.round(r.width * d); o.cv.height = Math.round(r.height * d); }
+    o.dirty = false;
+    const c = o.cv.getContext('2d');
+    c.setTransform(d, 0, 0, d, 0, 0); c.clearRect(0, 0, r.width, r.height);
+    c.save();
+    try { o.fn(c, r.width, r.height, t); } catch (e) { live.delete(o); setTimeout(() => { throw e; }); }
+    c.restore();
+  }
+  requestAnimationFrame(frame);
+}
+
+// ---------- storage ----------
+const Store = {
+  d: { done: {}, themes: [], lessons: [], intro: false, review: 0, mute: false },
+  load(key) { this.key = key; try { const s = JSON.parse(localStorage.getItem(key) || 'null'); if (s && typeof s === 'object') Object.assign(this.d, s); } catch (_) {} },
+  save() { try { localStorage.setItem(this.key, JSON.stringify(this.d)); } catch (_) {} },
+};
+
+// ---------- sound (synthesized) ----------
+const Snd = {
+  ctx: null, mute: false,
+  init() { if (!this.ctx) { try { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (_) { this.ctx = null; } } if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume().catch(() => {}); },
+  tone(f, d = .12, type = 'square', v = .05, when = 0, slide = 0) {
+    if (this.mute || !this.ctx) return;
+    try {
+      const c = this.ctx, t = c.currentTime + when, o = c.createOscillator(), g = c.createGain();
+      o.type = type; o.frequency.setValueAtTime(f, t); if (slide) o.frequency.exponentialRampToValueAtTime(slide, t + d);
+      g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.0001, t + d);
+      o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + d + .03);
+    } catch (_) {}
+  },
+  blip() { this.tone(660, .07, 'square', .035); },
+  tap() { this.tone(880, .05, 'triangle', .05); },
+  good() { [523, 659, 784, 1046].forEach((f, i) => this.tone(f, .16, 'triangle', .07, i * .08)); },
+  bad() { this.tone(260, .22, 'sawtooth', .035, 0, 140); },
+  whoosh() { this.tone(180, .5, 'sine', .06, 0, 700); },
+  star(i) { this.tone(784 + i * 200, .2, 'triangle', .07, i * .18); },
+  boom() { this.tone(120, .35, 'sawtooth', .07, 0, 40); this.tone(70, .4, 'square', .05, .02, 30); },
+  pew() { this.tone(1200, .12, 'square', .03, 0, 300); },
+  thud() { this.tone(90, .15, 'triangle', .09, 0, 50); },
+  bonk() { this.tone(520, .1, 'square', .05, 0, 200); this.tone(260, .12, 'triangle', .06, .04); },
+  splash() { this.tone(300, .25, 'sine', .05, 0, 900); },
+  lyre() { [392, 494, 587, 784].forEach((f, i) => this.tone(f, .5, 'triangle', .05, i * .12)); },
+};
+
+// ---------- comic bursts ----------
+function burst(text, x, y, color = COL.yellow) {
+  if (x == null) { x = innerWidth / 2; y = innerHeight * .4; }
+  x = clamp(x, 112, innerWidth - 112); y = clamp(y, 80, innerHeight - 80);
+  const b = el('div', 'burst'); b.style.left = x + 'px'; b.style.top = y + 'px';
+  const pts = []; for (let i = 0; i < 24; i++) { const a = i / 24 * TAU, r = i % 2 ? 48 : 70; pts.push((110 + Math.cos(a) * r * 1.45).toFixed(1) + ',' + (75 + Math.sin(a) * r).toFixed(1)); }
+  b.innerHTML = `<svg viewBox="0 0 220 150"><polygon points="${pts.join(' ')}" fill="${color}" stroke="#1d1b26" stroke-width="4" stroke-linejoin="round"/></svg><span>${esc(text)}</span>`;
+  document.body.appendChild(b); setTimeout(() => b.remove(), 950);
+}
+function burstAt(node, text, color) { const r = node.getBoundingClientRect(); burst(text, r.left + r.width / 2, r.top + r.height / 2, color); }
+
+// ---------- Captain Pup (Japanese Chin) ----------
+// head radius ~44 at s=1; (x,y) = head centre
+function drawPup(c, x, y, s = 1, o = {}) {
+  const t = o.t || 0;
+  c.save(); c.translate(x, y); c.scale(s, s);
+  if (o.flip) c.scale(-1, 1);
+  c.rotate(Math.sin(t * 2.2) * .04 * (o.wiggle ?? 1));
+  c.lineJoin = 'round'; c.lineCap = 'round';
+  const W = '#ffffff', B = '#1f1d22';
+  if (o.body !== false) {
+    // curly plume tail
+    c.beginPath(); c.moveTo(26, 62); c.bezierCurveTo(70 + Math.sin(t * 6) * 6, 40, 66, 4, 40, 18); c.bezierCurveTo(56, 26, 52, 50, 24, 50); c.closePath(); fs(c, W, 4);
+    E(c, 0, 60, 36, 30); fs(c, W, 4);
+    for (const sd of [-1, 1]) { E(c, sd * 16, 86, 12, 8); fs(c, W, 4); }
+    if (o.outfit === 'sailor') {
+      P(c, [-26, 36, 26, 36, 0, 62]); fs(c, COL.accent, 4);
+      E(c, 0, 44, 6, 5); fs(c, COL.yellow, 3);
+    } else if (o.outfit === 'chiton') {
+      c.beginPath(); c.moveTo(-34, 50); c.quadraticCurveTo(0, 40, 34, 50); c.lineTo(30, 80); c.quadraticCurveTo(0, 88, -30, 80); c.closePath(); fs(c, '#f7f1e3', 4);
+      L(c, -30, 58, 30, 58, 4, COL.purple); E(c, 0, 50, 6, 6); fs(c, COL.yellow, 3);
+    } else if (o.outfit === 'old') {
+      E(c, -20, 66, 8, 4); fs(c, '#e8e1d2', 0); E(c, 14, 54, 9, 5); fs(c, '#e8e1d2', 0);
+    }
+  }
+  // floppy black ears
+  for (const sd of [-1, 1]) { E(c, sd * 40, 8 + (o.droop ? 6 : 0), 16, 30, sd * (o.droop ? .15 : .35)); fs(c, B, 4); }
+  // head
+  E(c, 0, 0, 44, 40); fs(c, W, 4);
+  // black eye patches with a white blaze between
+  for (const sd of [-1, 1]) { E(c, sd * 21, -4, 17, 19, sd * -.3); c.fillStyle = B; c.fill(); }
+  c.fillStyle = W; RR(c, -5, -40, 10, 40, 5); c.fill();
+  // big round brown eyes (blink every few seconds)
+  const blink = (o.blink ?? true) && (t % 4.3) < .12;
+  for (const sd of [-1, 1]) {
+    if (blink || o.closed) { c.beginPath(); c.arc(sd * 20, -2, 8, .2, Math.PI - .2); c.lineWidth = 3.5; c.strokeStyle = '#fff'; c.stroke(); continue; }
+    E(c, sd * 20, -2, 10.5, 11.5); fs(c, '#7a4a21', 2.5);
+    E(c, sd * 20, -1, 6, 6.5); c.fillStyle = '#2a160a'; c.fill();
+    E(c, sd * 20 - 3.5, -6, 3.4, 3.4); c.fillStyle = '#fff'; c.fill();
+    E(c, sd * 20 + 3.5, 2, 1.5, 1.5); c.fill();
+  }
+  if (o.tear) { c.beginPath(); c.moveTo(28, 8); c.quadraticCurveTo(32, 18, 28, 20); c.quadraticCurveTo(24, 18, 28, 8); fs(c, COL.blue, 2); }
+  // muzzle, nose, open mouth, tongue
+  E(c, 0, 18, 15, 11); c.fillStyle = W; c.fill();
+  c.beginPath(); c.moveTo(-9, 22); c.quadraticCurveTo(0, 36, 9, 22); c.closePath(); fs(c, '#7a1f3a', 3);
+  c.beginPath(); c.moveTo(-5, 26); c.quadraticCurveTo(-6, 36 + Math.sin(t * 7) * 1.5, 0, 37 + Math.sin(t * 7) * 1.5); c.quadraticCurveTo(6, 36 + Math.sin(t * 7) * 1.5, 5, 26); fs(c, '#ff8fb1', 2.5);
+  E(c, 0, 12, 6.5, 4.8); c.fillStyle = B; c.fill(); E(c, -2, 10.5, 2, 1.2); c.fillStyle = '#777'; c.fill();
+  c.strokeStyle = '#9a9aa8'; c.lineWidth = 1.6;
+  for (const sd of [-1, 1]) for (const k of [-1, 0, 1]) { c.beginPath(); c.moveTo(sd * 14, 18 + k * 3); c.lineTo(sd * 30, 15 + k * 6); c.stroke(); }
+  // hats
+  if (o.hat === 'captain') {
+    c.save(); c.translate(0, -36); c.rotate(-.12);
+    RR(c, -30, -16, 60, 20, 8); fs(c, '#fff', 4);
+    c.beginPath(); c.moveTo(-34, 2); c.quadraticCurveTo(0, -6, 34, 2); c.lineTo(30, 8); c.quadraticCurveTo(0, 2, -30, 8); c.closePath(); fs(c, '#1d3557', 4);
+    RR(c, -30, -4, 60, 7, 3); fs(c, '#1d3557', 3);
+    E(c, 0, -8, 6, 6); fs(c, COL.yellow, 3);
+    c.restore();
+  } else if (o.hat === 'helmet') {
+    c.save(); c.translate(0, -30);
+    c.beginPath(); c.moveTo(-34, 6); c.quadraticCurveTo(-36, -30, 0, -32); c.quadraticCurveTo(36, -30, 34, 6); c.closePath(); fs(c, '#e9b44c', 4);
+    L(c, -30, 2, 30, 2, 4);
+    c.beginPath(); c.moveTo(-24, -26); c.quadraticCurveTo(0, -70 + Math.sin(t * 4) * 2, 30, -28 + Math.sin(t * 4) * 2); c.quadraticCurveTo(34, -14, 22, -30); c.quadraticCurveTo(0, -44, -16, -26); c.closePath(); fs(c, COL.accent, 4);
+    for (let i = 0; i < 4; i++) L(c, -8 + i * 9, -40 + i * 2, -2 + i * 10, -30, 2);
+    c.restore();
+  }
+  c.restore();
+}
+
+// ---------- cartoon people ----------
+// (x,y) = feet; total height ~ 150*s. o: skin, tunic, hair, beard, hat, crest, mood, long, cape, arms, prop
+function drawPerson(c, x, y, s = 1, o = {}) {
+  const t = o.t || 0, skin = o.skin || '#f2c49b', tunic = o.tunic || '#4cc9f0', hair = o.hair || '#5a3a22';
+  c.save(); c.translate(x, y); c.scale(s, s); if (o.flip) c.scale(-1, 1);
+  c.lineJoin = 'round'; c.lineCap = 'round';
+  const bob = Math.sin(t * 3 + (o.ph || 0)) * 1.5; c.translate(0, bob);
+  if (o.cape) { c.beginPath(); c.moveTo(-20, -86); c.quadraticCurveTo(-34, -40, -26, -10); c.lineTo(22, -10); c.quadraticCurveTo(30, -50, 20, -86); c.closePath(); fs(c, o.cape, 3); }
+  if (o.long) { RR(c, -24, -128, 48, 62, 18); fs(c, hair, 3); }
+  // legs
+  if (!o.robe) for (const sd of [-1, 1]) { RR(c, sd * 10 - 5, -34, 10, 32, 4); fs(c, skin, 3); E(c, sd * 11, -2, 9, 5); fs(c, '#8a5a2b', 3); }
+  // tunic body
+  c.beginPath();
+  if (o.robe) { c.moveTo(-18, -86); c.lineTo(18, -86); c.lineTo(30, 0); c.lineTo(-30, 0); }
+  else { c.moveTo(-17, -86); c.lineTo(17, -86); c.lineTo(24, -30); c.lineTo(-24, -30); }
+  c.closePath(); fs(c, tunic, 3);
+  L(c, -18, -56, 18, -56, 3, o.belt || '#8a5a2b');
+  if (o.armor) { c.beginPath(); c.moveTo(-17, -86); c.lineTo(17, -86); c.lineTo(19, -58); c.lineTo(-19, -58); c.closePath(); fs(c, o.armor, 3); L(c, 0, -84, 0, -60, 2); }
+  // arms
+  const arms = o.arms || 'down';
+  for (const sd of [-1, 1]) {
+    c.beginPath(); c.moveTo(sd * 15, -82);
+    let hx, hy;
+    if (arms === 'up') { hx = sd * 30; hy = -128; }
+    else if (arms === 'out') { hx = sd * 40; hy = -78; }
+    else if (arms === 'hold') { hx = sd * 14; hy = -62; }
+    else if (arms === 'wave' && sd > 0) { hx = 34; hy = -120 + Math.sin(t * 8) * 6; }
+    else { hx = sd * 26; hy = -44; }
+    c.lineTo(hx, hy); c.lineWidth = 11; c.strokeStyle = INK; c.stroke(); c.lineWidth = 6; c.strokeStyle = skin; c.stroke();
+    E(c, hx, hy, 6, 6); fs(c, skin, 2.5);
+  }
+  // head
+  c.save(); c.translate(0, -112);
+  E(c, 0, 0, 26, 27); fs(c, skin, 3);
+  if (o.hair !== false && !o.long) { c.beginPath(); c.arc(0, -4, 26, Math.PI * 1.05, Math.PI * 1.95); c.quadraticCurveTo(0, -18, -25, -10); c.closePath(); fs(c, hair, 3); }
+  if (o.long) { c.beginPath(); c.arc(0, -4, 26, Math.PI * 1.02, Math.PI * 1.98); c.quadraticCurveTo(0, -14, -26, -6); c.closePath(); fs(c, hair, 3); }
+  if (o.beard) { c.beginPath(); c.moveTo(-24, 2); c.quadraticCurveTo(-22, 34, 0, 36); c.quadraticCurveTo(22, 34, 24, 2); c.quadraticCurveTo(12, 16, 0, 14); c.quadraticCurveTo(-12, 16, -24, 2); fs(c, o.beard, 3); }
+  // face by mood
+  const mood = o.mood || 'happy';
+  for (const sd of [-1, 1]) {
+    if (mood === 'sleep') { c.beginPath(); c.arc(sd * 9, -2, 4, .3, Math.PI - .3); c.lineWidth = 2.5; c.strokeStyle = INK; c.stroke(); continue; }
+    E(c, sd * 9, -3, 3.8, 4.6); c.fillStyle = INK; c.fill(); E(c, sd * 9 - 1.2, -4.5, 1.3, 1.3); c.fillStyle = '#fff'; c.fill();
+    c.beginPath();
+    if (mood === 'angry') { c.moveTo(sd * 15, -14); c.lineTo(sd * 4, -9); }
+    else if (mood === 'sad') { c.moveTo(sd * 14, -9); c.lineTo(sd * 4, -13); }
+    else if (mood === 'surprised') { c.moveTo(sd * 13, -15); c.lineTo(sd * 5, -15); }
+    else { c.moveTo(sd * 13, -12); c.quadraticCurveTo(sd * 9, -15, sd * 5, -12); }
+    c.lineWidth = 2.6; c.strokeStyle = INK; c.stroke();
+  }
+  if (mood === 'sad') { c.beginPath(); c.moveTo(12, 2); c.quadraticCurveTo(15, 9, 12, 11); c.quadraticCurveTo(9, 9, 12, 2); fs(c, COL.blue, 1.5); }
+  c.beginPath();
+  if (mood === 'angry') { c.moveTo(-7, 13); c.quadraticCurveTo(0, 8, 7, 13); }
+  else if (mood === 'sad') { c.moveTo(-6, 13); c.quadraticCurveTo(0, 9, 6, 13); }
+  else if (mood === 'surprised') { E(c, 0, 12, 4, 5); }
+  else if (mood !== 'sleep') { c.moveTo(-8, 8); c.quadraticCurveTo(0, 16, 8, 8); }
+  else { c.moveTo(-4, 11); c.lineTo(4, 11); }
+  c.lineWidth = 2.6; c.strokeStyle = INK; c.stroke();
+  if (o.cheeks !== false) { c.fillStyle = 'rgba(255,120,140,.35)'; E(c, -16, 6, 4.5, 3); c.fill(); E(c, 16, 6, 4.5, 3); c.fill(); }
+  // hats
+  const hat = o.hat;
+  if (hat === 'pilos') { P(c, [-22, -14, 0, -46, 22, -14]); fs(c, '#a0522d', 3); L(c, -22, -14, 22, -14, 4); }
+  else if (hat === 'crown') { P(c, [-20, -16, -20, -34, -10, -24, 0, -38, 10, -24, 20, -34, 20, -16]); fs(c, COL.yellow, 3); }
+  else if (hat === 'wreath') { for (let i = 0; i < 9; i++) { const a = Math.PI * (1.05 + i * .1); E(c, Math.cos(a) * 25, Math.sin(a) * 25 - 2, 6, 3.5, a + 1.57); fs(c, '#57cc99', 2); } }
+  else if (hat === 'veil') { c.beginPath(); c.arc(0, -2, 30, Math.PI * .9, Math.PI * 2.1); c.lineTo(30, 30); c.lineTo(22, 30); c.arc(0, -2, 23, Math.PI * 2.05, Math.PI * .95, true); c.lineTo(-30, 30); c.closePath(); fs(c, o.veil || '#cdb4db', 3); }
+  else if (hat === 'helmet' || hat === 'plume') {
+    c.beginPath(); c.moveTo(-28, 4); c.quadraticCurveTo(-30, -32, 0, -32); c.quadraticCurveTo(30, -32, 28, 4); c.lineTo(20, 4); c.lineTo(18, -10); c.lineTo(-18, -10); c.lineTo(-20, 4); c.closePath(); fs(c, o.helm || '#e9b44c', 3);
+    L(c, 0, -10, 0, 8, 4);
+    if (hat === 'plume') {
+      const big = o.bigPlume ? 1.6 : 1, wob = Math.sin(t * 5) * 3;
+      c.beginPath(); c.moveTo(-20, -28); c.quadraticCurveTo(-4, -64 * big + wob, 30 * big, -40 * big + wob); c.quadraticCurveTo(36 * big, -22, 22, -30); c.quadraticCurveTo(4, -40, -10, -28); c.closePath(); fs(c, o.crest || COL.accent, 3);
+    }
+  }
+  if (o.wings) for (const sd of [-1, 1]) { c.beginPath(); c.moveTo(sd * 22, -16); c.quadraticCurveTo(sd * 48, -44, sd * 44, -10); c.quadraticCurveTo(sd * 36, -14, sd * 25, -6); c.closePath(); fs(c, '#fff', 2.5); }
+  c.restore();
+  // props
+  const p = o.prop;
+  if (p === 'spear') { L(c, 30, -150, 30, 0, 5, INK); L(c, 30, -150, 30, 0, 2.5, '#c08552'); P(c, [24, -150, 30, -170, 36, -150]); fs(c, '#d9d9d9', 2.5); }
+  else if (p === 'shield') { E(c, -30, -64, 22, 26); fs(c, o.shieldCol || '#e9b44c', 3); E(c, -30, -64, 8, 9); fs(c, COL.accent, 2.5); }
+  else if (p === 'lyre') { c.save(); c.translate(26, -70); c.beginPath(); c.moveTo(-10, 16); c.quadraticCurveTo(-18, -10, -10, -26); c.moveTo(10, 16); c.quadraticCurveTo(18, -10, 10, -26); c.lineWidth = 5; c.strokeStyle = '#c08552'; c.stroke(); L(c, -12, -20, 12, -20, 3, INK); L(c, -10, 16, 10, 16, 4, INK); for (const k of [-5, 0, 5]) L(c, k, -20, k, 16, 1.2, '#555'); c.restore(); }
+  else if (p === 'trident') { L(c, 30, -160, 30, 0, 5, INK); L(c, 30, -160, 30, 0, 2.5, COL.yellow); c.beginPath(); c.moveTo(18, -176); c.lineTo(18, -160); c.lineTo(42, -160); c.lineTo(42, -176); c.moveTo(30, -182); c.lineTo(30, -160); c.lineWidth = 4; c.strokeStyle = INK; c.stroke(); }
+  else if (p === 'bolt') { drawBolt(c, 36, -132, .9); }
+  else if (p === 'staff') { L(c, 30, -130, 30, 0, 5, '#8a5a2b'); }
+  else if (p === 'bow') { c.beginPath(); c.arc(-34, -76, 34, -1.1, 1.1); c.lineWidth = 5; c.strokeStyle = '#8a5a2b'; c.stroke(); L(c, -34 + Math.cos(-1.1) * 34, -76 + Math.sin(-1.1) * 34, -34 + Math.cos(1.1) * 34, -76 + Math.sin(1.1) * 34, 1.5); }
+  c.restore();
+}
+
+// ---------- common props ----------
+function drawCloud(c, x, y, s = 1, fill = '#fff') { c.save(); c.translate(x, y); c.scale(s, s); c.beginPath(); c.arc(-30, 6, 20, Math.PI * .5, Math.PI * 1.5); c.arc(-8, -10, 24, Math.PI, Math.PI * 1.9); c.arc(22, -2, 20, Math.PI * 1.3, Math.PI * .5); c.closePath(); fs(c, fill, 3); c.restore(); }
+function drawSun(c, x, y, r, t = 0) { c.save(); c.translate(x, y); c.rotate(t * .2); for (let i = 0; i < 12; i++) { c.rotate(TAU / 12); P(c, [r * .9, -6, r * 1.45, 0, r * .9, 6]); fs(c, COL.orange, 2.5); } c.restore(); E(c, x, y, r, r); fs(c, COL.yellow, 3); }
+function waves(c, y, w0, w1, t, col = 'rgba(255,255,255,.7)', amp = 6, len = 60, lw = 3) {
+  c.beginPath(); for (let x = w0; x <= w1; x += 6) { const yy = y + Math.sin(x / len * TAU + t * 2) * amp; x === w0 ? c.moveTo(x, yy) : c.lineTo(x, yy); }
+  c.lineWidth = lw; c.strokeStyle = col; c.stroke();
+}
+function drawSea(c, top, t, deep = '#1e88c7', light = '#4cc9f0') {
+  const g = c.createLinearGradient(0, top, 0, top + 400); g.addColorStop(0, light); g.addColorStop(1, deep);
+  c.fillStyle = g; c.fillRect(-3000, top, 7000, 4000);
+  for (let i = 0; i < 6; i++) waves(c, top + 20 + i * 38, -200, 1000, t + i, 'rgba(255,255,255,.45)', 5, 70 + i * 8, 2.5);
+}
+// Greek ship: (x,y) = waterline centre; o.sail colour, o.crew count, o.oars
+function drawShip(c, x, y, s = 1, o = {}) {
+  const t = o.t || 0;
+  c.save(); c.translate(x, y + Math.sin(t * 2) * 2); c.scale(s, s); if (o.flip) c.scale(-1, 1); c.rotate(Math.sin(t * 1.6) * .03);
+  c.lineJoin = 'round';
+  // mast + sail
+  L(c, 0, -10, 0, -130, 6, INK); L(c, 0, -10, 0, -130, 3, '#8a5a2b');
+  if (o.sail !== false) {
+    const puff = o.puff ?? Math.sin(t * 1.5) * 4 + 10;
+    c.beginPath(); c.moveTo(-52, -118); c.lineTo(52, -118); c.quadraticCurveTo(52 + puff, -70, 48, -30); c.lineTo(-48, -30); c.quadraticCurveTo(-52 + puff, -70, -52, -118); c.closePath(); fs(c, o.sailCol || '#fffaf0', 3.5);
+    c.save(); c.clip(); for (let i = -2; i < 4; i++) { c.fillStyle = i % 2 ? (o.stripe || COL.accent) : 'transparent'; c.fillRect(-60 + i * 30 + 30, -120, 15, 92); } c.restore();
+    c.beginPath(); c.moveTo(-52, -118); c.lineTo(52, -118); c.quadraticCurveTo(52 + puff, -70, 48, -30); c.lineTo(-48, -30); c.quadraticCurveTo(-52 + puff, -70, -52, -118); c.closePath(); c.lineWidth = 3.5; c.strokeStyle = INK; c.stroke();
+    L(c, -58, -120, 58, -120, 5);
+  }
+  if (o.tied) { drawPerson(c, 0, -10, .5, { tunic: '#f4a261', beard: '#5a3a22', hat: 'pilos', mood: o.tiedMood || 'surprised', arms: 'hold', t }); for (const yy of [-50, -38]) L(c, -12, yy, 12, yy, 3, '#c08552'); }
+  // crew heads
+  const n = o.crew ?? 4;
+  for (let i = 0; i < n; i++) { const cx = -60 + i * (120 / Math.max(1, n - 1)); E(c, cx, -14 + Math.sin(t * 4 + i) * 1.5, 9, 9); fs(c, o.crewCol?.[i] || '#f2c49b', 2.5); if (o.wax) { E(c, cx - 8, -14, 3, 3); fs(c, COL.yellow, 1.5); } }
+  // hull
+  c.beginPath(); c.moveTo(-95, -16); c.quadraticCurveTo(-100, 10, -70, 14); c.lineTo(70, 14); c.quadraticCurveTo(100, 10, 110, -26); c.quadraticCurveTo(118, -38, 106, -40); c.lineTo(96, -16); c.closePath(); fs(c, o.hull || '#3d2b56', 3.5);
+  L(c, -90, -4, 96, -4, 3, '#ffd23f');
+  E(c, 82, -6, 6, 5); fs(c, '#fff', 2); E(c, 83, -6, 2.5, 2.5); c.fillStyle = INK; c.fill();
+  // oars
+  if (o.oars !== false) for (let i = 0; i < 5; i++) { const a = Math.sin(t * 4 + i * .3) * .3; c.save(); c.translate(-60 + i * 30, 4); c.rotate(.5 + a); L(c, 0, 0, 0, 34, 4, INK); L(c, 0, 0, 0, 34, 2, '#c08552'); c.restore(); }
+  c.restore();
+}
+function drawIsland(c, x, y, w, h, o = {}) {
+  c.beginPath(); c.moveTo(x - w, y); c.quadraticCurveTo(x - w * .7, y - h, x - w * .1, y - h * .9); c.quadraticCurveTo(x + w * .5, y - h * 1.05, x + w, y); c.closePath(); fs(c, o.col || '#a7c957', 3);
+  c.beginPath(); c.moveTo(x - w - 6, y); c.quadraticCurveTo(x, y + 10, x + w + 6, y); c.quadraticCurveTo(x, y - 6, x - w - 6, y); fs(c, '#f2e2b1', 2.5);
+}
+function drawTree(c, x, y, s = 1, col = '#57cc99') { L(c, x, y, x, y - 34 * s, 7 * s, INK); L(c, x, y, x, y - 34 * s, 4 * s, '#8a5a2b'); E(c, x, y - 44 * s, 20 * s, 16 * s); fs(c, col, 2.5); E(c, x - 10 * s, y - 36 * s, 12 * s, 9 * s); fs(c, col, 2.5); }
+function drawColumns(c, x, y, w, h, n = 4, col = '#fffaf0') {
+  P(c, [x - w / 2 - 8, y - h, x, y - h - h * .32, x + w / 2 + 8, y - h]); fs(c, col, 3);
+  for (let i = 0; i < n; i++) { const cx = x - w / 2 + 8 + i * (w - 16) / (n - 1); c.beginPath(); c.rect(cx - 6, y - h, 12, h); fs(c, col, 3); }
+  c.beginPath(); c.rect(x - w / 2 - 6, y - 6, w + 12, 8); fs(c, col, 3);
+}
+function drawHeart(c, x, y, s, col = COL.accent) { c.save(); c.translate(x, y); c.scale(s, s); c.beginPath(); c.moveTo(0, 10); c.bezierCurveTo(-16, -2, -12, -16, 0, -8); c.bezierCurveTo(12, -16, 16, -2, 0, 10); fs(c, col, 2.5); c.restore(); }
+function drawStar(c, x, y, r, col = COL.yellow, lw = 2.5) { const pts = []; for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * .45 : r; pts.push(x + Math.cos(a) * rr, y + Math.sin(a) * rr); } P(c, pts); fs(c, col, lw); }
+function drawBolt(c, x, y, s = 1) { c.save(); c.translate(x, y); c.scale(s, s); P(c, [4, -30, -12, 2, 0, 2, -6, 30, 14, -6, 2, -6, 10, -30]); fs(c, COL.yellow, 2.5); c.restore(); }
+function drawFlame(c, x, y, s = 1, t = 0) { c.save(); c.translate(x, y); c.scale(s, s * (1 + Math.sin(t * 12) * .08)); c.beginPath(); c.moveTo(0, -30); c.quadraticCurveTo(18, -6, 12, 4); c.quadraticCurveTo(0, 14, -12, 4); c.quadraticCurveTo(-18, -6, 0, -30); fs(c, COL.orange, 2.5); c.beginPath(); c.moveTo(0, -14); c.quadraticCurveTo(8, 0, 4, 4); c.quadraticCurveTo(0, 8, -4, 4); c.quadraticCurveTo(-8, 0, 0, -14); c.fillStyle = COL.yellow; c.fill(); c.restore(); }
+
+
+// pointing-hand demo: kind = tap | hold | drag | dragv | tapfast
+function drawHand(c, x, y, s, kind, t) {
+  let dx = 0, dy = 0, press = 0;
+  if (kind === 'tap') { const k = (t % 1) ; press = k < .25 ? 1 : 0; dy = press ? 6 : -10 * Math.sin(k * Math.PI); }
+  else if (kind === 'tapfast') { const k = (t * 3) % 1; press = k < .4 ? 1 : 0; dy = press ? 6 : -6; }
+  else if (kind === 'hold') { const k = t % 2.4; press = k > .4 && k < 2 ? 1 : 0; dy = press ? 6 : -12; }
+  else if (kind === 'drag') { press = 1; dx = Math.sin(t * 1.8) * 110; }
+  else if (kind === 'dragv') { press = 1; dy = Math.sin(t * 1.8) * 80; }
+  c.save(); c.translate(x + dx, y + dy); c.scale(s, s);
+  if (press) { const r = kind === 'hold' ? 20 + ((t % 2.4) - .4) * 30 : 26; E(c, 0, -4, r, r * .5); c.lineWidth = 4; c.strokeStyle = 'rgba(255,255,255,.9)'; c.stroke(); }
+  c.lineJoin = 'round';
+  RR(c, -6, -2, 14, 34, 7); fs(c, '#fff', 3.5);
+  RR(c, -12, 22, 40, 40, 14); fs(c, '#fff', 3.5);
+  for (let i = 0; i < 3; i++) { RR(c, 8 + i * 0 - 4 + i * 10, 18, 11, 18, 5); fs(c, '#fff', 3); }
+  RR(c, -16, 34, 12, 20, 6); fs(c, '#fff', 3);
+  if (kind === 'drag' || kind === 'dragv') { c.globalAlpha = .7; const ar = kind === 'drag' ? [-70, 0, 70, 0] : [0, -60, 0, 60]; L(c, ar[0] - dx, ar[1] - dy - 40, ar[2] - dx, ar[3] - dy - 40, 5, '#fff'); c.globalAlpha = 1; }
+  c.restore();
+}
+function drawBulb(c, x, y, s = 1, t = 0) { c.save(); c.translate(x, y); c.scale(s, s); for (let i = 0; i < 8; i++) { const a = i / 8 * TAU + t * .5; L(c, Math.cos(a) * 34, Math.sin(a) * 34 - 6, Math.cos(a) * 44, Math.sin(a) * 44 - 6, 4, COL.orange); } E(c, 0, -6, 24, 24); fs(c, COL.yellow, 3.5); RR(c, -11, 16, 22, 16, 4); fs(c, '#adb5bd', 3); L(c, -8, 6, 8, 6, 2); c.restore(); }
+// speech bubble in virtual coords, wraps to 2 lines
+function bubble(c, x, y, s, tx, ty, size = 34) {
+  if (!s) return;
+  c.save(); c.font = `${size}px "Luckiest Guy","Comic Sans MS",system-ui,sans-serif`;
+  const words = s.split(' '); let lines = [s];
+  if (c.measureText(s).width > 380 && words.length > 1) { let best = 1, bw = 1e9; for (let i = 1; i < words.length; i++) { const a = words.slice(0, i).join(' '), b = words.slice(i).join(' '); const w = Math.max(c.measureText(a).width, c.measureText(b).width); if (w < bw) { bw = w; best = i; } } lines = [words.slice(0, best).join(' '), words.slice(best).join(' ')]; }
+  const w = Math.max(...lines.map(l => c.measureText(l).width)) + 40, h = lines.length * size * 1.1 + 26;
+  const bx = clamp(x - w / 2, 10, 790 - w), by = clamp(y - h / 2, 10, 590 - h);
+  if (tx != null) { c.beginPath(); const mx = clamp(tx, bx + 30, bx + w - 30); c.moveTo(mx - 18, by + h - 4); c.lineTo(tx, ty); c.lineTo(mx + 18, by + h - 4); c.closePath(); fs(c, '#fff', 4); }
+  RR(c, bx, by, w, h, 22); fs(c, '#fff', 4);
+  if (tx != null) { const mx = clamp(tx, bx + 30, bx + w - 30); c.beginPath(); c.moveTo(mx - 15, by + h - 3); c.lineTo(mx + 15, by + h - 3); c.lineWidth = 5; c.strokeStyle = '#fff'; c.stroke(); }
+  c.fillStyle = INK; c.textAlign = 'center'; c.textBaseline = 'middle';
+  lines.forEach((l, i) => c.fillText(l, bx + w / 2, by + 15 + size * .58 + i * size * 1.1));
+  c.restore();
+}
+
+function sky(c, top = '#8fd3ff', bot = '#d7f1ff') { const g = c.createLinearGradient(0, 0, 0, 400); g.addColorStop(0, top); g.addColorStop(1, bot); c.fillStyle = g; c.fillRect(-3000, -3000, 7000, 7000); }
+function mini(c, top, bot, sea = 80) { sky(c, top, bot); if (sea != null) drawSea(c, sea, 0); }
+function trojanWalls(c, x, y, w, h) { c.beginPath(); c.rect(x, y - h, w, h); fs(c, '#e9d8a6'); for (let i = 0; i < w / 30; i++) { c.beginPath(); c.rect(x + i * 30, y - h - 16, 18, 16); fs(c, '#e9d8a6'); } for (let i = 0; i < w / 60; i++) L(c, x + i * 60 + 20, y - h + 20, x + i * 60 + 20, y - h + 50, 3); }
+function note(c, x, y, s = 1, col = '#ff4d6d') { c.save(); c.translate(x, y); c.scale(s, s); E(c, 0, 0, 8, 6, -.4); fs(c, col, 2.5); L(c, 7, -2, 7, -26, 3); c.beginPath(); c.moveTo(7, -26); c.quadraticCurveTo(18, -20, 14, -10); c.lineWidth = 3; c.stroke(); c.restore(); }
+
+// ================= UI (visual-first) =================
+let G = null;
+const M = {};
+let bossRun = null, phaseTimer = null;
+
+// ---------- read-aloud ----------
+const Say = {
+  ok: typeof window !== 'undefined' && 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined',
+  auto: false, cur: null,
+  stop() { if (!this.ok) return; try { speechSynthesis.cancel(); } catch (_) {} document.querySelectorAll('.spk.talk').forEach(b => b.classList.remove('talk')); },
+  speak(text, btn) {
+    if (!this.ok || !text) return;
+    try {
+      this.stop();
+      const u = new SpeechSynthesisUtterance(String(text).replace(/[★♥]/g, ''));
+      u.rate = .95; u.pitch = 1.1; u.lang = 'en-US';
+      if (btn) { btn.classList.add('talk'); u.onend = u.onerror = () => btn.classList.remove('talk'); }
+      speechSynthesis.speak(u);
+    } catch (_) {}
+  },
+  autoSay(text, btn) { if (this.auto) this.speak(text, btn); },
+};
+const SPK_SVG = '<svg viewBox="0 0 32 32"><path d="M4 12h6l8-7v22l-8-7H4z" fill="#fff" stroke="#1d1b26" stroke-width="2.5" stroke-linejoin="round"/><path d="M22 10q4 6 0 12M25.5 6.5q7 9.5 0 19" fill="none" stroke="#1d1b26" stroke-width="2.8" stroke-linecap="round"/></svg>';
+function spk(text) {
+  const b = el('button', 'spk', SPK_SVG); b.setAttribute('aria-label', 'Read aloud');
+  b.onclick = e => { e.stopPropagation(); Snd.init(); Say.speak(typeof text === 'function' ? text() : text, b); };
+  if (!Say.ok) b.hidden = true;
+  return b;
+}
+
+// ---------- confetti ----------
+const FX = { parts: [] };
+function confetti(n = 70, x, y) {
+  x = x ?? innerWidth / 2; y = y ?? innerHeight * .35;
+  const cols = [COL.yellow, COL.accent, COL.green, COL.blue, COL.purple, COL.orange];
+  for (let i = 0; i < n; i++) { const a = rand(0, TAU), v = rand(200, 650); FX.parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 300, r: rand(0, TAU), vr: rand(-10, 10), c: cols[i % 6], s: rand(7, 13), life: rand(1.4, 2.2) }); }
+}
+function fxDraw(c, w, h, t) {
+  const dt = 1 / 60;
+  for (const p of FX.parts) { p.vy += 900 * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= .985; p.r += p.vr * dt; p.life -= dt;
+    c.save(); c.translate(p.x, p.y); c.rotate(p.r); c.fillStyle = p.c; c.strokeStyle = INK; c.lineWidth = 1.5; c.fillRect(-p.s / 2, -p.s / 3, p.s, p.s * .66); c.strokeRect(-p.s / 2, -p.s / 3, p.s, p.s * .66); c.restore(); }
+  FX.parts = FX.parts.filter(p => p.life > 0 && p.y < h + 40);
+}
+function yay(node, word) { Snd.good(); if (node) { const r = node.getBoundingClientRect(); confetti(50, r.left + r.width / 2, r.top + r.height / 2); burstAt(node, word || 'YES!', COL.green); } else confetti(); }
+function oops(node) { Snd.bad(); if (node) { node.classList.remove('wig'); void node.offsetWidth; node.classList.add('wig'); burstAt(node, 'TRY AGAIN!', '#ff8fa3'); } }
+
+// ---------- helpers ----------
+function showScreen(id) {
+  for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== id;
+  if (id !== 'mission') stopBoss();
+  clearInterval(phaseTimer); Say.stop();
+}
+function stopBoss() { if (bossRun) { bossRun.stop(); bossRun = null; } }
+function totalStars() { return Object.values(Store.d.done).reduce((a, b) => a + b, 0); }
+function nextIdx() { let i = 0; while (i < G.missions.length && Store.d.done[G.missions[i].id] != null) i++; return i; }
+function allDone() { return nextIdx() >= G.missions.length; }
+function setMute(m) { Snd.mute = m; Store.d.mute = m; Store.save(); for (const b of document.querySelectorAll('.muteBtn')) { b.innerHTML = '<svg viewBox="0 0 32 32"><path d="M11 24V8l14-3v16" fill="none" stroke="#1d1b26" stroke-width="3"/><ellipse cx="8" cy="24" rx="4" ry="3.2" fill="#1d1b26"/><ellipse cx="22" cy="21" rx="4" ry="3.2" fill="#1d1b26"/>' + (m ? '<path d="M4 4l24 24" stroke="#ff4d6d" stroke-width="4" stroke-linecap="round"/>' : '') + '</svg>'; b.style.opacity = m ? .7 : 1; b.setAttribute('aria-label', m ? 'Sound off' : 'Sound on'); } }
+function setAuto(a) { Say.auto = a; Store.d.auto = a; Store.save(); for (const b of document.querySelectorAll('.autoBtn')) { b.classList.toggle('on', a); b.innerHTML = SPK_SVG + `<span>${a ? 'Read to me: ON' : 'Read to me: OFF'}</span>`; } if (!a) Say.stop(); }
+function canvasTile(art, label, cls = '') {
+  const b = el('button', 'tile ' + cls);
+  if (art) { const cv = el('canvas'); b.appendChild(cv); addLive(cv, (c, w, h, t) => { virt(c, w, h, 800, 500); art(c, t); }); }
+  else b.classList.add('txtonly');
+  b.appendChild(el('div', 'lb', esc(label)));
+  return b;
+}
+// scene picture squeezed into a 800x500 tile box
+function sceneArt(fx, mission) { return (c, t) => { c.save(); c.translate(400, 500); c.scale(1.3, 1.3); c.translate(-400, -585); window.NOTXT = true; try { mission.scene(c, t, fx, 9); } finally { window.NOTXT = false; } c.restore(); }; }
+function pupSay(text, o = {}) {
+  const w = el('div', 'pupsay pop'); const cv = el('canvas'); w.appendChild(cv);
+  const bub = el('div', 'bub'); const bt = el('div', 'bt', esc(text)); bub.appendChild(bt);
+  const sb = spk(() => bt.textContent); bub.appendChild(sb); w.appendChild(bub);
+  addLive(cv, (c, W, H, t) => { const s = Math.min(W, H) / 150; drawPup(c, W / 2, H * .38, s, { t, hat: G.pupHat, outfit: G.pupOutfit, body: false, ...o }); });
+  w.set = (s, mood) => { bt.textContent = s; w.classList.remove('pop'); void w.offsetWidth; w.classList.add('pop'); Say.autoSay(s, sb); };
+  if (o.speak !== false) setTimeout(() => Say.autoSay(text, sb), 120);
+  return w;
+}
+function overlay(build) { const ov = $('#ov'), p = $('#ovp'); p.innerHTML = ''; ov.hidden = false; build(p); return () => { ov.hidden = true; p.innerHTML = ''; Say.stop(); }; }
+function navBtn(label, cls, fn) { const b = el('button', 'btn ' + cls, label); b.onclick = () => { Snd.blip(); Say.stop(); fn(); }; return b; }
+
+// ---------- Homer intro as comic pages ----------
+function homerIntro(after) {
+  let i = 0; const pages = G.intro;
+  const close = overlay(p => {
+    const render = () => {
+      p.innerHTML = ''; const pg = pages[i];
+      const head = el('div', 'nav'); head.style.cssText = 'justify-content:space-between;align-items:center;margin:0;padding:0';
+      head.appendChild(el('span', 'ribbon', esc(pg.ribbon)));
+      const dots = el('div', 'dots'); pages.forEach((_, k) => dots.appendChild(el('i', k < i ? 'ok' : k === i ? 'on' : ''))); head.appendChild(dots);
+      p.appendChild(head);
+      const cv = el('canvas'); cv.style.cssText = 'width:100%;aspect-ratio:8/3.6;height:auto;max-height:46vh;border:3px solid #1d1b26;border-radius:14px;display:block';
+      p.appendChild(cv); addLive(cv, (c, w, h, t) => { virt(c, w, h, 800, 360); pg.art(c, t); });
+      p.appendChild(pupSay(pg.text));
+      if (pg.more) { const mb = el('button', 'more', '📖︎ More'); const mt = el('div', 'moretxt', esc(pg.more)); mt.hidden = true; mb.onclick = () => { mt.hidden = !mt.hidden; }; const row = el('div', 'extra'); row.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;align-items:center'; row.append(mb, mt); p.appendChild(row); }
+      const nav = el('div', 'nav');
+      if (i > 0) nav.appendChild(navBtn('◀', 'alt sm', () => { i--; render(); }));
+      nav.appendChild(navBtn(i < pages.length - 1 ? 'Next ▶' : (after ? G.goLabel || 'Go! ▶' : 'Got it! ✔'), 'go', () => { if (i < pages.length - 1) { i++; render(); } else { close(); Store.d.intro = true; Store.save(); if (after) after(); } }));
+      p.appendChild(nav);
+    };
+    render();
+  });
+}
+
+// ---------- title ----------
+function buildTitle() {
+  $('#gTitle').innerHTML = G.titleHTML; $('#gTag').textContent = G.tagline;
+  $('#otherLink').href = G.other.href; $('#otherLink').textContent = G.other.label;
+  $('#playBtn').innerHTML = G.playLabel;
+  $('#playBtn').onclick = () => { Snd.init(); Snd.whoosh(); if (!Store.d.intro) homerIntro(() => showMap()); else showMap(); };
+  $('#homerBtn').onclick = () => { Snd.init(); Snd.lyre(); homerIntro(null); };
+  $('#bookBtn').onclick = () => { Snd.blip(); showBook('themes'); };
+  $('#reviewBtn').onclick = () => { Snd.blip(); tryReview(); };
+  addLive($('#titleCv'), (c, w, h, t) => G.titleBg(c, w, h, t));
+}
+function refreshTitle() { $('#starsTotal').textContent = `★ ${totalStars()} / ${G.missions.length * 3}`; }
+function showTitle() { showScreen('title'); refreshTitle(); }
+
+// ---------- playable world map ----------
+const W0 = { v: null, obs: [], parts: [], keys: {}, joy: null, target: null, cool: -1, last: 0, moved: false, shakeT: 0, layoutKey: '' };
+function seeded(n) { let s = n * 9301 + 49297; return () => { s = (s * 9301 + 49297) % 233280; return s / 233280; }; }
+function worldRect() { return $('#mapWrap').getBoundingClientRect(); }
+function worldScale() { const r = worldRect(); return clamp(Math.min(r.width, r.height) / 800, .5, 1.15); }
+function portalPos(i) { const r = worldRect(), m = G.missions[i], at = innerWidth < innerHeight * .9 ? m.atP : m.at; return { x: r.left + at[0] * r.width, y: r.top + at[1] * r.height }; }
+function layoutWorld() {
+  const r = worldRect(), s = worldScale(), key = `${Math.round(r.width)}x${Math.round(r.height)}`;
+  if (W0.layoutKey === key) return; W0.layoutKey = key;
+  const rnd = seeded(G.key.length * 7 + (innerWidth < innerHeight ? 3 : 1)), ps = G.missions.map((_, i) => portalPos(i));
+  const obs = [], sea = G.mapStyle !== 'land';
+  const ok = (x, y, rad) => ps.every(p => Math.hypot(p.x - x, p.y - y) > rad + 70 * s) && obs.every(o => Math.hypot(o.x - x, o.y - y) > rad + o.r + 30 * s);
+  const place = (k, rad, n) => { for (let i = 0, tries = 0; i < n && tries < 400; tries++) { const x = r.left + rad + rnd() * (r.width - rad * 2), y = r.top + rad + rnd() * (r.height - rad * 2); if (ok(x, y, rad)) { obs.push({ k, x, y, r: rad, ph: rnd() * 6 }); i++; } } };
+  place('whirl', 46 * s, 2); place('rock', 26 * s, 6); place('rock', 18 * s, 4);
+  if (sea) for (let i = 0; i < 2; i++) obs.push({ k: 'wave', x: r.left + rnd() * r.width, y: r.top + (.3 + i * .4) * r.height, r: 34 * s, vx: (i ? -1 : 1) * 60 * s, ph: i });
+  W0.obs = obs;
+}
+function placeVehicle(i) {
+  const p = portalPos(Math.max(0, Math.min(i, G.missions.length - 1))), r = worldRect(), s = worldScale();
+  const ang = Math.atan2(r.top + r.height / 2 - p.y, r.left + r.width / 2 - p.x);
+  W0.v = { x: p.x + Math.cos(ang) * 90 * s, y: p.y + Math.sin(ang) * 90 * s, vx: 0, vy: 0, flip: false };
+}
+function showMap(from) {
+  showScreen('map'); $('#mapTitle').textContent = G.mapTitle; W0.layoutKey = ''; layoutWorld();
+  const nx = nextIdx();
+  placeVehicle(from != null ? from : (M.i != null ? M.i : Math.min(nx, G.missions.length - 1)));
+  if (from == null && M.i == null && nx === 0) { const p = portalPos(0), s = worldScale(); W0.v.x += (p.x > innerWidth / 2 ? -1 : 1) * 60 * s; }
+  W0.cool = from != null ? from : (M.i != null ? M.i : -1); W0.target = null; W0.joy = null; W0.moved = false; W0.last = performance.now();
+  $('#mapStars').textContent = `★ ${totalStars()}`;
+  const say = $('#mapSay'); say.innerHTML = '';
+  say.appendChild(pupSay(nx < G.missions.length ? G.mapSay(nx) : G.mapDoneSay));
+  $('#mapReview').classList.toggle('pulse', allDone() && !Store.d.review);
+}
+function buildStops() { W0.layoutKey = ''; layoutWorld(); }
+function enterPortal(i) {
+  Snd.whoosh(); juiceBoom(W0.parts, W0.v.x, W0.v.y, COL.yellow, 20, .7);
+  W0.entering = { i, t: 0 };
+}
+function worldInput(wrap) {
+  const pos = e => [e.clientX, e.clientY];
+  wrap.addEventListener('pointerdown', e => {
+    e.preventDefault(); Snd.init(); try { wrap.setPointerCapture(e.pointerId); } catch (_) {}
+    const [x, y] = pos(e); W0.joy = { sx: x, sy: y, x, y, t: performance.now(), id: e.pointerId };
+  });
+  wrap.addEventListener('pointermove', e => { if (W0.joy && W0.joy.id === e.pointerId) { const [x, y] = pos(e); W0.joy.x = x; W0.joy.y = y; if (Math.hypot(x - W0.joy.sx, y - W0.joy.sy) > 12) { W0.target = null; W0.moved = true; } } });
+  const up = e => { if (!W0.joy) return; const j = W0.joy; W0.joy = null; if (Math.hypot(j.x - j.sx, j.y - j.sy) < 12 && performance.now() - j.t < 400) { W0.target = { x: j.x, y: j.y }; W0.moved = true; G.missions.forEach((_, i) => { const p = portalPos(i); if (Math.hypot(p.x - j.x, p.y - j.y) < 60 * worldScale()) W0.target = { x: p.x, y: p.y }; }); } };
+  wrap.addEventListener('pointerup', up); wrap.addEventListener('pointercancel', up);
+  const KM = { ArrowLeft: 'l', a: 'l', ArrowRight: 'r', d: 'r', ArrowUp: 'u', w: 'u', ArrowDown: 'd', s: 'd' };
+  addEventListener('keydown', e => { if ($('#map').hidden) return; const k = KM[e.key]; if (k) { e.preventDefault(); W0.keys[k] = true; W0.moved = true; W0.target = null; } });
+  addEventListener('keyup', e => { const k = KM[e.key]; if (k) W0.keys[k] = false; });
+}
+function mapDraw(c, w, h, t) {
+  if ($('#map').hidden || !W0.v) return;
+  layoutWorld();
+  const now = performance.now(), dt = Math.min(.05, (now - W0.last) / 1000); W0.last = now;
+  const s = worldScale(), r = worldRect(), v = W0.v, n = G.missions.length, nx = nextIdx(), VR = 34 * s;
+  // input
+  let ax = 0, ay = 0;
+  if (W0.keys.l) ax -= 1; if (W0.keys.r) ax += 1; if (W0.keys.u) ay -= 1; if (W0.keys.d) ay += 1;
+  if (W0.joy) { const dx = W0.joy.x - W0.joy.sx, dy = W0.joy.y - W0.joy.sy, d = Math.hypot(dx, dy); if (d > 8) { ax += dx / Math.max(d, 60); ay += dy / Math.max(d, 60); } }
+  if (W0.target && !W0.joy) { const dx = W0.target.x - v.x, dy = W0.target.y - v.y, d = Math.hypot(dx, dy); if (d < 10) W0.target = null; else { ax += dx / d; ay += dy / d; } }
+  const am = Math.hypot(ax, ay); if (am > 1) { ax /= am; ay /= am; }
+  if (!W0.entering) { v.vx += ax * 900 * s * dt; v.vy += ay * 900 * s * dt; }
+  const fr = Math.pow(.08, dt); v.vx *= fr; v.vy *= fr;
+  const sp = Math.hypot(v.vx, v.vy), mx = 330 * s; if (sp > mx) { v.vx *= mx / sp; v.vy *= mx / sp; }
+  // obstacles
+  for (const o of W0.obs) {
+    if (o.k === 'wave') { o.x += o.vx * dt; if (o.x > r.right + 60) o.x = r.left - 60; if (o.x < r.left - 60) o.x = r.right + 60; }
+    const dx = v.x - o.x, dy = v.y - o.y, d = Math.hypot(dx, dy) || 1;
+    if (o.k === 'whirl') { if (d < o.r * 2.2) { const f = (1 - d / (o.r * 2.2)) * 700 * s * dt; v.vx += (-dx / d * .7 + -dy / d) * f; v.vy += (-dy / d * .7 + dx / d) * f; if (Math.random() < .2) juiceSparks(W0.parts, v.x, v.y, '#fff', 1); if (d < o.r * .55) { v.vx = dx / d * 420 * s; v.vy = dy / d * 420 * s; juiceBoom(W0.parts, v.x, v.y, COL.blue, 14, .6); Snd.splash(); W0.shakeT = .25; } } continue; }
+    if (d < o.r + VR) {
+      const nxv = dx / d, nyv = dy / d; v.x = o.x + nxv * (o.r + VR); v.y = o.y + nyv * (o.r + VR);
+      const dot = v.vx * nxv + v.vy * nyv; if (dot < 0) { v.vx -= 1.7 * dot * nxv; v.vy -= 1.7 * dot * nyv; }
+      if (o.k === 'wave') { v.vx += o.vx * 2; v.vy += 160 * s * Math.sign(nyv || 1); Snd.splash(); juiceBoom(W0.parts, v.x, v.y, COL.blue, 10, .5); }
+      else if (Math.abs(dot) > 40 * s) { Snd.thud(); juiceSparks(W0.parts, v.x - nxv * VR, v.y - nyv * VR, COL.yellow, 8); juicePoof(W0.parts, v.x - nxv * VR, v.y - nyv * VR, 4); W0.shakeT = .2; }
+    }
+  }
+  // portals
+  if (W0.cool >= 0) { const p = portalPos(W0.cool); if (Math.hypot(v.x - p.x, v.y - p.y) > 90 * s) W0.cool = -1; }
+  for (let i = 0; i < n && !W0.entering; i++) {
+    const p = portalPos(i), dx = v.x - p.x, dy = v.y - p.y, d = Math.hypot(dx, dy) || 1, R = 44 * s;
+    if (d < R + VR) {
+      if (i > nx) { const nxv = dx / d, nyv = dy / d; v.x = p.x + nxv * (R + VR + 2); v.y = p.y + nyv * (R + VR + 2); v.vx = nxv * 260 * s; v.vy = nyv * 260 * s; Snd.bonk(); juiceSparks(W0.parts, p.x + nxv * R, p.y + nyv * R, COL.blue, 14); W0.shakeT = .2; W0.target = null; W0.locked = { i, t: 1 }; }
+      else if (W0.cool !== i) enterPortal(i);
+    }
+  }
+  v.x += v.vx * dt; v.y += v.vy * dt;
+  v.x = clamp(v.x, r.left + VR, r.right - VR); v.y = clamp(v.y, r.top + VR, r.bottom - VR);
+  if (Math.abs(v.vx) > 20) v.flip = v.vx < 0;
+  juiceStep(W0.parts, dt); W0.shakeT = Math.max(0, W0.shakeT - dt);
+  // draw
+  c.save(); if (W0.shakeT > 0) c.translate(rand(-6, 6) * W0.shakeT * 4, rand(-6, 6) * W0.shakeT * 4);
+  G.mapBg(c, w, h, t);
+  const ps = G.missions.map((_, i) => portalPos(i));
+  c.setLineDash([10 * s, 12 * s]); c.lineWidth = 5 * s; c.strokeStyle = 'rgba(255,255,255,.8)';
+  c.beginPath(); ps.forEach((p, i) => i ? c.lineTo(p.x, p.y) : c.moveTo(p.x, p.y)); c.stroke(); c.setLineDash([]);
+  for (const o of W0.obs) {
+    if (o.k === 'rock') G.mapRock ? G.mapRock(c, o, s, t) : (E(c, o.x, o.y, o.r, o.r * .8), fs(c, '#8d8577', 3));
+    else if (o.k === 'whirl') G.mapWhirl ? G.mapWhirl(c, o, s, t) : whirl(c, o.x, o.y, o.r * 1.4, t);
+    else if (o.k === 'wave') { c.save(); c.translate(o.x, o.y); c.scale(s, s); c.beginPath(); c.moveTo(-50, 14); c.quadraticCurveTo(-30, -40, 10, -30); c.quadraticCurveTo(40, -24, 46, 4); c.quadraticCurveTo(26, -8, 16, 6); c.quadraticCurveTo(0, 20, -50, 14); fs(c, '#e0f7ff', 3); c.restore(); }
+  }
+  for (let i = 0; i < n; i++) {
+    const p = ps[i], st = Store.d.done[G.missions[i].id], locked = i > nx, isNext = i === nx;
+    if (isNext) { E(c, p.x, p.y, 54 * s + Math.sin(t * 4) * 5 * s, 54 * s + Math.sin(t * 4) * 5 * s); c.fillStyle = 'rgba(255,210,63,.35)'; c.fill(); c.lineWidth = 4; c.strokeStyle = COL.yellow; c.stroke(); }
+    G.mapIcon(c, i, p.x, p.y - 4 * s, s, t);
+    if (locked) { const sh = W0.locked && W0.locked.i === i ? W0.locked.t : 0; E(c, p.x, p.y, 50 * s + sh * 6 * s, 50 * s + sh * 6 * s); c.fillStyle = `rgba(76,201,240,${.18 + sh * .3})`; c.fill(); c.setLineDash([6, 6]); c.lineDashOffset = -t * 20; c.lineWidth = 3; c.strokeStyle = 'rgba(255,255,255,.9)'; c.stroke(); c.setLineDash([]); }
+    // label pill
+    const lab = `${i + 1}`; RR(c, p.x - 18 * s, p.y + 34 * s, 36 * s, 26 * s, 13 * s); fs(c, st != null ? COL.green : isNext ? COL.yellow : '#e7e0cf', 3);
+    txt(c, lab, p.x, p.y + 48 * s, 18 * s, st != null || isNext ? INK : '#8d8577', 'center', 0);
+    if (st != null) for (let k = 0; k < 3; k++) drawStar(c, p.x - 22 * s + k * 22 * s, p.y + 72 * s, 8 * s, k < st ? COL.yellow : '#d8d0bd', 2);
+    if (isNext) { const by = p.y - 74 * s - Math.abs(Math.sin(t * 4)) * 12 * s; P(c, [p.x - 14 * s, by, p.x + 14 * s, by, p.x, by + 18 * s]); fs(c, COL.accent, 3); }
+  }
+  if (W0.locked) { W0.locked.t -= dt * 2; if (W0.locked.t <= 0) W0.locked = null; }
+  let ent = 1; if (W0.entering) { W0.entering.t += dt; ent = Math.max(0, 1 - W0.entering.t / .45); const p = ps[W0.entering.i]; v.x = lerp(v.x, p.x, .2); v.y = lerp(v.y, p.y, .2); if (W0.entering.t > .5) { const i = W0.entering.i; W0.entering = null; startMission(i); c.restore(); return; } }
+  c.save(); c.translate(v.x, v.y); c.scale(ent, ent); c.rotate(clamp(v.vx / (330 * s), -1, 1) * .12); G.drawToken(c, 0, 18 * s, s, t, v.flip); c.restore();
+  juiceDraw(W0.parts, c);
+  if (W0.joy) { E(c, W0.joy.sx, W0.joy.sy, 60, 60); c.fillStyle = 'rgba(255,255,255,.25)'; c.fill(); c.lineWidth = 3; c.strokeStyle = 'rgba(255,255,255,.8)'; c.stroke(); const dx = W0.joy.x - W0.joy.sx, dy = W0.joy.y - W0.joy.sy, d = Math.hypot(dx, dy), k = d > 60 ? 60 / d : 1; E(c, W0.joy.sx + dx * k, W0.joy.sy + dy * k, 26, 26); fs(c, '#fff', 3); }
+  if (!W0.moved && nx < n) { const p = ps[nx]; c.globalAlpha = .9; drawHand(c, lerp(v.x, p.x, (t * .5) % 1), lerp(v.y, p.y, (t * .5) % 1) + 20, s * 1.1, 'drag', 0); c.globalAlpha = 1; }
+  c.restore();
+}
+
+// ---------- mission ----------
+const STEPS = ['Challenge', 'Story', 'Experiment', 'Boss', 'Check'];
+function startMission(i) {
+  Object.assign(M, { i, m: G.missions[i], step: 0, fx: null, tried: new Set(), boss: false, quizRight: 0, combo: 0 });
+  showScreen('mission'); renderStep();
+}
+function renderTracker() {
+  const tr = $('#tracker'); tr.innerHTML = '';
+  STEPS.forEach((s, k) => tr.appendChild(el('span', k < M.step ? 'ok' : k === M.step ? 'on' : '', `${k === 4 ? '✔' : k + 1}<span class="lbl"> ${s}</span>`)));
+}
+function startPhaseTimer(sec, onEnd) {
+  clearInterval(phaseTimer); const chip = $('#tchip');
+  if (!sec) { chip.hidden = true; return; }
+  chip.hidden = false; let left = sec;
+  const show = () => { chip.textContent = left > 0 ? `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}` : 'Take your time!'; };
+  show(); phaseTimer = setInterval(() => { left--; show(); if (left <= 0) { clearInterval(phaseTimer); onEnd && onEnd(); } }, 1000);
+}
+function sideHead(side) { side.appendChild(el('div', '', `<span class="ribbon">${M.i + 1} · ${esc(M.m.name)}</span>`)); }
+function goStep(k) { M.step = k; renderStep(); }
+function sceneLive() { const cv = $('#sceneCv'); if (!cv._live) cv._live = addLive(cv, (c, w, h, t) => { if (M.step === 3) return; virt(c, w, h, 800, 600); M.m.scene(c, t, M.fx, M.step); }); }
+function choiceStep(side, data, isExp) {
+  const say = pupSay(data.say); side.appendChild(say);
+  let bars = [];
+  if (isExp && data.meters) {
+    const ms = el('div', 'meters');
+    data.meters.forEach(nm => { const r = el('div', 'meter', `<span>${esc(nm)}</span><div class="mb"><i></i></div><b>?</b>`); ms.appendChild(r); bars.push(r); r.querySelector('i').style.cssText = 'width:50%;background:#bbb'; });
+    side.appendChild(ms);
+  }
+  const tiles = el('div', 'tiles'); const list = isExp ? data.choices : data.options;
+  const need = isExp ? (data.need || Math.min(2, list.length)) : 1;
+  const nav = el('div', 'nav');
+  const next = navBtn(isExp ? `Try ${need}!` : 'Next ▶', 'go', () => goStep(M.step + 1)); next.disabled = true;
+  list.forEach((o, k) => {
+    const b = canvasTile(o.art || (o.fx ? sceneArt(o.fx, M.m) : null), o.t);
+    b.onclick = () => {
+      M.tried.add(k); M.fx = o.fx || null;
+      tiles.querySelectorAll('.tile').forEach(x => x.classList.remove('good', 'bad', 'meh'));
+      b.classList.add(o.good ? 'good' : o.good === false ? 'bad' : 'meh');
+      say.set(o.r);
+      if (o.m) o.m.forEach((v, j) => { const i = bars[j].querySelector('i'); i.style.width = v + '%'; i.style.background = v >= 60 ? COL.green : v >= 35 ? COL.yellow : COL.accent; bars[j].querySelector('b').textContent = v >= 60 ? '☺' : v >= 35 ? '~' : '☹'; });
+      o.good ? yay(b, isExp ? 'NICE!' : (data.yes || 'YES!')) : (isExp ? Snd.tap() : oops(b));
+      if (!isExp) { if (o.good) { next.disabled = false; next.classList.add('pulse'); } else { next.disabled = false; } }
+      else { const left = need - M.tried.size; next.disabled = left > 0; next.textContent = left > 0 ? `Try ${left} more` : 'Boss! ▶'; if (left <= 0) next.classList.add('pulse'); }
+      if (innerWidth < innerHeight) $('#stage').scrollIntoView?.({ block: 'nearest' });
+    };
+    tiles.appendChild(b);
+  });
+  side.appendChild(tiles); nav.appendChild(next); side.appendChild(nav);
+}
+function renderStep() {
+  renderTracker(); stopBoss(); Say.stop();
+  const body = $('#mbody'), side = $('#side'), stage = $('#stage');
+  setLayout(M.step === 3); body.classList.toggle('story', M.step === 1); sceneLive();
+  side.innerHTML = ''; side.scrollTop = 0;
+  const m = M.m;
+  startPhaseTimer([30, 60, 120, 0, 0][M.step], () => side.querySelector('.nav .btn.go')?.classList.add('pulse'));
+  if (M.step === 0) { M.fx = null; sideHead(side); choiceStep(side, m.challenge, false); }
+  else if (M.step === 1) renderStory(side);
+  else if (M.step === 2) { M.fx = null; sideHead(side); choiceStep(side, m.experiment, true); }
+  else if (M.step === 3) runBossIntro();
+  else renderQuiz(0);
+}
+// comic strip
+function renderStory(side) {
+  const m = M.m, d = m.discover; sideHead(side);
+  side.appendChild(pupSay(d.say || 'Tap each panel to see the story!'));
+  const strip = el('div', 'strip'); strip.style.setProperty('--n', d.panels.length);
+  let seen = 0; const nav = el('div', 'nav');
+  const next = navBtn('Next ▶', 'go', () => goStep(2)); next.disabled = true;
+  d.panels.forEach((pn, k) => {
+    const b = el('div', 'cpanel hid'); b.setAttribute('role', 'button'); b.tabIndex = 0;
+    const cv = el('canvas'); b.appendChild(cv);
+    b.appendChild(el('div', 'num', String(k + 1)));
+    const cap = el('div', 'cap'); const ct = el('div', 'ct', esc(pn.cap)); const sb = spk(pn.cap); cap.append(ct, sb); b.appendChild(cap);
+    const ex = el('div', 'extra');
+    const th = pn.theme ? G.themes[pn.theme] : null;
+    if (th) ex.appendChild(el('span', 'tchip', esc(th.name)));
+    if (pn.more) { const mb = el('button', 'more', '📖︎ More'); const mt = el('div', 'moretxt', esc(pn.more)); mt.hidden = true; mb.onclick = e => { e.stopPropagation(); mt.hidden = !mt.hidden; if (!mt.hidden) Say.autoSay(pn.more); }; ex.append(mb, mt); }
+    b.appendChild(ex);
+    const open = () => b.classList.contains('hid') ? 0 : 1;
+    addLive(cv, (c, w, h, t) => {
+      virt(c, w, h, 800, 600);
+      if (!open()) { bigRect(c, ['#ffd23f', '#4cc9f0', '#9b5de5', '#06d6a0'][k % 4]); for (let i = 0; i < 14; i++) { const a = i / 14 * TAU + t * .3; L(c, 400, 300, 400 + Math.cos(a) * 700, 300 + Math.sin(a) * 700, 30, 'rgba(255,255,255,.18)'); } txt(c, String(k + 1), 400, 270, 200, '#fff', 'center', 10); txt(c, 'TAP!', 400, 470, 70, COL.yellow, 'center', 8); drawHand(c, 560, 420, 1.6, 'tap', t); return; }
+      window.NOTXT = true; try { if (pn.art) pn.art(c, t); else m.scene(c, t, pn.fx, 1); } finally { window.NOTXT = false; }
+      if (pn.bub) bubble(c, pn.bx ?? 400, pn.by ?? 70, pn.bub, pn.tx, pn.ty, 40);
+    });
+    b.onclick = () => {
+      if (!b.classList.contains('hid')) return;
+      b.classList.remove('hid'); seen++; Snd.tap(); M.fx = pn.fx || M.fx;
+      Say.autoSay(pn.cap, sb);
+      if (th) burstAt(b, th.short || 'THEME!', COL.purple);
+      if (seen === d.panels.length) { next.disabled = false; next.classList.add('pulse'); confetti(30); }
+    };
+    strip.appendChild(b);
+  });
+  side.appendChild(strip);
+  if (Store.d.done[m.id] != null) nav.appendChild(navBtn('Skip ▶', 'alt sm', () => goStep(2)));
+  nav.appendChild(next); side.appendChild(nav);
+}
+
+// ---------- boss ----------
+function runBossIntro() {
+  const stage = $('#stage'), b = M.m.boss;
+  const wrap = el('div', 'mgwrap'); wrap.style.cssText = 'position:absolute;inset:0'; stage.appendChild(wrap);
+  const cv = el('canvas'); cv.style.cssText = 'position:absolute;inset:0;width:100%;height:100%'; wrap.appendChild(cv);
+  addLive(cv, (c, w, h, t) => { virt(c, w, h, 800, 600); M.m.scene(c, t, 'boss', 3); });
+  const ov = el('div', 'mgov'); const p = el('div', 'panel');
+  p.appendChild(el('div', 'ribbon', 'BOSS!'));
+  p.appendChild(el('h2', 't', esc(b.name)));
+  const demo = el('canvas', 'demo'); p.appendChild(demo);
+  addLive(demo, (c, w, h, t) => { virt(c, w, h, 800, 500); if (b.demoArt) b.demoArt(c, t); else { c.save(); c.translate(0, -50); M.m.scene(c, t, 'boss', 3); c.restore(); } (b.hands || [[b.demo || 'tap', 560, 330]]).forEach(([k, x, y]) => drawHand(c, x, y, 1.6, k, t)); });
+  const hint = el('div', 'pupsay'); p.appendChild(pupSay(b.how));
+  const row = el('div', 'nav'); row.style.justifyContent = 'center';
+  row.appendChild(navBtn('Start! ▶', 'go pulse', () => startBoss(wrap)));
+  p.appendChild(row); ov.appendChild(p); wrap.appendChild(ov);
+}
+function startBoss(wrap) {
+  wrap.innerHTML = ''; Snd.whoosh(); Say.stop();
+  const spec = G.games[M.m.boss.game](M.m.boss);
+  if (innerWidth < innerHeight) { const rh = el('div', 'rot', '<span>⟳</span> Tip: turn your screen sideways for a bigger game!'); wrap.appendChild(rh); setTimeout(() => rh.remove(), 3500); }
+  bossRun = MG(wrap, spec, (win, msg) => {
+    bossRun = null;
+    const ov = el('div', 'mgov'); const p = el('div', 'panel');
+    if (win) { M.boss = true; yay(null); burst('WOW!', null, null, COL.green); } else Snd.bad();
+    p.appendChild(el('h2', 't', win ? 'You did it!' : 'So close!'));
+    const cv = el('canvas', 'demo'); p.appendChild(cv);
+    addLive(cv, (c, w, h, t) => { virt(c, w, h, 800, 500); c.save(); c.translate(0, -50); M.m.scene(c, t, win ? 'lesson' : 'boss', 3); c.restore(); if (win) for (let i = 0; i < 3; i++) drawStar(c, 300 + i * 100, 80 + Math.sin(t * 4 + i) * 10, 40); });
+    p.appendChild(pupSay(msg || (win ? 'Amazing!' : 'Try again!')));
+    const row = el('div', 'nav'); row.style.justifyContent = 'center';
+    row.appendChild(navBtn('Again ↻', win ? 'alt sm' : 'y', () => startBoss(wrap)));
+    row.appendChild(navBtn(win ? 'Next ▶' : 'Keep going ▶', 'go', () => goStep(4)));
+    p.appendChild(row); ov.appendChild(p); wrap.appendChild(ov);
+  });
+}
+function MG(host, o, onEnd) {
+  const cv = el('canvas', 'mg'); host.appendChild(cv);
+  const hud = el('div', 'mghud'); const hl = el('div', ''); const hr = el('span', 'chip'); hud.append(hl, hr); host.appendChild(hud);
+  const g = { t: 0, left: o.time || 0, keys: {}, W: 0, H: 0, done: false, data: {}, VW: 800, VH: 500 };
+  g.info = html => { if (g._info !== html) { g._info = html; hl.innerHTML = html; } };
+  g.meter = (label, f, col) => `<div class="mgmeter">${esc(label)}<div class="mb"><i style="width:${clamp(f, 0, 1) * 100}%;background:${col || (f > .5 ? COL.green : f > .25 ? COL.yellow : COL.accent)}"></i></div></div>`;
+  g.parts = []; g.shakeT = 0; g.slow = 0; g.flash = 0;
+  g.shake = (a = 10, d = .3) => { g.shakeA = Math.max(g.shakeA || 0, a); g.shakeT = Math.max(g.shakeT, d); };
+  g.boom = (x, y, col = COL.yellow, n = 26, big = 1) => { Snd.boom(); g.shake(8 * big, .25); juiceBoom(g.parts, x, y, col, n, big); };
+  g.poof = (x, y, n = 14) => juicePoof(g.parts, x, y, n);
+  g.sparks = (x, y, col = COL.yellow, n = 10) => juiceSparks(g.parts, x, y, col, n);
+  g.end = (win, msg) => { if (g.ending) return; g.ending = true; if (win) { g.slow = 1; g.boom(400, g.VH / 2, COL.yellow, 50, 1.6); confettiCanvas(g); } setTimeout(() => { g.done = true; cleanup(); onEnd(win, msg); }, win ? 1100 : 450); };
+  g.win = m => g.end(true, m); g.lose = m => g.end(false, m);
+  let ctl = null;
+  if (o.ctl) {
+    ctl = el('div', 'mgctl');
+    for (const k of o.ctl) {
+      const b = el('button', 'btn ' + (k.cls || 'alt'), k.label); (g.btns || (g.btns = {}))[k.key] = b;
+      const on = e => { e.preventDefault(); g.keys[k.key] = true; o.press && o.press(g, k.key); };
+      const off = e => { e.preventDefault(); g.keys[k.key] = false; };
+      b.addEventListener('pointerdown', on); b.addEventListener('pointerup', off); b.addEventListener('pointerleave', off); b.addEventListener('pointercancel', off);
+      ctl.appendChild(b);
+    }
+    host.appendChild(ctl);
+  }
+  const fit = () => { g.VH = clamp(800 * g.H / Math.max(1, g.W), 450, 1100); g.S = Math.min(g.W / 800, g.H / g.VH); g.OX = (g.W - 800 * g.S) / 2; g.OY = (g.H - g.VH * g.S) / 2; };
+  const pt = e => { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left - g.OX) / g.S, (e.clientY - r.top - g.OY) / g.S]; };
+  const pd = e => { e.preventDefault(); try { cv.setPointerCapture(e.pointerId); } catch (_) {} g.ptr = pt(e); g.down = true; g.touched = true; o.down && o.down(g, ...g.ptr); };
+  const pm = e => { g.ptr = pt(e); o.move && o.move(g, ...g.ptr); };
+  const pu = e => { g.down = false; o.up && o.up(g, ...pt(e)); };
+  cv.addEventListener('pointerdown', pd); cv.addEventListener('pointermove', pm); cv.addEventListener('pointerup', pu); cv.addEventListener('pointercancel', pu);
+  const KM = { ArrowLeft: 'left', a: 'left', A: 'left', ArrowRight: 'right', d: 'right', D: 'right', ArrowUp: 'up', w: 'up', ArrowDown: 'down', s: 'down', ' ': 'act', Enter: 'act' };
+  const kd = e => { const k = KM[e.key]; if (!k) return; e.preventDefault(); g.touched = true; if (!g.keys[k]) { g.keys[k] = true; o.press && o.press(g, k); } };
+  const ku = e => { const k = KM[e.key]; if (k) g.keys[k] = false; };
+  addEventListener('keydown', kd); addEventListener('keyup', ku);
+  if (ctl) ctl.addEventListener('pointerdown', () => { g.touched = true; });
+  let last = performance.now(), raf = 0, started = false;
+  function step(now) {
+    if (g.done) return;
+    const dt = Math.min(.05, (now - last) / 1000); last = now;
+    const r = cv.getBoundingClientRect(), d = Math.min(2, devicePixelRatio || 1);
+    if (r.width !== g.W || r.height !== g.H) { g.W = r.width; g.H = r.height; cv.width = Math.round(r.width * d); cv.height = Math.round(r.height * d); fit(); }
+    if (!started) { started = true; o.init && o.init(g); }
+    g.t += g.slow ? dt * .3 : dt;
+    if (o.time && !g.ending) { g.left = Math.max(0, g.left - dt); hr.textContent = `${Math.ceil(g.left)}s`; if (g.left <= 0) { o.timeout ? o.timeout(g) : g.lose("Time's up!"); } } else hr.hidden = true;
+    const sdt = g.slow ? dt * .3 : dt;
+    if (!g.ending) o.update && o.update(g, sdt);
+    juiceStep(g.parts, sdt);
+    g.shakeT = Math.max(0, g.shakeT - dt);
+    const c = cv.getContext('2d'); c.setTransform(d, 0, 0, d, 0, 0); c.clearRect(0, 0, g.W, g.H);
+    c.save(); const sh = g.shakeT > 0 ? (g.shakeA || 8) * (g.shakeT / .3) : 0; c.translate(g.OX + rand(-sh, sh) * g.S, g.OY + rand(-sh, sh) * g.S); c.scale(g.S, g.S); o.draw(g, c, g.VW, g.VH); juiceDraw(g.parts, c);
+    if (g.flash > 0) { c.fillStyle = `rgba(255,255,255,${g.flash})`; c.fillRect(-100, -100, 1000, g.VH + 200); g.flash = Math.max(0, g.flash - dt * 3); }
+    if (o.hand && !g.touched && g.t < 6) { const [k, x, y] = typeof o.hand === 'function' ? o.hand(g) : o.hand; c.globalAlpha = .9; drawHand(c, x, y, 1.4, k, g.t); c.globalAlpha = 1; }
+    c.restore();
+    raf = requestAnimationFrame(step);
+  }
+  raf = requestAnimationFrame(step);
+  function cleanup() { cancelAnimationFrame(raf); removeEventListener('keydown', kd); removeEventListener('keyup', ku); if (ctl) ctl.remove(); }
+  g.stop = () => { g.done = true; g.ending = true; cleanup(); };
+  if (window.__game) window.__game.mg = g;
+  return g;
+}
+function mgPop(g, x, y, s, col = COL.yellow) { (g.pops || (g.pops = [])).push({ x, y, s, col, t: 0 }); if (g.parts) juiceSparks(g.parts, x, y + 30, col, 8); }
+function mgDrawPops(g, c, dt = 1 / 60) {
+  if (!g.pops) return;
+  for (const p of g.pops) { p.t += dt; const k = p.t / .9, sc = k < .2 ? k / .2 * 1.1 : 1;
+    c.save(); c.globalAlpha = clamp(1.6 - k * 1.6, 0, 1); c.translate(p.x, p.y - k * 30); c.scale(sc, sc);
+    const pts = []; for (let i = 0; i < 18; i++) { const a = i / 18 * TAU, r = i % 2 ? 26 : 38; pts.push(Math.cos(a) * r * 1.6, Math.sin(a) * r); }
+    P(c, pts); fs(c, p.col, 3); txt(c, p.s, 0, 2, 22, '#fff', 'center', 4); c.restore(); }
+  g.pops = g.pops.filter(p => p.t < .9);
+}
+
+// ---------- check, lesson, results ----------
+function setLayout(full) {
+  const body = $('#mbody'), side = $('#side');
+  body.classList.toggle('full', !!full); body.classList.remove('story'); side.hidden = !!full;
+  $('#stage').querySelectorAll('.mgwrap').forEach(n => n.remove()); $('#sceneCv').hidden = !!full;
+}
+function wrapLines(c, s, maxW, size) {
+  c.font = `${size}px "Luckiest Guy","Comic Sans MS",system-ui,sans-serif`;
+  const words = String(s).split(' '), lines = []; let cur = '';
+  for (const w of words) { const tst = cur ? cur + ' ' + w : w; if (c.measureText(tst).width > maxW && cur) { lines.push(cur); cur = w; } else cur = tst; }
+  if (cur) lines.push(cur); return lines.slice(0, 3);
+}
+function renderQuiz(qi) {
+  stopBoss(); Say.stop(); M.step = 4; renderTracker(); setLayout(true); clearInterval(phaseTimer); $('#tchip').hidden = true;
+  const m = M.m, q = m.quiz[qi], stage = $('#stage');
+  const wrap = el('div', 'mgwrap'); wrap.style.cssText = 'position:absolute;inset:0'; stage.appendChild(wrap);
+  const top = el('div', 'qbar');
+  const dots = el('div', 'dots'); m.quiz.forEach((_, k) => dots.appendChild(el('i', k < qi ? 'ok' : k === qi ? 'on' : ''))); top.appendChild(dots);
+  if (q.moral) top.appendChild(el('span', 'tchip', 'Think!'));
+  const say = pupSay(q.q); top.appendChild(say);
+  let firstTry = true;
+  const skin = G.quizSkin || {};
+  const spec = { hand: g => { const tg = g.tg && g.tg[q.a === 0 ? 1 % g.tg.length : 0]; return ['tap', tg ? tg.x : 400, tg ? tg.y : 300]; },
+    init(g) {
+      const n = q.o.length, port = g.VH > 640;
+      g.tg = q.o.map((o, k) => { const lab = typeof o === 'string' ? o : o.t, art = typeof o === 'string' ? null : (o.art || (o.fx ? sceneArt(o.fx, m) : null));
+        const bx = port ? (k % 2 ? 560 : 240) : 800 * (k + 1) / (n + 1), by = port ? g.VH * (.34 + k * (.4 / Math.max(1, n - 1))) : g.VH * .5;
+        return { k, lab, art, bx, by, x: bx, y: by, r: port ? 118 : Math.min(92, 800 / (n + 1) / 2 - 18), ph: k * 2.1, kx: 0, ky: 0, wob: 0, gone: false }; });
+      g.shots = []; g.cool = 0; g.ang = -Math.PI / 2;
+    },
+    down(g, x, y) {
+      if (g.ending || g.cool > 0) return;
+      const cx = 400, cy = g.VH - 40, a = Math.atan2(y - cy, x - cx); g.ang = a;
+      const sx = cx + Math.cos(a) * 60, sy = cy + Math.sin(a) * 60;
+      if (skin.shot === 'stone') { const T = Math.max(.35, Math.hypot(x - sx, y - sy) / 800); g.shots.push({ x: sx, y: sy, vx: (x - sx) / T, vy: (y - sy) / T - 250 * T, a }); }
+      else g.shots.push({ x: sx, y: sy, vx: Math.cos(a) * 1100, vy: Math.sin(a) * 1100, a });
+      g.cool = .22; skin.shot === 'stone' ? Snd.thud() : Snd.pew(); g.recoil = 1;
+    },
+    move(g, x, y) { g.ang = Math.atan2(y - (g.VH - 40), x - 400); },
+    update(g, dt) {
+      g.cool -= dt; g.recoil = Math.max(0, (g.recoil || 0) - dt * 5);
+      for (const tg of g.tg) { tg.kx *= Math.pow(.05, dt); tg.ky *= Math.pow(.05, dt); tg.wob = Math.max(0, tg.wob - dt * 2);
+        tg.x = tg.bx + Math.sin(g.t * .9) * (g.VH > 640 ? 50 : 45) + tg.kx; tg.y = tg.by + Math.sin(g.t * 1.4 + tg.ph) * 22 + tg.ky; }
+      for (const sh of g.shots) { sh.x += sh.vx * dt; sh.y += sh.vy * dt; if (skin.shot === 'stone') sh.vy += 500 * dt;
+        for (const tg of g.tg) { if (tg.gone || sh.dead) continue; if (Math.hypot(sh.x - tg.x, sh.y - tg.y) < tg.r) { sh.dead = true;
+          if (tg.k === q.a) { tg.gone = true; g.boom(tg.x, tg.y, COL.green, 40, 1.3); g.flash = .4; M.combo = (M.combo || 0) + (firstTry ? 1 : 0); if (firstTry) M.quizRight++; mgPop(g, tg.x, tg.y - 40, M.combo > 1 && firstTry ? `COMBO x${M.combo}!` : 'BOOM!', COL.green); g.end(true); }
+          else { firstTry = false; M.combo = 0; tg.kx = sh.vx * .12; tg.ky = sh.vy * .12; tg.wob = 1; Snd.bonk(); g.sparks(sh.x, sh.y, COL.blue, 12); g.shake(6, .2); mgPop(g, tg.x, tg.y - tg.r - 10, 'Try again!', '#ff8fa3'); } } } }
+      g.shots = g.shots.filter(s => !s.dead && s.y > -60 && s.x > -60 && s.x < 860 && s.y < g.VH + 60);
+    },
+    draw(g, c, W, H) {
+      const t = g.t; (G.quizBg || ((c2, H2, t2) => { sky(c2); }))(c, H, t);
+      for (const tg of g.tg) { if (tg.gone) continue;
+        c.save(); c.translate(tg.x, tg.y); c.rotate(Math.sin(t * 30) * .12 * tg.wob);
+        (skin.target || defaultTarget)(c, tg.r, t, tg);
+        if (tg.art) { c.save(); E(c, 0, -tg.r * .08, tg.r * .7, tg.r * .62); c.clip(); const sc = tg.r * 1.3 / 500; c.translate(0, -tg.r * .08); c.scale(sc, sc); c.translate(-400, -250); window.NOTXT = true; try { tg.art(c, t); } finally { window.NOTXT = false; } c.restore(); E(c, 0, -tg.r * .08, tg.r * .7, tg.r * .62); c.lineWidth = 3; c.strokeStyle = INK; c.stroke(); }
+        const fsz = g.VH > 640 ? 54 : 30, lines = wrapLines(c, tg.lab, tg.r * 2.3, fsz), lh = fsz * 1.05, bw = Math.max(...lines.map(l => c.measureText(l).width)) + 26, bh = lines.length * lh + 14, ly = tg.art ? tg.r * .62 : -bh / 2;
+        RR(c, -bw / 2, ly, bw, bh, 14); fs(c, '#fff', 3);
+        lines.forEach((l, i) => { c.fillStyle = INK; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(l, 0, ly + 9 + lh * (i + .5)); });
+        c.restore(); }
+      for (const sh of g.shots) (skin.drawShot || defaultShot)(c, sh, t);
+      (skin.launcher || defaultLauncher)(c, 400, H - 40, g.ang, g.recoil || 0, t);
+      mgDrawPops(g, c);
+    } };
+  bossRun = MG(wrap, spec, () => {
+    bossRun = null;
+    const ov = el('div', 'mgov low'); const p = el('div', 'panel');
+    p.appendChild(pupSay((firstTry ? 'Yes! ' : 'Got it! ') + q.why));
+    const row = el('div', 'nav'); row.style.justifyContent = 'center';
+    row.appendChild(navBtn(qi + 1 < m.quiz.length ? 'Next ▶' : 'Lesson ▶', 'go pulse', () => qi + 1 < m.quiz.length ? renderQuiz(qi + 1) : renderLesson()));
+    p.appendChild(row); ov.appendChild(p); wrap.appendChild(ov);
+  });
+  wrap.appendChild(top);
+}
+function defaultTarget(c, r, t) { c.beginPath(); c.moveTo(0, r); c.quadraticCurveTo(-8, r + 30, 6, r + 50); c.lineWidth = 2; c.strokeStyle = INK; c.stroke(); E(c, 0, 0, r, r * 1.08); fs(c, COL.accent, 4); E(c, -r * .4, -r * .45, r * .16, r * .24, -.5); c.fillStyle = 'rgba(255,255,255,.6)'; c.fill(); P(c, [-8, r * 1.06, 8, r * 1.06, 0, r * 1.16]); fs(c, COL.accent, 3); }
+function defaultShot(c, sh) { c.save(); c.translate(sh.x, sh.y); c.rotate(Math.atan2(sh.vy, sh.vx)); L(c, -40, 0, 10, 0, 5, '#8a5a2b'); P(c, [10, -8, 28, 0, 10, 8]); fs(c, '#adb5bd', 2.5); P(c, [-40, 0, -50, -9, -34, 0, -50, 9]); fs(c, COL.accent, 2); c.restore(); }
+function defaultLauncher(c, x, y, a, rec, t) { c.save(); c.translate(x, y); c.rotate(a + Math.PI / 2); c.translate(0, rec * 10); c.beginPath(); c.arc(0, 0, 60, Math.PI * 1.15, Math.PI * 1.85); c.lineWidth = 12; c.strokeStyle = INK; c.stroke(); c.lineWidth = 7; c.strokeStyle = '#8a5a2b'; c.stroke(); L(c, Math.cos(Math.PI * 1.15) * 60, Math.sin(Math.PI * 1.15) * 60, 0, 6 + (1 - rec) * 6, 2, '#fff'); L(c, Math.cos(Math.PI * 1.85) * 60, Math.sin(Math.PI * 1.85) * 60, 0, 6 + (1 - rec) * 6, 2, '#fff'); c.restore(); drawPup(c, x, y + 10, .45, { t, hat: G.pupHat, body: false }); }
+function lessonCard(m, big = true) {
+  const l = m.lesson, box = el('div', 'lesson');
+  box.appendChild(el('span', 'ribbon', 'Lesson Learned'));
+  const cv = el('canvas'); cv.style.cssText = `width:100%;aspect-ratio:16/7;height:auto;border:3px solid #1d1b26;border-radius:14px;display:block;margin-top:8px`;
+  box.appendChild(cv); addLive(cv, (c, w, h, t) => { virt(c, w, h, 800, 350); c.save(); c.translate(400, 350); c.scale(1.15, 1.15); c.translate(-400, -560); window.NOTXT = true; try { m.scene(c, t, 'lesson', 5); } finally { window.NOTXT = false; } c.restore(); });
+  const mo = el('div', 'moral'); mo.append(el('span', '', esc(l.moral)), spk(l.moral)); box.appendChild(mo);
+  const today = el('div', 'today'); const ic = el('canvas'); today.appendChild(ic);
+  addLive(ic, (c, w, h, t) => { virt(c, w, h, 100, 100); (l.icon || G.todayIcon)(c, t); });
+  const tt = el('div', 'tt', `<b>Try it today:</b> ${esc(l.today)}`); today.append(tt, spk('Try it today: ' + l.today));
+  box.appendChild(today);
+  return box;
+}
+function renderLesson() {
+  stopBoss(); setLayout(false);
+  const side = $('#side'), m = M.m; side.innerHTML = ''; side.scrollTop = 0; sideHead(side);
+  M.fx = 'lesson'; Snd.lyre();
+  side.appendChild(lessonCard(m));
+  setTimeout(() => Say.autoSay(m.lesson.moral + '. Try it today: ' + m.lesson.today), 200);
+  const nav = el('div', 'nav'); nav.appendChild(navBtn('Add to my Book ▶', 'go pulse', finishMission)); side.appendChild(nav);
+}
+function finishMission() {
+  const m = M.m, side = $('#side');
+  const stars = 1 + (M.boss ? 1 : 0) + (M.quizRight >= m.quiz.length - 1 ? 1 : 0);
+  const first = Store.d.done[m.id] == null;
+  Store.d.done[m.id] = Math.max(stars, Store.d.done[m.id] || 0);
+  const newThemes = m.themes.filter(t => !Store.d.themes.includes(t)); Store.d.themes.push(...newThemes);
+  if (!Store.d.lessons.includes(m.id)) Store.d.lessons.push(m.id);
+  Store.save();
+  M.step = 5; renderTracker(); clearInterval(phaseTimer); $('#tchip').hidden = true;
+  side.innerHTML = ''; sideHead(side);
+  side.appendChild(el('h2', 't', 'Stop complete!'));
+  side.appendChild(el('div', 'starsBig', [0, 1, 2].map(k => k < stars ? '★' : '<span class="off">★</span>').join('')));
+  for (let k = 0; k < stars; k++) Snd.star(k);
+  confetti(120); burst(stars === 3 ? 'EPIC!' : 'GREAT!', null, null, COL.yellow);
+  side.appendChild(el('p', 'hint', `★ finish · ★ boss${M.boss ? ' ✔' : ''} · ★ quiz ${M.quizRight}/${m.quiz.length}`));
+  side.appendChild(el('p', '', `<b>${newThemes.length ? 'New Theme Cards!' : 'Theme Cards:'}</b>`));
+  const ear = el('div', 'earned');
+  m.themes.forEach(id => { const th = G.themes[id]; const mc = el('div', 'mini-card'); const cv = el('canvas'); mc.appendChild(cv); mc.appendChild(el('b', '', esc(th.name))); addLive(cv, (c, w, h, t) => { virt(c, w, h, 200, 110); th.art(c, t); }); ear.appendChild(mc); });
+  side.appendChild(ear);
+  const nav = el('div', 'nav');
+  nav.appendChild(navBtn('Replay ↻', 'alt sm', () => startMission(M.i)));
+  if (M.i + 1 >= G.missions.length) nav.appendChild(navBtn('Epic Review ▶', 'p', () => tryReview()));
+  nav.appendChild(navBtn('Map ▶', 'go pulse', () => showMap(first ? M.i : undefined)));
+  side.appendChild(nav);
+}
+
+// ---------- book ----------
+function showBook(tab) {
+  showScreen('book');
+  for (const b of document.querySelectorAll('#bookTabs .btn')) b.classList.toggle('on', b.dataset.tab === tab);
+  const grid = $('#bookGrid'); grid.innerHTML = '';
+  if (tab === 'themes') {
+    $('#bookCount').textContent = `${Store.d.themes.length}/${Object.keys(G.themes).length}`;
+    for (const id in G.themes) {
+      const th = G.themes[id], have = Store.d.themes.includes(id);
+      const card = el('div', 'tcard' + (have ? '' : ' lock'));
+      const cv = el('canvas'); card.appendChild(cv);
+      addLive(cv, (c, w, h, t) => { virt(c, w, h, 200, 110); have ? th.art(c, t) : (bigRect(c, '#cfc8b8'), txt(c, '?', 100, 58, 60, '#fff')); });
+      card.appendChild(el('b', '', have ? esc(th.name) : '???'));
+      if (th.greek && have) card.appendChild(el('i', '', esc(th.greek)));
+      const row = el('div', 'row'); row.appendChild(el('p', '', have ? esc(th.desc) : 'Keep playing!')); if (have) row.appendChild(spk(th.name + '. ' + th.desc)); card.appendChild(row);
+      grid.appendChild(card);
+    }
+  } else {
+    $('#bookCount').textContent = `${Store.d.lessons.length}/${G.missions.length}`;
+    G.missions.forEach((m, i) => {
+      const have = Store.d.lessons.includes(m.id);
+      const card = el('div', 'tcard wis' + (have ? '' : ' lock'));
+      const cv = el('canvas'); card.appendChild(cv);
+      addLive(cv, (c, w, h, t) => { virt(c, w, h, 200, 110); if (!have) { bigRect(c, '#cfc8b8'); txt(c, '?', 100, 58, 60, '#fff'); return; } bigRect(c, '#fff3c4'); c.save(); c.translate(100, 68); c.scale(.85, .85); G.mapIcon(c, i, 0, 0, 1, t); c.restore(); });
+      card.appendChild(el('div', 'from', `${i + 1} · ${esc(m.name)}`));
+      const row = el('div', 'row'); row.appendChild(el('div', 'm', have ? esc(m.lesson.moral) : '???')); if (have) row.appendChild(spk(m.lesson.moral + '. Try it today: ' + m.lesson.today)); card.appendChild(row);
+      if (have) card.appendChild(el('p', '', '<b>Try it:</b> ' + esc(m.lesson.today)));
+      grid.appendChild(card);
+    });
+  }
+}
+
+// ---------- final review ----------
+function tryReview() {
+  if (!allDone()) {
+    const close = overlay(p => {
+      p.appendChild(el('h2', 't', 'Almost there!'));
+      const cv = el('canvas', 'demo'); cv.style.margin = '0 auto'; p.appendChild(cv);
+      addLive(cv, (c, w, h, t) => { virt(c, w, h, 800, 500); bigRect(c, '#fff3c4'); const n = G.missions.length, d = nextIdx(); for (let i = 0; i < n; i++) { const x = 400 + (i - (n - 1) / 2) * Math.min(70, 700 / n), y = 250; E(c, x, y, 26, 26); fs(c, i < d ? COL.green : '#fff', 4); txt(c, String(i + 1), x, y + 2, 26, i < d ? '#fff' : '#bbb', 'center', 3); } drawPup(c, 400, 400, .8, { t, hat: G.pupHat, body: false }); });
+      p.appendChild(pupSay(`Finish all ${G.missions.length} stops to unlock the review! Done: ${nextIdx()}.`));
+      const nav = el('div', 'nav'); nav.appendChild(navBtn('OK ▶', 'go', () => close())); p.appendChild(nav);
+    });
+    return;
+  }
+  startReview();
+}
+function pickDistinct(list, n) { const out = [], seen = new Set(); for (const p of shuffle(list)) { if (seen.has(p.key)) continue; seen.add(p.key); out.push(p); if (out.length >= n) break; } return out; }
+function startReview() {
+  showScreen('review');
+  const rounds = [
+    { title: 'Scenes ↔ Themes', how: 'Tap a scene. Then tap its theme!',
+      pairs: pickDistinct(G.review.map(r => ({ l: r.t, la: r.art || (r.m ? sceneArt(r.fx, G.missions.find(m => m.id === r.m)) : null), r: G.themes[r.th].name, ra: G.themes[r.th].art, key: r.th, why: r.why })), 5) },
+    { title: 'Lessons ↔ Stops', how: 'Tap a lesson. Then tap where you learned it!',
+      pairs: shuffle(G.missions.map((m, i) => ({ l: m.lesson.moral, r: `${i + 1}. ${m.short}`, ra: (c, t) => { bigRect(c, '#d7f1ff'); c.save(); c.translate(100, 70); G.mapIcon(c, i, 0, 0, 1, t); c.restore(); }, key: m.id, why: m.lesson.today }))).slice(0, 5) },
+  ];
+  let ri = 0, mistakes = 0; const box = $('#reviewBox');
+  const item = (label, art, vw = 200, vh = 110) => { const b = el('button', 'mitem mtile'); if (art) { const cv = el('canvas'); b.appendChild(cv); addLive(cv, (c, w, h, t) => { virt(c, w, h, vw, vh); art(c, t); }); } b.appendChild(el('span', '', esc(label))); return b; };
+  const render = () => {
+    box.innerHTML = ''; const R = rounds[ri];
+    box.appendChild(el('h2', 't', `Round ${ri + 1}: ${esc(R.title)}`));
+    const say = pupSay(R.how); box.appendChild(say);
+    const mt = el('div', 'match'), Lc = el('div', 'col'), Rc = el('div', 'col');
+    let sel = null, left = R.pairs.length;
+    shuffle(R.pairs).forEach(p => { const b = item(p.l, p.la, 800, 500); b._p = p; Lc.appendChild(b); });
+    shuffle(R.pairs).forEach(p => { const b = item(p.r, p.ra); b._p = p; Rc.appendChild(b); });
+    Lc.onclick = e => { const b = e.target.closest('.mitem'); if (!b || b.classList.contains('done')) return; Snd.tap(); Lc.querySelectorAll('.sel').forEach(x => x.classList.remove('sel')); b.classList.add('sel'); sel = b; };
+    Rc.onclick = e => {
+      const b = e.target.closest('.mitem'); if (!b || b.classList.contains('done')) return;
+      if (!sel) { oops(b); say.set('First tap one on the LEFT!'); return; }
+      if (b._p.key === sel._p.key) {
+        sel.classList.remove('sel'); sel.classList.add('done'); b.classList.add('done'); yay(b, 'MATCH!');
+        say.set(sel._p.why); sel = null; left--;
+        if (!left) { const nav = el('div', 'nav'); nav.appendChild(navBtn(ri + 1 < rounds.length ? 'Round 2 ▶' : 'Finish! ▶', 'go pulse', () => { ri++; ri < rounds.length ? render() : reviewDone(mistakes); })); box.appendChild(nav); nav.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+      } else { mistakes++; b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); Snd.bad(); say.set('Not that one. Try again!'); }
+    };
+    mt.append(Lc, Rc); box.appendChild(mt);
+  };
+  render();
+}
+function reviewDone(mistakes) {
+  Store.d.review = Math.max(Store.d.review || 0, mistakes <= 2 ? 3 : mistakes <= 5 ? 2 : 1); Store.save();
+  const box = $('#reviewBox'); box.innerHTML = ''; yay(null); confetti(160); burst('EPIC!', null, null, COL.yellow);
+  box.appendChild(el('h2', 't', esc(G.finale.title)));
+  const cv = el('canvas'); cv.style.cssText = 'width:100%;aspect-ratio:8/3.2;height:auto;max-height:40vh;border:3px solid #1d1b26;border-radius:18px;display:block';
+  box.appendChild(cv); addLive(cv, (c, w, h, t) => { virt(c, w, h, 800, 320); G.finale.art(c, t); });
+  box.appendChild(pupSay(G.finale.text));
+  box.appendChild(el('div', 'starsBig', [0, 1, 2].map(k => k < Store.d.review ? '★' : '<span class="off">★</span>').join('')));
+  const nav = el('div', 'nav');
+  nav.appendChild(navBtn('Book of Wisdom', 'b', () => showBook('wisdom')));
+  nav.appendChild(navBtn('Again ↻', 'alt', () => startReview()));
+  nav.appendChild(navBtn('Title ▶', 'go', () => showTitle()));
+  box.appendChild(nav);
+}
+
+// ---------- boot ----------
+function boot(game) {
+  G = game;
+  Store.load(G.key); Snd.mute = !!Store.d.mute;
+  document.documentElement.style.setProperty('--bg', G.bg || '#2b2a4a');
+  addEventListener('pointerdown', () => Snd.init(), { passive: true });
+  for (const b of document.querySelectorAll('.muteBtn')) b.onclick = () => { Snd.init(); setMute(!Snd.mute); Snd.blip(); };
+  for (const b of document.querySelectorAll('.autoBtn')) { b.onclick = () => { Snd.init(); setAuto(!Say.auto); if (Say.auto) Say.speak('I will read to you!'); }; if (!Say.ok) b.hidden = true; }
+  setMute(Snd.mute); setAuto(!!Store.d.auto);
+  buildTitle();
+  addLive($('#mapCv'), mapDraw);
+  const fxc = el('canvas'); fxc.id = 'fxc'; document.body.appendChild(fxc); addLive(fxc, fxDraw);
+  $('#mapBack').onclick = () => { Snd.blip(); showTitle(); };
+  $('#mapBook').onclick = () => { Snd.blip(); showBook('themes'); };
+  $('#mapReview').onclick = () => { Snd.blip(); tryReview(); };
+  $('#mBack').onclick = () => { Snd.blip(); showMap(); };
+  $('#bookBack').onclick = () => { Snd.blip(); showTitle(); };
+  $('#bookMap').onclick = () => { Snd.blip(); showMap(); };
+  for (const b of document.querySelectorAll('#bookTabs .btn')) b.onclick = () => { Snd.blip(); showBook(b.dataset.tab); };
+  $('#revBack').onclick = () => { Snd.blip(); showMap(); };
+  worldInput($('#mapWrap'));
+  addEventListener('resize', () => { W0.layoutKey = ''; });
+  showTitle();
+  requestAnimationFrame(frame);
+  window.__game = {
+    G, M, Store, start: startMission, step: goStep, map: showMap, world: W0, book: showBook, review: startReview, title: showTitle,
+    winBoss: () => { if (bossRun) bossRun.win('Test win'); },
+    unlockAll: () => { G.missions.forEach(m => Store.d.done[m.id] = Store.d.done[m.id] || 1); Store.d.themes = Object.keys(G.themes); Store.d.lessons = G.missions.map(m => m.id); Store.save(); },
+  };
+}
+function hitBtn(x, y, b) { return x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h; }
+
+// ---------- juice (particles) ----------
+function juiceBoom(parts, x, y, col, n = 26, big = 1) {
+  const cols = [col, COL.yellow, COL.orange, '#fff', COL.accent];
+  for (let i = 0; i < n; i++) { const a = rand(0, TAU), v = rand(120, 420) * big; parts.push({ k: i % 3 ? 'c' : 's', x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, r: rand(5, 12) * big, c: cols[i % cols.length], life: rand(.5, .9), max: .9, g: 300 }); }
+  for (let i = 0; i < 6; i++) { const a = rand(0, TAU); parts.push({ k: 'p', x: x + Math.cos(a) * 10, y: y + Math.sin(a) * 10, vx: Math.cos(a) * 60, vy: Math.sin(a) * 60 - 30, r: rand(18, 30) * big, c: '#f1f1f1', life: .8, max: .8, g: -20 }); }
+  parts.push({ k: 'ring', x, y, r: 10, life: .35, max: .35, c: '#fff' });
+  if (parts.length > 300) parts.splice(0, parts.length - 300);
+}
+function juicePoof(parts, x, y, n = 14) { for (let i = 0; i < n; i++) { const a = rand(0, TAU), v = rand(40, 140); parts.push({ k: i % 3 ? 'p' : 's', x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 40, r: i % 3 ? rand(16, 28) : 10, c: i % 3 ? '#eeeeee' : COL.yellow, life: rand(.6, 1), max: 1, g: -30 }); } if (parts.length > 300) parts.splice(0, parts.length - 300); }
+function juiceSparks(parts, x, y, col, n = 10) { for (let i = 0; i < n; i++) { const a = rand(0, TAU), v = rand(150, 380); parts.push({ k: 'l', x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, c: col, life: rand(.25, .45), max: .45, g: 200 }); } if (parts.length > 300) parts.splice(0, parts.length - 300); }
+function juiceStep(parts, dt) { for (let i = parts.length - 1; i >= 0; i--) { const p = parts[i]; p.life -= dt; if (p.life <= 0) { parts.splice(i, 1); continue; } if (p.k === 'ring') { p.r += 600 * dt; continue; } p.vy += (p.g || 0) * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= .97; p.vy *= .97; } }
+function juiceDraw(parts, c) {
+  for (const p of parts) {
+    const a = clamp(p.life / p.max, 0, 1); c.globalAlpha = a;
+    if (p.k === 'c') { E(c, p.x, p.y, p.r * a + 2, p.r * a + 2); fs(c, p.c, 2); }
+    else if (p.k === 's') drawStar(c, p.x, p.y, p.r, p.c, 2);
+    else if (p.k === 'p') { E(c, p.x, p.y, p.r * (1.4 - a * .4), p.r * (1.4 - a * .4)); c.fillStyle = p.c; c.fill(); c.lineWidth = 2; c.strokeStyle = 'rgba(29,27,38,.35)'; c.stroke(); }
+    else if (p.k === 'l') L(c, p.x, p.y, p.x - p.vx * .04, p.y - p.vy * .04, 4, p.c);
+    else if (p.k === 'ring') { E(c, p.x, p.y, p.r, p.r); c.lineWidth = 8 * a; c.strokeStyle = p.c; c.stroke(); }
+  }
+  c.globalAlpha = 1;
+}
+function confettiCanvas(g) { const cols = [COL.yellow, COL.accent, COL.green, COL.blue, COL.purple]; for (let i = 0; i < 60; i++) g.parts.push({ k: 'c', x: rand(0, 800), y: -20, vx: rand(-60, 60), vy: rand(100, 300), r: rand(5, 9), c: cols[i % 5], life: 1.6, max: 1.6, g: 200 }); }
+
+</script>
+<script>
+// ================= THE ILIAD: HEROES OF TROY =================
+const GOLD = '#e9b44c';
+const TRO = ['#6a4c93', '#ff9f1c', '#e76f51', '#2a9d8f'];
+const GRK = ['#4cc9f0', '#06d6a0', '#ffd23f', '#ff4d6d'];
+function achilles(c, x, y, s, t, o = {}) { drawPerson(c, x, y, s, Object.assign({ t, tunic: '#4cc9f0', hair: '#d4a017', armor: o.noArmor ? null : GOLD, hat: o.noArmor ? null : 'plume', crest: '#ff4d6d', helm: GOLD, cape: '#1d3557' }, o)); }
+function agamemnon(c, x, y, s, t, o = {}) { drawPerson(c, x, y, s, Object.assign({ t, tunic: '#9b2226', hat: 'crown', beard: '#3b2a1a', hair: '#3b2a1a', cape: '#6a040f', prop: 'staff' }, o)); }
+function hector(c, x, y, s, t, o = {}) { drawPerson(c, x, y, s, Object.assign({ t, tunic: '#6a4c93', armor: '#adb5bd', hat: 'plume', crest: '#ff9f1c', helm: '#adb5bd', beard: '#3b2a1a', hair: '#3b2a1a', cape: '#7b2cbf' }, o)); }
+function patroclus(c, x, y, s, t, o = {}) { drawPerson(c, x, y, s, Object.assign({ t, tunic: '#06d6a0', hair: '#6b4226' }, o)); }
+function priam(c, x, y, s, t, o = {}) { drawPerson(c, x, y, s, Object.assign({ t, tunic: '#7b2cbf', robe: true, beard: '#fff', hair: '#fff', hat: 'crown', prop: 'staff' }, o)); }
+function andromache(c, x, y, s, t, o = {}) { drawPerson(c, x, y, s, Object.assign({ t, tunic: '#ff8fab', robe: true, long: true, hair: '#3b2a1a', hat: 'veil', veil: '#ffc8dd' }, o)); }
+function thetis(c, x, y, s, t, o = {}) { drawPerson(c, x, y, s, Object.assign({ t, tunic: '#00b4d8', robe: true, long: true, hair: '#90e0ef', hat: 'wreath', skin: '#cdeffd' }, o)); }
+function zeus(c, x, y, s, t, o = {}) { drawPerson(c, x, y, s, Object.assign({ t, tunic: '#fffaf0', robe: true, beard: '#e0e0e0', hair: '#e0e0e0', hat: 'crown', prop: 'bolt' }, o)); }
+function hera(c, x, y, s, t, o = {}) { drawPerson(c, x, y, s, Object.assign({ t, tunic: '#ffafcc', robe: true, long: true, hair: '#5a3a22', hat: 'crown' }, o)); }
+function athena(c, x, y, s, t, o = {}) { drawPerson(c, x, y, s, Object.assign({ t, tunic: '#9b5de5', robe: true, long: true, hair: '#3b2a1a', hat: 'plume', crest: '#4cc9f0', helm: '#c0c0c0', prop: 'spear' }, o)); }
+function apollo(c, x, y, s, t, o = {}) { drawPerson(c, x, y, s, Object.assign({ t, tunic: '#ffd23f', hair: '#f4a261', hat: 'wreath', prop: 'bow' }, o)); }
+function hermes(c, x, y, s, t, o = {}) { drawPerson(c, x, y, s, Object.assign({ t, tunic: '#ffd23f', hair: '#d4a017', wings: true, prop: 'staff' }, o)); }
+function hephaestus(c, x, y, s, t, o = {}) { drawPerson(c, x, y, s, Object.assign({ t, tunic: '#6c757d', beard: '#3b2a1a', hair: '#3b2a1a', arms: 'up' }, o)); c.save(); c.translate(x + 30 * s, y - 128 * s - Math.abs(Math.sin(t * 5)) * 10 * s); c.scale(s, s); c.rotate(-.6 + Math.sin(t * 5) * .4); L(c, 0, 0, 0, 36, 6, '#8a5a2b'); RR(c, -14, -10, 28, 16, 3); fs(c, '#495057', 3); c.restore(); }
+function odys(c, x, y, s, t, o = {}) { drawPerson(c, x, y, s, Object.assign({ t, tunic: '#f4a261', beard: '#5a3a22', hat: 'pilos' }, o)); }
+function ajax(c, x, y, s, t, o = {}) { drawPerson(c, x * 1, y, s * 1.12, Object.assign({ t, tunic: '#ff9f1c', beard: '#222', hair: '#222', prop: 'shield', shieldCol: '#c08552' }, o)); }
+function phoenix(c, x, y, s, t, o = {}) { drawPerson(c, x, y, s, Object.assign({ t, tunic: '#9b5de5', robe: true, beard: '#fff', hair: '#fff', prop: 'staff' }, o)); }
+function baby(c, x, y, s, t, o = {}) {
+  c.save(); c.translate(x, y + Math.sin(t * 4) * 2); c.scale(s, s);
+  E(c, 0, 18, 22, 18); fs(c, '#fff3c4');
+  E(c, 0, -8, 20, 19); fs(c, '#f7d1b0');
+  c.beginPath(); c.arc(0, -16, 8, Math.PI, 0); c.lineWidth = 3; c.strokeStyle = INK; c.stroke();
+  if (o.mood === 'scared') { for (const sd of [-1, 1]) { E(c, sd * 7, -9, 3, 4); c.fillStyle = INK; c.fill(); } E(c, 0, 2, 5, 6); fs(c, '#7a1f3a', 2); E(c, 14, -4, 3, 6); fs(c, COL.blue, 1.5); }
+  else { for (const sd of [-1, 1]) { c.beginPath(); c.arc(sd * 7, -8, 4, Math.PI * 1.1, Math.PI * 1.9); c.lineWidth = 2.5; c.stroke(); } c.beginPath(); c.arc(0, -1, 7, .2, Math.PI - .2); c.closePath(); fs(c, '#7a1f3a', 2); c.fillStyle = 'rgba(255,120,140,.4)'; E(c, -12, -2, 4, 3); c.fill(); E(c, 12, -2, 4, 3); c.fill(); }
+  c.restore();
+}
+function tent(c, x, y, s, col = '#e9d8a6') { c.save(); c.translate(x, y); c.scale(s, s); P(c, [-90, 0, 0, -110, 90, 0]); fs(c, col, 4); P(c, [-20, 0, 0, -50, 20, 0]); fs(c, '#5e4b56', 3); L(c, 0, -110, 0, -134, 4); P(c, [0, -134, 22, -128, 0, -122]); fs(c, COL.accent, 2); c.restore(); }
+function camp(c, H = 600, t = 0) { sky(c, '#ffd6a5', '#fff1d0'); drawSea(c, H * .55, t); c.fillStyle = '#f2e2b1'; c.fillRect(-3000, H * .68, 7000, 3000); for (let i = 0; i < 3; i++) drawShip(c, 120 + i * 260, H * .64, .6, { t, crew: 0, sail: false, oars: false }); }
+function troy(c, H = 600) { sky(c, '#ffd6a5', '#fff1d0'); c.fillStyle = '#c9b38a'; c.fillRect(-3000, H * .7, 7000, 3000); trojanWalls(c, -40, H * .7, 880, H * .34); drawColumns(c, 600, H * .36 - 16, 160, 70, 4); }
+function olympus(c, H = 600, t = 0) { sky(c, '#4361ee', '#bde0fe'); for (let i = 0; i < 6; i++) drawCloud(c, 60 + i * 150, H * .78 + (i % 2) * 20, 2.2); drawColumns(c, 400, H * .7, 520, 260, 6, '#fffaf0'); }
+function forge(c, H = 600, t = 0) { bigRect(c, '#3a2f37'); c.fillStyle = '#5e4b56'; c.fillRect(-3000, H * .78, 7000, 3000); E(c, 650, H * .55, 110, 120); c.fillStyle = '#1d1b26'; c.fill(); for (let i = 0; i < 3; i++) drawFlame(c, 620 + i * 30, H * .62, 2, t + i); RR(c, 300, H * .62, 170, 30, 8); fs(c, '#495057', 4); RR(c, 345, H * .66, 80, 60, 6); fs(c, '#495057', 4); }
+function shieldArt(c, x, y, r, rings = 5, t = 0) {
+  c.save(); c.translate(x, y);
+  E(c, 0, 0, r, r); fs(c, GOLD, 5);
+  if (rings >= 5) { for (let i = 0; i < 24; i++) { const a = i / 24 * TAU + t * .2; c.beginPath(); c.arc(Math.cos(a) * r * .9, Math.sin(a) * r * .9, r * .06, a, a + Math.PI); c.lineWidth = 3; c.strokeStyle = '#0b4f7a'; c.stroke(); } }
+  for (let k = 1; k <= 3; k++) { E(c, 0, 0, r * (1 - k * .2), r * (1 - k * .2)); fs(c, null, 3); }
+  if (rings >= 1) { drawSun(c, -r * .1, -r * .05, r * .08, t); E(c, r * .12, r * .08, r * .05, r * .05); fs(c, '#fffaf0', 2); }
+  if (rings >= 2) { for (let i = 0; i < 2; i++) { const a = i * Math.PI; c.save(); c.rotate(a + .3); RR(c, -r * .1, -r * .55, r * .2, r * .12, 4); fs(c, i ? '#e9d8a6' : '#ffd6e0', 2); c.restore(); } }
+  if (rings >= 3) for (let i = 0; i < 6; i++) { const a = i / 6 * TAU; E(c, Math.cos(a) * r * .68, Math.sin(a) * r * .68, r * .05, r * .03, a); fs(c, i % 2 ? '#57cc99' : COL.yellow, 2); }
+  c.restore();
+}
+function chariot(c, x, y, s, t, o = {}) {
+  c.save(); c.translate(x, y); c.scale(s, s); if (o.flip) c.scale(-1, 1);
+  for (let i = 0; i < 2; i++) { const b = Math.sin(t * 14 + i) * 4; c.save(); c.translate(70 + i * 22, -6 + b); E(c, 0, -26, 34, 18); fs(c, o.horse || '#fffaf0', 3); E(c, 30, -46, 12, 18, .5); fs(c, o.horse || '#fffaf0', 3); E(c, 34, -50, 2, 2); c.fillStyle = INK; c.fill(); for (const k of [-20, 18]) L(c, k, -12, k + Math.sin(t * 14 + k) * 8, 14, 5); c.restore(); }
+  L(c, 0, -20, 70, -30, 5, '#8a5a2b');
+  RR(c, -40, -54, 50, 40, 10); fs(c, o.car || GOLD, 3.5);
+  E(c, -15, -8, 20, 20); fs(c, '#8a5a2b', 3.5); for (let i = 0; i < 4; i++) { const a = i / 4 * Math.PI + t * 10; L(c, -15 + Math.cos(a) * 18, -8 + Math.sin(a) * 18, -15 - Math.cos(a) * 18, -8 - Math.sin(a) * 18, 2); }
+  if (o.rider) o.rider(c, -15, -40, .5, t);
+  c.restore();
+}
+function pyre(c, x, y, s, t) { c.save(); c.translate(x, y); c.scale(s, s); for (let i = 0; i < 4; i++) { RR(c, -80 + i * 6, -i * 16 - 16, 160 - i * 12, 16, 4); fs(c, '#8a5a2b', 3); } for (let i = 0; i < 5; i++) drawFlame(c, -50 + i * 25, -70, 1.4, t + i); c.restore(); }
+function dust(c, x, y, s, t, word) { c.save(); c.translate(x, y); c.scale(s, s); for (let i = 0; i < 8; i++) { const a = i / 8 * TAU + t; E(c, Math.cos(a) * 50, Math.sin(a) * 30, 40 + Math.sin(t * 6 + i) * 6, 30); fs(c, '#e9d8a6', 3); } E(c, 0, 0, 70, 46); fs(c, '#f2e2b1', 3); if (word) txt(c, word, 0, 0, 34, COL.yellow); for (let i = 0; i < 4; i++) drawStar(c, Math.cos(t * 3 + i * 1.6) * 90, Math.sin(t * 3 + i * 1.6) * 50 - 20, 10); c.restore(); }
+function scales(c, x, y, s, tilt, t) { c.save(); c.translate(x, y); c.scale(s, s); L(c, 0, 0, 0, 120, 6, GOLD); L(c, 0, 0, 0, 120, 3, INK); c.rotate(tilt); L(c, -110, 0, 110, 0, 8, INK); L(c, -110, 0, 110, 0, 4, GOLD); for (const sd of [-1, 1]) { c.save(); c.translate(sd * 110, 0); c.rotate(-tilt); L(c, 0, 0, -26, 50, 2); L(c, 0, 0, 26, 50, 2); c.beginPath(); c.moveTo(-34, 50); c.quadraticCurveTo(0, 74, 34, 50); c.closePath(); fs(c, GOLD, 3); c.restore(); } c.restore(); }
+function lyre(c, x, y, s = 1) { c.save(); c.translate(x, y); c.scale(s, s); c.beginPath(); c.moveTo(-14, 24); c.quadraticCurveTo(-26, -14, -14, -38); c.moveTo(14, 24); c.quadraticCurveTo(26, -14, 14, -38); c.lineWidth = 9; c.strokeStyle = INK; c.stroke(); c.lineWidth = 5; c.strokeStyle = '#c08552'; c.stroke(); L(c, -18, -30, 18, -30, 5); L(c, -14, 24, 14, 24, 6); for (const k of [-7, 0, 7]) L(c, k, -30, k, 24, 1.5, '#555'); c.restore(); }
+function gifts(c, x, y, s, t) { c.save(); c.translate(x, y); c.scale(s, s); for (let i = 0; i < 3; i++) { c.save(); c.translate(-80 + i * 80, 0); P(c, [-24, -10, 24, -10, 16, 30, -16, 30]); fs(c, GOLD, 3); L(c, -16, 30, -22, 50, 4); L(c, 16, 30, 22, 50, 4); c.restore(); } for (let i = 0; i < 6; i++) { E(c, -60 + i * 24, 70, 14, 7); fs(c, COL.yellow, 2.5); } c.restore(); }
+
+// ---------------- themes ----------------
+const THEMES = {
+  wrath: { name: 'Anger', short: 'ANGER!', greek: 'mēnis (wrath)', desc: 'The Iliad\'s very first word is "wrath." Achilles\' anger hurts friends and enemies alike.', art: (c, t) => { bigRect(c, '#ffd6dc'); achilles(c, 70, 106, .45, t, { mood: 'angry', noArmor: true }); for (let i = 0; i < 3; i++) drawFlame(c, 140 + i * 18, 70, .7, t + i); } },
+  kleos: { name: 'Glory', short: 'GLORY!', greek: 'kleos', desc: 'Kleos is fame that lives on in songs after a hero is gone. Heroes risked everything for it.', art: (c, t) => { bigRect(c, '#fff3b0'); for (let i = 0; i < 5; i++) drawStar(c, 30 + i * 35, 30 + (i % 2) * 20, 10); note(c, 150, 80, 1.2); lyre(c, 60, 72, .8); } },
+  pride: { name: 'Pride', short: 'PRIDE!', desc: 'Caring about honor is good, but too much pride makes heroes refuse help and hurt others.', art: (c, t) => { bigRect(c, '#e0c3fc'); agamemnon(c, 60, 106, .42, t, { mood: 'angry' }); achilles(c, 140, 106, .42, t, { mood: 'angry', flip: true, noArmor: true }); } },
+  friendship: { name: 'Friendship & Grief', short: 'FRIENDS!', desc: 'Achilles loves his friend Patroclus. His huge grief shows how deep love can be.', art: (c, t) => { bigRect(c, '#d8f3dc'); achilles(c, 70, 106, .42, t, { noArmor: true }); patroclus(c, 130, 106, .42, t, { flip: true }); drawHeart(c, 100, 22, .9); } },
+  fate: { name: 'Fate & Choice', short: 'FATE!', desc: 'The Greeks believed fate was fixed, yet heroes still choose HOW to face it.', art: (c, t) => { sky(c, '#4361ee', '#bde0fe'); scales(c, 100, 30, .4, Math.sin(t) * .2, t); } },
+  gods: { name: 'Meddling Gods', short: 'GODS!', desc: 'Gods pick sides, argue and jump into the war, often making it worse.', art: (c, t) => { olympus(c, 110, t); zeus(c, 100, 100, .3, t); } },
+  family: { name: 'Family & Duty', short: 'FAMILY!', desc: 'Hector loves his family but feels he must defend his city. Both pull at his heart.', art: (c, t) => { bigRect(c, '#ffe5ec'); hector(c, 70, 108, .42, t, { hat: null }); andromache(c, 140, 108, .42, t); baby(c, 95, 52, .6, t); } },
+  cost: { name: 'Cost of War', short: 'SO SAD!', desc: 'War brings grief to both sides. Homer shows Trojans and Greeks as real people with families.', art: (c, t) => { sky(c, '#5c6b8a', '#9fb3d1'); c.fillStyle = '#7a6a4a'; c.fillRect(0, 80, 200, 40); for (let i = 0; i < 3; i++) { E(c, 50 + i * 50, 90, 16, 18); fs(c, '#adb5bd'); } } },
+  mercy: { name: 'Mercy', short: 'MERCY!', desc: 'Showing kindness to someone you could hurt. Achilles and Priam share tears and a meal.', art: (c, t) => { bigRect(c, '#fff1d0'); priam(c, 60, 106, .42, t); achilles(c, 140, 106, .42, t, { flip: true, noArmor: true }); drawHeart(c, 100, 26, .9); } },
+};
+
+// ---------------- scenes ----------------
+const SCENES = {
+  quarrel(c, t, fx) {
+    camp(c, 600, t); tent(c, 640, 420, 1.1);
+    if (fx === 'quit' || fx === 'lesson') { achilles(c, 520, 580, .9, t, { noArmor: true, mood: fx === 'lesson' ? 'sad' : 'angry' }); lyre(c, 550, 500, 1); note(c, 600, 400 + Math.sin(t * 2) * 10, 1.2); for (let i = 0; i < 3; i++) drawPerson(c, 120 + i * 90, 590, .7, { t, ph: i, tunic: GRK[i], hat: 'helmet', mood: 'sad' }); if (fx === 'quit') txt(c, 'I won\'t fight!', 520, 120, 32, COL.accent); return; }
+    agamemnon(c, 220, 590, .95, t, { mood: fx === 'calm' ? 'happy' : 'angry', arms: fx === 'calm' ? 'out' : 'down' });
+    achilles(c, 560, 590, .95, t, { mood: fx === 'calm' ? 'happy' : 'angry', noArmor: true, flip: true, arms: fx === 'sword' ? 'hold' : fx === 'calm' ? 'out' : 'down' });
+    if (fx === 'sword' || fx === 'athena') { athena(c, 690, 590, .85, t, { arms: 'out' }); if (fx === 'sword') txt(c, 'STOP!', 690, 330, 40, COL.yellow); }
+    if (fx === 'shout') { txt(c, 'GRRR!', 220, 330, 36, COL.accent); txt(c, 'HMPH!', 560, 330, 36, COL.accent); }
+    if (fx === 'calm') { drawHeart(c, 390, 360, 1.6); txt(c, 'Let\'s talk.', 400, 140, 32, COL.green); }
+    if (fx === 'breathe') { E(c, 560, 360, 50 + Math.sin(t * 2) * 14, 50 + Math.sin(t * 2) * 14); c.lineWidth = 5; c.strokeStyle = COL.blue; c.stroke(); }
+    if (fx === 'friend') patroclus(c, 680, 590, .85, t, { arms: 'out' });
+    if (fx === 'muse') { drawCloud(c, 400, 200, 2.2); drawPerson(c, 400, 200, .8, { t, tunic: COL.yellow, robe: true, long: true, hair: '#3b2a1a', hat: 'wreath', arms: 'up' }); }
+    drawPup(c, 390, 560, .38, { t, hat: 'helmet', outfit: 'chiton' });
+  },
+  olympus(c, t, fx) {
+    if (fx === 'sea') { sky(c, '#90e0ef', '#e0fbfc'); drawSea(c, 380, t); thetis(c, 400, 500, 1.2, t, { arms: 'up' }); return; }
+    olympus(c, 600, t);
+    if (fx === 'sides' || fx === 'tug' || fx === 'boss') {
+      L(c, 120, 480, 680, 480, 8, '#c08552'); E(c, 400 + Math.sin(t * 2) * 30, 480, 12, 12); fs(c, COL.accent);
+      hera(c, 120, 590, .7, t, { arms: 'out' }); athena(c, 200, 590, .7, t, { arms: 'out' });
+      apollo(c, 600, 590, .7, t, { arms: 'out', flip: true }); drawPerson(c, 680, 590, .7, { t, tunic: '#ff4d6d', robe: true, long: true, hair: '#d4a017', flip: true, arms: 'out' });
+      zeus(c, 400, 400, .7, t, { mood: 'surprised' }); return;
+    }
+    zeus(c, 520, 590, 1.05, t, { mood: fx === 'nod' ? 'happy' : 'happy' });
+    if (fx === 'nod') { for (let i = 0; i < 4; i++) L(c, 120 + i * 180, 120 + Math.sin(t * 30 + i) * 6, 180 + i * 180, 120, 5, COL.yellow); txt(c, 'RUMBLE!', 400, 90, 40, COL.yellow); }
+    if (fx === 'hera') { hera(c, 300, 590, .95, t, { mood: 'angry', arms: 'out' }); }
+    else if (fx === 'laugh') { drawPerson(c, 260, 590, .9, { t, tunic: '#6c757d', beard: '#3b2a1a', hair: '#3b2a1a', arms: 'hold' }); txt(c, 'HA HA HA!', 400, 120, 36, COL.yellow); }
+    else if (fx === 'no') { thetis(c, 280, 590, .9, t, { mood: 'sad' }); }
+    else thetis(c, 280, 590, .9, t, { arms: 'up', mood: fx === 'nod' ? 'happy' : 'sad' });
+    if (fx === 'lesson') { txt(c, 'Bigger fights...', 400, 100, 30, '#fff'); }
+    drawPup(c, 120, 560, .38, { t, hat: 'helmet', outfit: 'chiton' });
+  },
+  hector(c, t, fx) {
+    troy(c);
+    const off = fx === 'laugh' || fx === 'tickle' || fx === 'silly' || fx === 'hug' || fx === 'lesson' || fx === 'pray';
+    andromache(c, 260, 590, .95, t, { mood: fx === 'go' || fx === 'leave' ? 'sad' : fx === 'stay' || off ? 'happy' : 'sad', arms: fx === 'wall' ? 'out' : 'down' });
+    hector(c, 520, 590, 1, t, { hat: off ? null : 'plume', bigPlume: fx === 'scared', mood: fx === 'silly' ? 'surprised' : 'happy', arms: 'hold', flip: true });
+    if (off) { c.save(); c.translate(640, 590); c.beginPath(); c.moveTo(-26, 0); c.quadraticCurveTo(-28, -36, 0, -36); c.quadraticCurveTo(28, -36, 26, 0); c.closePath(); fs(c, '#adb5bd', 3); c.beginPath(); c.moveTo(-18, -32); c.quadraticCurveTo(0, -70, 30, -46); c.quadraticCurveTo(10, -46, -8, -30); fs(c, COL.orange, 3); c.restore(); }
+    if (fx !== 'go' && fx !== 'leave') baby(c, 505, 500, 1.2, t, { mood: fx === 'scared' || fx === 'helmet' ? 'scared' : 'happy' });
+    if (fx === 'scared' || fx === 'helmet') txt(c, 'WAAAH!', 500, 380, 34, COL.accent);
+    if (fx === 'laugh' || fx === 'tickle' || fx === 'silly') { txt(c, 'Hee hee!', 500, 380, 34, COL.yellow); drawHeart(c, 420, 420, 1.2); }
+    if (fx === 'pray') { drawStar(c, 520, 120, 24); txt(c, '"Be greater than me!"', 400, 80, 28, COL.yellow); }
+    if (fx === 'wall') txt(c, '"Please stay safe!"', 300, 100, 30, COL.yellow);
+    if (fx === 'go' || fx === 'leave') { txt(c, fx === 'leave' ? 'No goodbye?' : 'Duty calls...', 400, 100, 32, '#fff'); }
+    drawPup(c, 120, 560, .38, { t, hat: 'helmet', outfit: 'chiton' });
+  },
+  embassy(c, t, fx) {
+    camp(c, 600, t); tent(c, 660, 420, 1.1, '#cdb4db');
+    if (fx === 'fates') { c.fillStyle = 'rgba(30,20,60,.35)'; c.fillRect(-3000, -3000, 7000, 7000); c.fillStyle = '#80b918'; c.beginPath(); c.moveTo(400, 600); c.lineTo(100, 200); c.lineTo(180, 200); c.lineTo(400, 560); c.fill(); c.fillStyle = COL.yellow; c.beginPath(); c.moveTo(400, 600); c.lineTo(620, 200); c.lineTo(700, 200); c.lineTo(400, 560); c.fill(); drawTree(c, 140, 200, 1.4); drawPerson(c, 140, 230, .5, { t, beard: '#fff', hair: '#fff', robe: true, tunic: '#4cc9f0' }); for (let i = 0; i < 5; i++) drawStar(c, 600 + i * 30, 150 - (i % 2) * 30, 14); txt(c, 'LONG & QUIET', 160, 120, 24, '#fff'); txt(c, 'SHORT & GLORIOUS', 640, 90, 24, COL.yellow); achilles(c, 400, 600, .8, t, { noArmor: true, mood: 'surprised' }); return; }
+    achilles(c, 560, 590, .95, t, { noArmor: true, flip: true, mood: fx === 'refuse' || fx === 'gold' ? 'angry' : fx === 'listen' ? 'surprised' : 'happy', arms: fx === 'refuse' ? 'out' : 'down' });
+    if (fx !== 'refuse' && fx !== 'gold') lyre(c, 600, 500, .9);
+    odys(c, 140, 590, .8, t, { arms: fx === 'gold' || fx === 'gifts' ? 'out' : 'down' }); ajax(c, 250, 590, .8, t, { arms: fx === 'listen' ? 'out' : 'down' }); phoenix(c, 360, 590, .8, t, { arms: fx === 'phoenix' ? 'out' : 'down' });
+    if (fx === 'gifts' || fx === 'gold') gifts(c, 260, 430, .9, t);
+    if (fx === 'refuse') txt(c, 'NO!', 560, 300, 50, COL.accent);
+    if (fx === 'listen') txt(c, 'Your friends need you!', 300, 100, 30, COL.green);
+    if (fx === 'phoenix') txt(c, 'Once upon a time...', 360, 100, 30, COL.yellow);
+    if (fx === 'lesson') { txt(c, 'Pride says no...', 400, 100, 30, '#fff'); }
+    drawPup(c, 450, 560, .38, { t, hat: 'helmet', outfit: 'chiton' });
+  },
+  patroclus(c, t, fx) {
+    if (fx === 'grief' || fx === 'lesson') { camp(c, 600, t); tent(c, 640, 420, 1.1); achilles(c, 380, 590, 1, t, { noArmor: true, mood: 'sad', arms: 'up' }); thetis(c, 600, 590, .85, t, { mood: 'sad', arms: 'out' }); drawPup(c, 200, 560, .45, { t, hat: 'helmet', outfit: 'chiton', tear: true }); if (fx === 'grief') txt(c, 'My best friend...', 400, 100, 32, '#fff'); return; }
+    if (fx === 'toofar') { troy(c); chariot(c, 300, 590, 1, t, { rider: (c2, x, y, s, t2) => achilles(c2, x, y + 40, s, t2, { tunic: '#06d6a0' }) }); apollo(c, 620, 400, .9, t, { arms: 'out' }); txt(c, 'Too far!', 400, 90, 40, COL.accent); return; }
+    camp(c, 600, t);
+    if (fx === 'fire' || fx === 'stay') { drawFlame(c, 380, 360, 2.4, t); drawFlame(c, 640, 360, 2, t); for (let i = 0; i < 3; i++) drawPerson(c, 120 + i * 80, 590, .7, { t, ph: i, tunic: TRO[i], hat: 'plume', crest: COL.orange, prop: 'shield', shieldCol: '#adb5bd' }); }
+    if (fx === 'armor' || fx === 'chase' || fx === 'boss' || fx === 'stop') {
+      achilles(c, 420, 590, 1, t, { tunic: '#06d6a0', arms: fx === 'stop' ? 'wave' : 'out' });
+      if (fx === 'chase' || fx === 'boss') for (let i = 0; i < 3; i++) drawPerson(c, 600 + i * 70 + (t * 40 % 40), 590, .65, { t: t * 2, ph: i, tunic: TRO[i], hat: 'plume', crest: COL.orange, mood: 'surprised', flip: false });
+      if (fx === 'armor') txt(c, '"Achilles is back?!"', 400, 100, 30, COL.yellow);
+      if (fx === 'stop') txt(c, 'Ships safe! Back home!', 400, 100, 30, COL.green);
+    } else patroclus(c, 480, 590, 1, t, { mood: fx === 'stay' ? 'sad' : 'sad', arms: 'out' });
+    if (fx === 'ask' || fx === 'fire' || fx === 'stay' || !fx) achilles(c, 640, 590, .95, t, { noArmor: true, flip: true });
+    drawPup(c, 270, 560, .38, { t, hat: 'helmet', outfit: 'chiton' });
+  },
+  shield(c, t, fx) {
+    if (fx === 'done' || fx === 'lesson' || fx === 'boss') { forge(c, 600, t); shieldArt(c, 400, 300, 220, 5, t); thetis(c, 120, 590, .8, t, { arms: 'out' }); drawPup(c, 700, 560, .4, { t, hat: 'helmet', outfit: 'chiton' }); return; }
+    if (fx === 'sky') { bigRect(c, '#1d3557'); drawSun(c, 250, 250, 70, t); E(c, 560, 220, 50, 50); fs(c, '#fffaf0', 4); for (let i = 0; i < 7; i++) drawStar(c, 420 + i * 50, 380 + (i % 3) * 40, 12); drawSea(c, 500, t); return; }
+    if (fx === 'peace') { sky(c); c.fillStyle = '#c9b38a'; c.fillRect(-100, 420, 1000, 300); for (let i = 0; i < 5; i++) drawPerson(c, 160 + i * 120, 590, .75, { t: t * 2, ph: i, tunic: GRK[i % 4], arms: 'up', long: i % 2 === 1 }); for (let i = 0; i < 3; i++) note(c, 260 + i * 140, 200 + Math.sin(t * 2 + i) * 20, 1.6); return; }
+    if (fx === 'war') { troy(c); for (let i = 0; i < 4; i++) drawPerson(c, 140 + i * 160, 590, .7, { t, ph: i, tunic: TRO[i], hat: 'helmet', prop: 'shield', mood: 'sad' }); return; }
+    if (fx === 'fields') { sky(c, '#ffd6a5', '#fff1d0'); c.fillStyle = '#a7c957'; c.fillRect(-100, 380, 1000, 400); for (let i = 0; i < 8; i++) L(c, -50 + i * 120, 600, 100 + i * 100, 380, 4, '#6b4226'); for (let i = 0; i < 6; i++) { L(c, 500 + i * 40, 520, 500 + i * 40, 420, 4, '#d4a017'); E(c, 500 + i * 40, 410, 8, 18); fs(c, COL.yellow, 2); } drawPerson(c, 200, 590, .8, { t, tunic: '#ff9f1c', arms: 'hold' }); return; }
+    if (fx === 'plain') { forge(c, 600, t); E(c, 400, 300, 200, 200); fs(c, '#adb5bd', 5); txt(c, 'Boring!', 400, 300, 40, '#fff'); return; }
+    forge(c, 600, t); hephaestus(c, 380, 560, 1.1, t); shieldArt(c, 380, 480, 60, fx === 'battle' ? 0 : 2, t);
+    if (fx !== 'forge') thetis(c, 140, 590, .85, t, { arms: 'out' });
+    if (fx === 'battle') txt(c, 'Only battles?', 400, 100, 32, COL.yellow);
+    drawPup(c, 620, 590, .38, { t, hat: 'helmet', outfit: 'chiton' });
+  },
+  fate(c, t, fx) {
+    if (fx === 'scales') { olympus(c, 600, t); scales(c, 400, 160, 1.6, Math.sin(t) * .05 + .25, t); zeus(c, 640, 590, .8, t, { mood: 'sad' }); txt(c, 'HECTOR', 230, 300, 26, '#fff'); txt(c, 'ACHILLES', 570, 230, 26, '#fff'); return; }
+    if (fx === 'games' || fx === 'boss' || fx === 'fair' || fx === 'foul' || fx === 'sorry' || fx === 'mad' || fx === 'prize') {
+      sky(c); c.fillStyle = '#e9c46a'; c.fillRect(-100, 420, 1000, 300); L(c, -100, 500, 900, 500, 3, '#c9b38a');
+      if (fx === 'prize') { achilles(c, 320, 590, .9, t, { noArmor: true, arms: 'out' }); gifts(c, 500, 470, .6, t); drawPerson(c, 640, 590, .8, { t, tunic: '#adb5bd', mood: 'surprised', arms: 'out' }); txt(c, 'A prize for you too!', 400, 90, 30, COL.green); return; }
+      if (fx === 'sorry' || fx === 'mad') { drawPerson(c, 300, 590, .9, { t, tunic: '#06d6a0', hair: '#6b4226', arms: 'out', mood: fx === 'sorry' ? 'sad' : 'happy' }); drawPerson(c, 520, 590, .9, { t, tunic: '#9b2226', hair: '#d4a017', beard: '#d4a017', hat: 'crown', mood: fx === 'mad' ? 'angry' : 'happy', flip: true, arms: fx === 'sorry' ? 'out' : 'down' }); txt(c, fx === 'sorry' ? '"I\'m sorry!" "I forgive you!"' : 'Still mad!', 400, 90, 28, fx === 'sorry' ? COL.green : COL.accent); return; }
+      chariot(c, 240 + (t * 60 % 200), 560, 1, t, { car: GOLD }); chariot(c, 560 + (t * 50 % 160), 460, .8, t, { car: '#06d6a0', horse: '#c08552' });
+      if (fx === 'foul') txt(c, 'FOUL!', 400, 120, 44, COL.accent);
+      L(c, 720, 300, 720, 430, 8, '#8a5a2b'); return;
+    }
+    troy(c);
+    if (fx === 'walls' || !fx) { priam(c, 220, 260, .55, t, { mood: 'sad', arms: 'out' }); drawPerson(c, 300, 260, .55, { t, tunic: '#ff8fab', robe: true, long: true, hair: '#fff', mood: 'sad', arms: 'out' }); hector(c, 480, 600, 1, t, { mood: 'surprised' }); txt(c, '"Come inside!"', 260, 110, 30, COL.yellow); return; }
+    if (fx === 'duel') { dust(c, 420, 480, 1.4, t, 'CLANG!'); return; }
+    if (fx === 'mourn' || fx === 'lesson') { for (let i = 0; i < 4; i++) drawPerson(c, 180 + i * 140, 260, .5, { t, ph: i, tunic: TRO[i], mood: 'sad', robe: i % 2 === 1, long: i % 2 === 1 }); drawPup(c, 400, 560, .45, { t, hat: 'helmet', outfit: 'chiton', tear: true }); return; }
+    if (fx === 'return' || fx === 'grief2' || fx === 'gifts2') { agamemnon(c, 220, 600, .9, t, { arms: 'out', mood: 'happy' }); achilles(c, 520, 600, 1, t, { flip: true, mood: fx === 'grief2' ? 'sad' : 'angry' }); if (fx === 'gifts2') gifts(c, 370, 470, .6, t); if (fx === 'grief2') txt(c, 'For Patroclus!', 400, 100, 32, COL.yellow); return; }
+    hector(c, 480, 600, 1, t);
+  },
+  priam(c, t, fx) {
+    const night = fx !== 'army' && fx !== 'funeral';
+    if (fx === 'funeral' || fx === 'lesson') { sky(c, '#2b2a4a', '#5a4f8a'); for (let i = 0; i < 12; i++) drawStar(c, 40 + i * 66, 40 + (i % 3) * 40, 8, '#fffaf0'); c.fillStyle = '#5e4b56'; c.fillRect(-100, 440, 1000, 300); trojanWalls(c, -40, 440, 880, 160); pyre(c, 400, 560, 1.3, t); for (let i = 0; i < 4; i++) drawPerson(c, 120 + i * 60 + (i > 1 ? 380 : 0), 600, .6, { t, ph: i, tunic: TRO[i], mood: 'sad', robe: true }); return; }
+    if (fx === 'army') { troy(c); for (let i = 0; i < 5; i++) drawPerson(c, 120 + i * 130, 590, .7, { t, ph: i, tunic: TRO[i % 4], hat: 'plume', crest: COL.orange, prop: 'spear', mood: 'angry' }); txt(c, 'That means more fighting!', 400, 90, 28, COL.accent); return; }
+    sky(c, '#1d1b4a', '#3d3b8a'); for (let i = 0; i < 12; i++) drawStar(c, 40 + i * 66, 40 + (i % 3) * 40, 7, '#fffaf0'); E(c, 680, 90, 40, 40); fs(c, '#fffaf0', 3);
+    c.fillStyle = '#4a4466'; c.fillRect(-100, 420, 1000, 300); tent(c, 640, 460, 1.2, '#b8a98a');
+    if (fx === 'night' || fx === 'boss') { chariot(c, 260, 570, .9, t, { car: '#7b2cbf', horse: '#d4c4a8', rider: (c2, x, y, s, t2) => priam(c2, x, y + 40, s, t2) }); hermes(c, 470, 590, .8, t, { arms: 'wave' }); drawPerson(c, 700, 590, .6, { t, tunic: GRK[0], hat: 'helmet', mood: 'sleep' }); txt(c, 'Zzz', 720, 430, 26, '#fff'); return; }
+    if (fx === 'shout') { priam(c, 300, 590, .95, t, { mood: 'angry', arms: 'up' }); achilles(c, 540, 590, .95, t, { noArmor: true, mood: 'angry', flip: true }); txt(c, 'GIVE HIM BACK!', 400, 110, 32, COL.accent); return; }
+    if (fx === 'keep') { achilles(c, 520, 590, .95, t, { noArmor: true, mood: 'angry', flip: true, arms: 'out' }); priam(c, 300, 590, .95, t, { mood: 'sad' }); txt(c, 'No peace...', 400, 110, 32, '#fff'); return; }
+    const kneel = fx === 'plead' || fx === 'gifts' || !fx;
+    priam(c, 300, kneel ? 620 : 590, kneel ? .8 : .95, t, { mood: fx === 'meal' || fx === 'truce' ? 'happy' : 'sad', arms: kneel ? 'out' : 'down' });
+    achilles(c, 520, 590, .95, t, { noArmor: true, flip: true, mood: fx === 'weep' ? 'sad' : fx === 'meal' || fx === 'truce' || fx === 'give' ? 'happy' : 'surprised' });
+    if (fx === 'gifts') gifts(c, 140, 470, .6, t);
+    if (fx === 'plead') txt(c, '"Remember your father."', 400, 100, 30, COL.yellow);
+    if (fx === 'weep') { priam(c, 300, 590, .95, t, { mood: 'sad' }); txt(c, 'Both cry together.', 400, 100, 30, '#fff'); }
+    if (fx === 'meal' || fx === 'truce') { RR(c, 330, 520, 160, 16, 6); fs(c, '#c08552'); E(c, 380, 512, 18, 9); fs(c, '#fff'); E(c, 440, 512, 18, 9); fs(c, COL.orange); drawFlame(c, 410, 470, .8, t); if (fx === 'truce') txt(c, '11 days of peace', 400, 100, 32, COL.green); }
+    drawPup(c, 140, 580, .38, { t, hat: 'helmet', outfit: 'chiton' });
+  },
+};
+
+// ---------------- missions ----------------
+const S = SCENES;
+const MISSIONS = [
+// 1 ---------------------------------------------------------------
+{ id: 'quarrel', name: 'The Big Quarrel', short: 'Quarrel', at: [.12, .7], atP: [.28, .07], themes: ['wrath', 'pride', 'gods'], scene: S.quarrel,
+  challenge: { say: 'King Agamemnon takes Achilles\' prize. Achilles is FURIOUS! What should he do?',
+    options: [
+      { t: 'Grab his sword', good: false, fx: 'sword', r: 'Goddess Athena stops him just in time!' },
+      { t: 'Shout and quit', good: false, fx: 'quit', r: 'That\'s what he did. His friends suffer for it.' },
+      { t: 'Calm down, talk', good: true, fx: 'calm', r: 'A cool head could have saved lots of trouble!' },
+    ] },
+  discover: { say: 'The Iliad starts with ONE word: "wrath." Tap!',
+    panels: [
+      { fx: 'muse', theme: 'wrath', bub: 'Sing of the anger of Achilles!', bx: 400, by: 70, cap: 'Homer asks the Muse to sing about Achilles\' anger.', more: 'The Iliad covers just a few weeks in the 10th year of the Trojan War.' },
+      { fx: 'shout', theme: 'pride', bub: 'That prize is MINE!', bx: 240, by: 160, tx: 220, ty: 330, cap: 'Agamemnon takes Achilles\' prize. Both feel their honor is hurt.', more: 'Agamemnon had to give back his own prize to end a plague sent by the god Apollo. So he took Achilles\' prize instead.' },
+      { fx: 'sword', theme: 'gods', bub: 'Put it away!', bx: 600, by: 200, tx: 690, ty: 330, cap: 'Achilles reaches for his sword. Athena stops him!' },
+      { fx: 'quit', bub: 'I quit!', bx: 520, by: 210, tx: 520, ty: 330, cap: 'Achilles stops fighting. Without him, the Greeks start losing.' },
+    ] },
+  experiment: { say: 'Anger is a big feeling. Try different ways to handle it!', meters: ['Calm', 'Friends OK'], need: 3,
+    choices: [
+      { t: 'Yell louder', good: false, fx: 'shout', m: [5, 20], r: 'Both get angrier. Nobody listens.' },
+      { t: 'Take deep breaths', good: true, fx: 'breathe', m: [80, 70], r: 'Breathing slows the anger down.' },
+      { t: 'Talk to a friend', good: true, fx: 'friend', m: [70, 85], r: 'Patroclus could help him think it through.' },
+      { t: 'Sulk alone', good: false, fx: 'quit', m: [30, 15], r: 'Sulking lets the anger grow. Friends get hurt.' },
+    ] },
+  boss: { game: 'calm', name: 'Block the Anger!', how: 'Drag the shield. Block red angry bolts. Let the hearts through!', hands: [['dragv', 470, 300]] },
+  quiz: [
+    { q: 'What is the very first word of the Iliad?', o: ['Wrath (anger)', 'Horse', 'Home'], a: 0, why: 'The poem begins with the anger of Achilles.' },
+    { q: 'Who stopped Achilles from drawing his sword?', o: [{ t: 'Athena', art: (c, t) => { olympus(c, 600, t); athena(c, 400, 560, 1.4, t); } }, { t: 'Zeus', art: (c, t) => { olympus(c, 600, t); zeus(c, 400, 560, 1.4, t); } }, { t: 'Hector', art: (c, t) => { troy(c); hector(c, 400, 560, 1.4, t); } }], a: 0, why: 'The goddess Athena grabbed his hair from behind!' },
+    { q: 'Who got hurt by Achilles\' anger?', moral: true, o: ['Nobody', 'His own friends', 'Only Agamemnon'], a: 1, why: 'Without him, many of his own friends suffered.' },
+  ],
+  lesson: { moral: 'Anger can hurt the people you care about most.', today: 'Feeling mad? Count to ten before you speak.' },
+},
+// 2 ---------------------------------------------------------------
+{ id: 'olympus', name: 'Gods Take Sides', short: 'Olympus', at: [.26, .38], atP: [.72, .19], themes: ['gods', 'fate'], scene: S.olympus,
+  challenge: { say: 'Achilles\' mother is Thetis, a sea goddess. She can visit Zeus! What should she ask?',
+    options: [
+      { t: 'Help the Trojans win', good: null, fx: 'nod', r: 'For a while, so the Greeks see they need Achilles. Zeus nods!' },
+      { t: 'End the war now', good: false, fx: 'no', r: 'Zeus won\'t. Fate says the war goes on.' },
+      { t: 'Ask for nothing', good: false, fx: 'sea', r: 'Thetis wants to help her angry son.' },
+    ] },
+  discover: { say: 'Up on Mount Olympus, the gods argue too! Tap.',
+    panels: [
+      { fx: 'nod', theme: 'fate', bub: 'I will do it.', bx: 560, by: 230, tx: 520, ty: 340, cap: 'Zeus nods. All of Olympus shakes!' },
+      { fx: 'hera', theme: 'gods', bub: 'You promised WHAT?!', bx: 300, by: 220, tx: 300, ty: 340, cap: 'His wife Hera supports the Greeks. She is angry!' },
+      { fx: 'laugh', bub: 'Ha ha ha!', bx: 400, by: 120, cap: 'Hephaestus jokes and serves drinks. The gods laugh.' },
+      { fx: 'sides', theme: 'gods', bub: 'Go Greeks! / Go Troy!', bx: 400, by: 100, cap: 'Gods pick sides: Hera and Athena vs Apollo and Aphrodite.' },
+    ] },
+  experiment: { say: 'Gods can help or hurt. See what each one does!', meters: ['Greeks', 'Trojans'], need: 3,
+    choices: [
+      { t: 'Hera & Athena', good: null, fx: 'sides', m: [80, 30], r: 'They help the Greeks.' },
+      { t: 'Apollo & Aphrodite', good: null, fx: 'sides', m: [30, 80], r: 'They help the Trojans.' },
+      { t: 'Zeus', good: null, fx: 'nod', m: [40, 70], r: 'He keeps his promise to Thetis. For now, Troy wins.' },
+      { t: 'Gods stay out', good: true, fx: 'lesson', m: [50, 50], r: 'Humans would decide. Hmm, would that be fairer?' },
+    ] },
+  boss: { game: 'tug', name: 'Olympus Tug-of-War!', how: 'Tap when the ring shrinks onto the glowing circle. Pull for Thetis!', hands: [['tap', 400, 330]] },
+  quiz: [
+    { q: 'Who is Achilles\' mother?', o: [{ t: 'Thetis', art: (c, t) => { sky(c, '#90e0ef', '#e0fbfc'); drawSea(c, 380, t); thetis(c, 400, 560, 1.4, t); } }, { t: 'Hera', art: (c, t) => { olympus(c, 600, t); hera(c, 400, 560, 1.4, t); } }, { t: 'Penelope', art: (c, t) => { bigRect(c, '#fde2e4'); andromache(c, 400, 560, 1.4, t); } }], a: 0, why: 'Thetis, a sea goddess.' },
+    { q: 'What happened when Zeus nodded?', o: ['Olympus shook', 'It rained', 'Nothing'], a: 0, why: 'A nod from Zeus was the biggest promise of all.' },
+    { q: 'What did the gods\' meddling do?', moral: true, o: ['Ended the war', 'Made fights bigger', 'Helped everyone'], a: 1, why: 'Picking sides made the fighting worse.' },
+  ],
+  lesson: { moral: 'Taking sides in a fight can make it bigger.', today: 'Friends arguing? Help them talk, don\'t pick a team.' },
+},
+// 3 ---------------------------------------------------------------
+{ id: 'hector', name: "Hector's Goodbye", short: 'Hector', at: [.86, .34], atP: [.28, .31], themes: ['family', 'cost', 'kleos'], scene: S.hector,
+  challenge: { say: 'Hector, Troy\'s best fighter, visits his wife and baby. The baby cries at his big helmet!',
+    options: [
+      { t: 'Take off helmet', good: true, fx: 'laugh', r: 'Hector laughs and takes it off. The baby giggles!' },
+      { t: 'Shake the plume', good: false, fx: 'scared', r: 'WAAAH! Even scarier!' },
+      { t: 'Leave quickly', good: false, fx: 'leave', r: 'No goodbye? That would hurt them more.' },
+    ] },
+  discover: { say: 'One of the most tender moments in the Iliad. Tap!',
+    panels: [
+      { fx: 'wall', theme: 'family', bub: 'Please stay safe!', bx: 260, by: 200, tx: 260, ty: 340, cap: 'Andromache begs Hector to stay near the walls.' },
+      { fx: 'scared', bub: 'WAAAH!', bx: 500, by: 200, tx: 505, ty: 450, cap: 'Baby Astyanax is scared of the nodding horsehair plume.' },
+      { fx: 'laugh', bub: 'Ha ha! Just Daddy!', bx: 560, by: 200, tx: 520, ty: 340, cap: 'Hector laughs, puts his helmet down and hugs his son.' },
+      { fx: 'go', theme: 'cost', bub: 'I must defend Troy.', bx: 520, by: 200, tx: 520, ty: 340, cap: 'Duty calls. He must go back to the battle.', more: 'Hector prays his son will grow up even greater than him. He knows the war may cost him everything.' },
+    ] },
+  experiment: { say: 'Help Hector cheer up his baby! Try ideas.', meters: ['Baby happy', 'Family time'], need: 3,
+    choices: [
+      { t: 'Helmet off', good: true, fx: 'laugh', m: [90, 70], r: 'Now he\'s just Daddy!' },
+      { t: 'Tickle!', good: true, fx: 'tickle', m: [85, 80], r: 'Giggles all around!' },
+      { t: 'Bigger plume', good: false, fx: 'helmet', m: [5, 30], r: 'Scarier! Armor is not for hugs.' },
+      { t: 'Say a wish', good: true, fx: 'pray', m: [70, 90], r: '"May he be braver than me!"' },
+    ] },
+  boss: { game: 'baby', name: 'Make Baby Laugh!', how: 'Tap the helmet away. Shoo the noisy clouds. Tap baby to tickle!', hands: [['tap', 470, 200]] },
+  quiz: [
+    { q: 'Why did baby Astyanax cry?', o: [{ t: 'The helmet plume', art: (c, t) => { bigRect(c, '#ffe5ec'); hector(c, 400, 600, 1.6, t, { bigPlume: true }); } }, { t: 'He was hungry', art: (c, t) => { bigRect(c, '#fff3c4'); baby(c, 400, 280, 3, t); } }, { t: 'A dog barked', art: (c, t) => { bigRect(c, '#d8f3dc'); drawPup(c, 400, 260, 2, { t }); } }], a: 0, why: 'The big horsehair plume scared him!' },
+    { q: 'Who is Andromache?', o: ['Hector\'s wife', 'A goddess', 'A Greek queen'], a: 0, why: 'Hector\'s loving wife.' },
+    { q: 'What does this scene show about war?', moral: true, o: ['War is fun', 'War hurts families', 'Only soldiers matter'], a: 1, why: 'War hurts families on both sides.' },
+  ],
+  lesson: { moral: 'Make time for the people you love.', today: 'Tonight, give your family a hug and say goodnight.' },
+},
+// 4 ---------------------------------------------------------------
+{ id: 'embassy', name: 'The Peace Offer', short: 'Embassy', at: [.44, .74], atP: [.72, .43], themes: ['pride', 'kleos', 'fate'], scene: S.embassy,
+  challenge: { say: 'The Greeks are losing! Three friends bring Achilles a big apology gift. What will he say?',
+    options: [
+      { t: 'Yes, I\'ll help!', good: null, fx: 'listen', r: 'That would save many friends. But he says...' },
+      { t: 'NO!', good: false, fx: 'refuse', r: 'That\'s what he said. His pride is still too hurt.' },
+      { t: 'Listen first', good: true, fx: 'listen', r: 'Listening is a great first step!' },
+    ] },
+  discover: { say: 'Odysseus, big Ajax and old Phoenix visit Achilles\' tent. Tap!',
+    panels: [
+      { fx: 'gifts', bub: 'Gold, horses, and more!', bx: 260, by: 150, tx: 160, ty: 330, cap: 'Odysseus lists Agamemnon\'s huge gifts.' },
+      { fx: 'phoenix', theme: 'pride', bub: 'Don\'t let pride win!', bx: 360, by: 170, tx: 360, ty: 330, cap: 'Old Phoenix, who raised him, tells a story of pride gone wrong.' },
+      { fx: 'fates', theme: 'fate', bub: 'Two paths...', bx: 400, by: 520, cap: 'Achilles says he has two fates: long and quiet, or short and glorious.' },
+      { fx: 'refuse', theme: 'kleos', bub: 'NO!', bx: 560, by: 200, cap: 'He still says no. Ajax says: "You\'re ignoring your friends!"' },
+    ] },
+  experiment: { say: 'What could change Achilles\' mind? Try!', meters: ['Pride', 'Friendship'], need: 3,
+    choices: [
+      { t: 'More gold', good: false, fx: 'gold', m: [90, 20], r: 'Gifts can\'t fix hurt feelings.' },
+      { t: 'A real "sorry"', good: true, fx: 'listen', m: [40, 80], r: 'Agamemnon never says sorry himself. That might help!' },
+      { t: 'Remind him of friends', good: true, fx: 'listen', m: [50, 85], r: 'Ajax\'s words hit home. He promises to stay... for now.' },
+      { t: 'Call him names', good: false, fx: 'refuse', m: [100, 0], r: 'Even more stubborn!' },
+    ] },
+  boss: { game: 'lyre', name: "Achilles' Lyre!", how: 'Watch the strings light up. Then play them back in order!', hands: [['tap', 330, 330]] },
+  quiz: [
+    { q: 'Who visited Achilles\' tent?', o: ['Odysseus, Ajax, Phoenix', 'Hector and Priam', 'Zeus and Hera'], a: 0, why: 'Three friends sent by Agamemnon.' },
+    { q: 'What was Achilles doing when they came?', o: [{ t: 'Playing a lyre', art: (c, t) => { bigRect(c, '#fff3b0'); lyre(c, 400, 260, 4); } }, { t: 'Sleeping', art: (c, t) => { bigRect(c, '#1d3557'); for (let i = 0; i < 5; i++) drawStar(c, 200 + i * 100, 200, 20, '#fffaf0'); } }, { t: 'Fighting', art: (c, t) => { dust(c, 400, 260, 2, t); } }], a: 0, why: 'Singing songs of heroes\' glory!' },
+    { q: 'Why couldn\'t gifts fix things?', moral: true, o: ['Not enough gold', 'Hurt feelings need a real sorry', 'He hated horses'], a: 1, why: 'Feelings need kindness, not stuff.' },
+  ],
+  lesson: { moral: 'Pride can make you push away the friends who need you.', today: 'Someone says sorry? Try to forgive and play again.' },
+},
+// 5 ---------------------------------------------------------------
+{ id: 'patroclus', name: 'Patroclus Borrows Armor', short: 'Patroclus', at: [.56, .44], atP: [.28, .55], themes: ['friendship', 'cost', 'fate'], scene: S.patroclus,
+  challenge: { say: 'Trojans are setting the Greek ships on fire! Patroclus asks: "Can I wear your armor?"',
+    options: [
+      { t: 'Yes, but come back', good: true, fx: 'armor', r: 'Achilles agrees: "Save the ships, then come right back!"' },
+      { t: 'No, stay here', good: false, fx: 'stay', r: 'The ships would burn. Everyone needs help!' },
+      { t: 'Go, beat Troy!', good: false, fx: 'toofar', r: 'Too risky! Achilles warns him not to go too far.' },
+    ] },
+  discover: { say: 'This is the saddest part. Tap gently.',
+    panels: [
+      { fx: 'armor', theme: 'friendship', bub: 'Achilles is back?!', bx: 400, by: 120, cap: 'In shining armor, Patroclus looks like Achilles. The Trojans run!' },
+      { fx: 'stop', bub: 'Come back after!', bx: 400, by: 120, cap: 'The ships are saved! Achilles said: "Then come back."' },
+      { fx: 'toofar', theme: 'fate', bub: 'Too far!', bx: 400, by: 100, cap: 'But Patroclus chases all the way to Troy\'s walls.', more: 'The god Apollo stops him. Then Hector defeats him in battle.' },
+      { fx: 'grief', theme: 'cost', bub: 'My best friend...', bx: 400, by: 120, cap: 'Patroclus falls in battle. Achilles\' grief is huge.' },
+    ] },
+  experiment: { say: 'Plans need limits! See what happens.', meters: ['Ships safe', 'Friends safe'], need: 2,
+    choices: [
+      { t: 'Stop at the ships', good: true, fx: 'stop', m: [90, 90], r: 'Mission done. Everyone comes home!' },
+      { t: 'Chase to the walls', good: false, fx: 'toofar', m: [80, 0], r: 'Excitement pushed him too far.' },
+      { t: 'Don\'t go at all', good: false, fx: 'fire', m: [0, 60], r: 'The ships burn. Doing nothing has a cost too.' },
+    ] },
+  boss: { game: 'drive', name: 'Know When to Stop!', how: 'Hold GO to chase Trojans from the ships. Let go before the red STOP line!', hands: [['hold', 120, 440]] },
+  quiz: [
+    { q: 'Whose armor did Patroclus wear?', o: [{ t: 'Achilles\'', art: (c, t) => { bigRect(c, '#d8f3dc'); achilles(c, 400, 560, 1.5, t); } }, { t: 'Hector\'s', art: (c, t) => { bigRect(c, '#e0c3fc'); hector(c, 400, 560, 1.5, t); } }, { t: 'Zeus\'', art: (c, t) => { olympus(c, 600, t); zeus(c, 400, 560, 1.4, t); } }], a: 0, why: 'He wore Achilles\' armor so Trojans thought Achilles was back.' },
+    { q: 'What did Achilles tell him?', o: ['Save the ships, come back', 'Capture Troy', 'Find Hector'], a: 0, why: '"Then come right back!"' },
+    { q: 'What can we learn here?', moral: true, o: ['Never help friends', 'Know when to stop', 'Armor makes you safe'], a: 1, why: 'Getting carried away can turn a win into a loss.' },
+  ],
+  lesson: { moral: 'Know when to stop, even when you\'re winning.', today: 'Playground game getting too wild? Stop and check on friends.' },
+},
+// 6 ---------------------------------------------------------------
+{ id: 'shield', name: 'The Shield of Achilles', short: 'Shield', at: [.3, .1], atP: [.72, .67], themes: ['cost', 'kleos', 'friendship'], scene: S.shield,
+  challenge: { say: 'Achilles lost his armor. Thetis asks Hephaestus, god of the forge, to make a new shield. What goes on it?',
+    options: [
+      { t: 'Only battles', good: false, fx: 'battle', r: 'Hephaestus puts in much more than war!' },
+      { t: 'The whole world', good: true, fx: 'done', r: 'Yes! Sky, cities, farms, dancing, all life!' },
+      { t: 'Nothing', good: false, fx: 'plain', r: 'A plain shield? Not from a god!' },
+    ] },
+  discover: { say: 'Homer describes the shield in amazing detail. Tap!',
+    panels: [
+      { fx: 'sky', bub: 'Sun, moon, stars!', bx: 400, by: 80, cap: 'In the middle: earth, sea, sky, sun, moon and stars.' },
+      { fx: 'peace', theme: 'friendship', bub: 'A wedding!', bx: 400, by: 80, cap: 'A city at peace: weddings, music and dancing.' },
+      { fx: 'war', theme: 'cost', bub: 'A city at war.', bx: 400, by: 80, cap: 'A city at war, under siege. Very different!' },
+      { fx: 'fields', bub: 'Harvest time!', bx: 500, by: 120, cap: 'Fields, harvests and vineyards. The great Ocean runs around the edge.' },
+    ] },
+  experiment: { say: 'Peace or war? Compare the two cities!', meters: ['Happy', 'Safe'], need: 2,
+    choices: [
+      { t: 'City at peace', good: true, fx: 'peace', m: [95, 90], r: 'Weddings, dancing, people solving problems by talking.' },
+      { t: 'City at war', good: false, fx: 'war', m: [15, 10], r: 'Fear and loss for everyone inside.' },
+      { t: 'Fields', good: true, fx: 'fields', m: [80, 85], r: 'Ordinary work: life goes on.' },
+    ] },
+  boss: { game: 'shield', name: 'Design the Shield!', how: 'Tap a picture, then tap the right ring. Fill every ring!', hands: [['tap', 140, 330]] },
+  quiz: [
+    { q: 'Who forged the shield?', o: [{ t: 'Hephaestus', art: (c, t) => { forge(c, 600, t); hephaestus(c, 380, 560, 1.3, t); } }, { t: 'Apollo', art: (c, t) => { sky(c); apollo(c, 400, 560, 1.4, t); } }, { t: 'Hermes', art: (c, t) => { sky(c); hermes(c, 400, 560, 1.4, t); } }], a: 0, why: 'Hephaestus, god of fire and the forge.' },
+    { q: 'What is shown on the shield?', o: ['Only battles', 'Peace AND war', 'Only Achilles'], a: 1, why: 'Both cities, farms, dances, the whole world!' },
+    { q: 'Why might Homer show peace on a war shield?', moral: true, o: ['To remind us what war destroys', 'He forgot', 'Peace is boring'], a: 0, why: 'Even in war, we remember what\'s worth protecting.' },
+  ],
+  lesson: { moral: 'Remember what matters: peace, friends and everyday life.', today: 'Draw a picture of a happy day with your family.' },
+},
+// 7 ---------------------------------------------------------------
+{ id: 'fate', name: 'Achilles and Hector', short: 'Hector & Achilles', at: [.7, .7], atP: [.28, .79], themes: ['fate', 'kleos', 'wrath'], scene: S.fate,
+  challenge: { say: 'Achilles returns to battle, full of grief and anger. Hector\'s parents beg him to come inside the walls.',
+    options: [
+      { t: 'Hide inside', good: null, fx: 'walls', r: 'His family wants that! But he feels shame for earlier mistakes.' },
+      { t: 'Face Achilles', good: null, fx: 'duel', r: 'He chooses to stand and face him. Brave, and tragic.' },
+      { t: 'Ask for peace', good: true, fx: 'walls', r: 'He thinks about it! But he fears Achilles won\'t listen.' },
+    ] },
+  discover: { say: 'The big moment. Battles stay off-screen. Tap gently.',
+    panels: [
+      { fx: 'return', theme: 'wrath', bub: 'For Patroclus!', bx: 520, by: 160, cap: 'Achilles makes up with Agamemnon. Now his anger points at Hector.' },
+      { fx: 'scales', theme: 'fate', bub: 'Fate decides...', bx: 400, by: 80, cap: 'Zeus weighs their fates on golden scales. Hector\'s side sinks.' },
+      { fx: 'duel', theme: 'kleos', bub: 'CLANG!', bx: 400, by: 120, cap: 'They meet. Hector falls. Achilles wins great glory.', more: 'Achilles then treats Hector\'s body cruelly. Even the gods disapprove. His anger has gone too far.' },
+      { fx: 'mourn', theme: 'cost', bub: 'Our Hector...', bx: 400, by: 120, cap: 'All of Troy cries for Hector, their protector.' },
+    ] },
+  experiment: { say: 'Funeral games honor Patroclus. Play fair or foul?', meters: ['Fair play', 'Friends'], need: 3,
+    choices: [
+      { t: 'Cut someone off', good: false, fx: 'foul', m: [10, 20], r: 'A young driver did that. People got angry!' },
+      { t: 'Say sorry after', good: true, fx: 'sorry', m: [80, 90], r: 'He apologized, and was forgiven. Nice!' },
+      { t: 'Stay mad', good: false, fx: 'mad', m: [40, 20], r: 'Grudges spoil the games.' },
+      { t: 'Prize for the unlucky', good: true, fx: 'prize', m: [90, 95], r: 'Achilles gives a prize to the one who crashed. Kind!' },
+    ] },
+  boss: { game: 'race', name: 'Chariot Race!', how: 'Drag up and down. Dodge rocks. Don\'t bump other chariots!', hands: [['dragv', 200, 300]] },
+  quiz: [
+    { q: 'What did Zeus use to weigh fate?', o: [{ t: 'Golden scales', art: (c, t) => { olympus(c, 600, t); scales(c, 400, 160, 1.4, .2, t); } }, { t: 'A dice', art: (c, t) => { bigRect(c, '#fff'); RR(c, 300, 180, 200, 200, 30); fs(c, '#fff', 6); for (const [x, y] of [[350, 230], [450, 330], [400, 280]]) { E(c, x, y, 18, 18); c.fillStyle = INK; c.fill(); } } }, { t: 'A coin', art: (c, t) => { bigRect(c, '#fff3b0'); E(c, 400, 280, 120, 120); fs(c, COL.yellow, 6); } }], a: 0, why: 'Golden scales. Hector\'s side sank.' },
+    { q: 'What does "kleos" mean?', o: ['Glory that lives on', 'A sword', 'A horse'], a: 0, why: 'Fame people sing about long after.' },
+    { q: 'Achilles won, but his anger went too far. What does that teach?', moral: true, o: ['Winning fixes everything', 'Winning doesn\'t heal anger', 'Anger is always good'], a: 1, why: 'Revenge didn\'t take his sadness away.' },
+  ],
+  lesson: { moral: 'Getting even doesn\'t heal a broken heart.', today: 'Someone hurt you? Talk to a grown-up instead of getting back at them.' },
+},
+// 8 ---------------------------------------------------------------
+{ id: 'priam', name: 'Priam and Achilles', short: 'Priam', at: [.88, .78], atP: [.72, .93], themes: ['mercy', 'friendship', 'cost'], scene: S.priam,
+  challenge: { say: 'Old King Priam wants his son Hector back, to give him a proper funeral. What should he do?',
+    options: [
+      { t: 'Send the army', good: false, fx: 'army', r: 'More fighting, more sadness.' },
+      { t: 'Ask Achilles kindly', good: true, fx: 'night', r: 'So brave! With Hermes\' help, he sneaks into the camp at night.' },
+      { t: 'Shout at Achilles', good: false, fx: 'shout', r: 'Anger meets anger. That won\'t work.' },
+    ] },
+  discover: { say: 'The ending of the Iliad. Tap!',
+    panels: [
+      { fx: 'night', theme: 'mercy', bub: 'Follow me!', bx: 470, by: 300, tx: 470, ty: 400, cap: 'Hermes guides Priam past the sleeping guards.' },
+      { fx: 'plead', bub: 'Remember your father.', bx: 400, by: 100, cap: 'Priam kneels and kisses Achilles\' hands.' },
+      { fx: 'weep', theme: 'friendship', bub: 'We both lost someone.', bx: 400, by: 100, cap: 'They cry together: Priam for his son, Achilles for his father and friend.' },
+      { fx: 'funeral', theme: 'cost', bub: 'Goodbye, Hector.', bx: 400, by: 100, cap: 'Achilles gives Hector back. Troy holds his funeral. The poem ends.', more: 'Achilles gives 11 days of peace for the funeral. The Trojan Horse is NOT in the Iliad! The poem ends before Troy falls.' },
+    ] },
+  experiment: { say: 'Enemies sharing kindness? Try each choice!', meters: ['Kindness', 'Peace'], need: 3,
+    choices: [
+      { t: 'Give Hector back', good: true, fx: 'give', m: [90, 80], r: 'Mercy! Achilles finally lets go of his anger.' },
+      { t: 'Share a meal', good: true, fx: 'meal', m: [95, 90], r: 'Enemies eat together and admire each other.' },
+      { t: 'Keep him', good: false, fx: 'keep', m: [5, 5], r: 'Anger wins again. No peace for anyone.' },
+      { t: 'A truce', good: true, fx: 'truce', m: [85, 100], r: '11 days of peace for the funeral.' },
+    ] },
+  boss: { game: 'night', name: 'Through the Night!', how: 'Drag Priam\'s cart. Stay in Hermes\' glowing light!', hands: [['drag', 400, 380]] },
+  quiz: [
+    { q: 'Who guided Priam at night?', o: [{ t: 'Hermes', art: (c, t) => { sky(c, '#1d1b4a', '#3d3b8a'); hermes(c, 400, 560, 1.4, t); } }, { t: 'Ares', art: (c, t) => { sky(c, '#9b2226', '#ff8fab'); drawPerson(c, 400, 560, 1.4, { t, tunic: '#9b2226', hat: 'plume', armor: '#adb5bd', mood: 'angry' }); } }, { t: 'Patroclus', art: (c, t) => { bigRect(c, '#d8f3dc'); patroclus(c, 400, 560, 1.4, t); } }], a: 0, why: 'Hermes, the guide god.' },
+    { q: 'Is the Trojan Horse in the Iliad?', o: ['Yes', 'No, the Iliad ends first'], a: 1, why: 'The Iliad ends with Hector\'s funeral. The horse story comes later, in the Odyssey and other poems.' },
+    { q: 'What did Achilles and Priam share?', moral: true, o: ['A fight', 'Tears and kindness', 'A race'], a: 1, why: 'Even enemies can share sadness and kindness.' },
+  ],
+  lesson: { moral: 'Even rivals can share kindness.', today: 'Lost a game? Shake hands with the other team.' },
+},
+];
+
+// ---------------- Iliad boss mini-games ----------------
+const GAMES = {
+  // 1. block anger bolts with the shield, let hearts through
+  calm: () => ({ time: 35, hand: ['dragv', 470, 260],
+    init(g) { g.y = g.VH / 2; g.items = []; g.sp = 0; g.calm = .5; },
+    timeout(g) { g.calm >= .5 ? g.win('Achilles cooled down. His friends are safe!') : g.lose('Still too angry. Block the red bolts!'); },
+    move(g, x, y) { if (g.down) g.y = clamp(y, 80, g.VH - 60); }, down(g, x, y) { g.y = clamp(y, 80, g.VH - 60); },
+    update(g, dt) {
+      if (g.keys.up) g.y -= 400 * dt; if (g.keys.down) g.y += 400 * dt; g.y = clamp(g.y, 80, g.VH - 60);
+      g.sp -= dt; if (g.sp <= 0) { g.items.push({ x: 820, y: rand(90, g.VH - 70), k: Math.random() < .62 ? 'bolt' : 'heart', v: rand(220, 320) + g.t * 4 }); g.sp = rand(.5, .85); }
+      for (const it of g.items) { it.x -= it.v * dt;
+        if (!it.gone && it.x < 490 && it.x > 440 && Math.abs(it.y - g.y) < 70) { it.gone = true; if (it.k === 'bolt') { g.calm = Math.min(1, g.calm + .06); Snd.tap(); mgPop(g, 470, it.y - 40, 'BLOCK!', COL.green); } else { g.calm -= .1; Snd.bad(); mgPop(g, 470, it.y - 40, 'Oops!', '#ff8fa3'); } }
+        if (!it.gone && it.x < 200) { it.gone = true; if (it.k === 'bolt') { g.calm -= .12; Snd.bad(); mgPop(g, 160, g.VH * .4, 'GRR!', COL.accent); } else { g.calm = Math.min(1, g.calm + .08); Snd.good(); mgPop(g, 160, g.VH * .4, '♥', '#ffafcc'); } } }
+      g.items = g.items.filter(i => !i.gone);
+      if (g.calm <= 0) g.lose('Anger took over! Try again: block red bolts, let hearts reach him.');
+      if (g.calm >= 1) g.win('Totally calm! Friends first, anger second.');
+      g.info(g.meter('Calm', g.calm, COL.blue));
+    },
+    draw(g, c, W, H) {
+      const t = g.t; camp(c, H, t);
+      achilles(c, 130, H * .82, 1, t, { noArmor: true, mood: g.calm > .6 ? 'happy' : g.calm > .3 ? 'surprised' : 'angry' });
+      for (const it of g.items) it.k === 'bolt' ? (c.save(), c.translate(it.x, it.y), c.rotate(1.2), drawBolt(c, 0, 0, 1.2), c.restore(), E(c, it.x, it.y, 34, 34), c.strokeStyle = 'rgba(255,77,109,.6)', c.lineWidth = 5, c.stroke()) : drawHeart(c, it.x, it.y, 2.4, '#ff8fab');
+      c.save(); c.translate(470, g.y); E(c, 0, 0, 36, 70); fs(c, GOLD, 5); E(c, 0, 0, 12, 24); fs(c, COL.accent, 3); c.restore();
+      athena(c, 680, H * .82, .8, t, { arms: 'out' });
+      mgDrawPops(g, c);
+    } }),
+
+  // 2. tug-of-war: timed taps
+  tug: () => ({ time: 40, hand: ['tap', 400, 330],
+    init(g) { g.rope = 0; g.ring = 1; },
+    timeout(g) { g.rope > 0 ? g.win('Thetis wins the tug! Zeus keeps his promise.') : g.lose('Hera pulled harder this time. Try again!'); },
+    press(g, k) { if (k === 'act') this.tap(g); }, down(g) { this.tap(g); },
+    tap(g) { const d = Math.abs(g.ring - .35); if (d < .08) { g.rope += .14; Snd.good(); mgPop(g, 400, g.VH * .3, 'PULL!', COL.green); } else { g.rope -= .05; Snd.bad(); mgPop(g, 400, g.VH * .3, 'Slip!', '#ff8fa3'); } g.ring = 1; },
+    update(g, dt) {
+      g.ring -= dt * (.55 + g.t * .006); if (g.ring < .15) { g.ring = 1; g.rope -= .06; }
+      g.rope -= dt * .035; g.rope = clamp(g.rope, -1, 1);
+      if (g.rope >= 1) g.win('Thetis wins the tug-of-war! Zeus keeps his promise.');
+      if (g.rope <= -1) g.lose('Hera wins this round! Tap when the ring hits the glowing circle.');
+      g.info(g.meter('Pull for Thetis', (g.rope + 1) / 2, COL.blue));
+    },
+    draw(g, c, W, H) {
+      const t = g.t; olympus(c, H, t);
+      const ox = g.rope * 180, ry = H * .66;
+      L(c, 60, ry, 740, ry, 10, '#c08552'); E(c, 400 + ox, ry, 14, 14); fs(c, COL.accent);
+      L(c, 400, ry - 60, 400, ry + 60, 4, COL.yellow);
+      hera(c, 120 + ox, H * .86, .9, t, { arms: 'out', mood: g.rope > .3 ? 'surprised' : 'angry' }); athena(c, 210 + ox, H * .86, .8, t, { arms: 'out' });
+      thetis(c, 680 + ox, H * .86, .9, t, { arms: 'out', flip: true, mood: g.rope > 0 ? 'happy' : 'surprised' });
+      zeus(c, 400, H * .45, .7, t);
+      const cx = 400, cy = H * .22; E(c, cx, cy, 120 * .35, 120 * .35); c.fillStyle = 'rgba(6,214,160,.45)'; c.fill(); c.lineWidth = 4; c.strokeStyle = INK; c.stroke();
+      E(c, cx, cy, 120 * g.ring, 120 * g.ring); c.lineWidth = 7; c.strokeStyle = Math.abs(g.ring - .35) < .08 ? COL.green : COL.yellow; c.stroke();
+      mgDrawPops(g, c);
+    } }),
+
+  // 3. make baby laugh
+  baby: () => ({ time: 40, hand: ['tap', 470, 230],
+    init(g) { g.joy = .3; g.helm = 1; g.clouds = []; g.sp = 2; },
+    timeout(g) { g.joy >= .6 ? g.win('Giggles! A happy family moment.') : g.lose('Baby is still fussy. Try again!'); },
+    down(g, x, y) {
+      const H = g.VH;
+      if (g.helm > 0 && Math.hypot(x - 470, y - H * .3) < 90) { g.helm = 0; Snd.good(); mgPop(g, 470, H * .3, 'OFF!', COL.green); g.joy += .1; return; }
+      for (const cl of g.clouds) if (!cl.gone && Math.hypot(x - cl.x, y - cl.y) < 70) { cl.gone = true; Snd.tap(); mgPop(g, cl.x, cl.y, 'SHOO!', COL.blue); return; }
+      if (Math.hypot(x - 380, y - H * .55) < 90) { if (g.helm > 0) { g.joy -= .05; Snd.bad(); mgPop(g, 380, H * .45, 'WAAH!', COL.accent); } else { g.joy += .07; Snd.tone(900, .08, 'triangle', .05); mgPop(g, 380, H * .45, 'HEE!', COL.yellow); } }
+    },
+    update(g, dt) {
+      g.helm = g.helm > 0 ? 1 : (g.t % 9 > 8.6 ? 1 : 0);
+      if (g.helm > 0) g.joy -= dt * .05;
+      g.sp -= dt; if (g.sp <= 0) { g.clouds.push({ x: rand(80, 720), y: -40, v: rand(50, 90) }); g.sp = rand(1.6, 2.6); }
+      for (const cl of g.clouds) { cl.y += cl.v * dt; if (!cl.gone && cl.y > g.VH * .5) { cl.gone = true; g.joy -= .12; Snd.bad(); mgPop(g, cl.x, cl.y, 'BOOM!', '#adb5bd'); } }
+      g.clouds = g.clouds.filter(c => !c.gone);
+      g.joy = clamp(g.joy, 0, 1);
+      if (g.joy >= 1) g.win('Big belly laughs! Hector hugs his son.');
+      g.info(g.meter('Baby giggles', g.joy, COL.yellow));
+    },
+    draw(g, c, W, H) {
+      const t = g.t; troy(c, H);
+      andromache(c, 200, H * .92, 1, t, { mood: g.joy > .5 ? 'happy' : 'sad' });
+      hector(c, 470, H * .92, 1.05, t, { hat: g.helm > 0 ? 'plume' : null, bigPlume: true, flip: true, arms: 'hold' });
+      if (g.helm > 0) { E(c, 470, H * .3, 90, 90); c.lineWidth = 4; c.setLineDash([10, 8]); c.strokeStyle = '#fff'; c.stroke(); c.setLineDash([]); }
+      baby(c, 380, H * .55, 1.8, t, { mood: g.helm > 0 || g.joy < .25 ? 'scared' : 'happy' });
+      for (const cl of g.clouds) { drawCloud(c, cl.x, cl.y, 1.2, '#adb5bd'); drawBolt(c, cl.x, cl.y + 40, .6); }
+      mgDrawPops(g, c);
+    } }),
+
+  // 4. lyre memory (Simon)
+  lyre: () => ({ time: 75, hand: g => g.ph === 'you' ? ['tap', 220, g.VH * .55] : ['tap', -200, -200],
+    init(g) { g.seq = [(Math.random() * 4) | 0]; g.ph = 'show'; g.k = 0; g.i = 0; g.lit = -1; g.round = 1; },
+    timeout(g) { g.round >= 4 ? g.win('Beautiful music!') : g.lose('Time\'s up! Try again.'); },
+    sx(i) { return 220 + i * 120; },
+    down(g, x, y) {
+      if (g.ph !== 'you') return;
+      for (let i = 0; i < 4; i++) if (Math.abs(x - this.sx(i)) < 55 && y > g.VH * .3 && y < g.VH * .85) {
+        g.lit = i; g.litT = .3; Snd.tone([392, 494, 587, 698][i], .3, 'triangle', .08);
+        if (g.seq[g.i] !== i) { Snd.bad(); mgPop(g, 400, g.VH * .2, 'Oops!', '#ff8fa3'); g.miss = (g.miss || 0) + 1; if (g.miss >= 3) { g.lose('The song got mixed up. Listen carefully and try again!'); return; } g.ph = 'show'; g.k = -.6; g.i = 0; return; }
+        g.i++; if (g.i >= g.seq.length) { mgPop(g, 400, g.VH * .2, 'LOVELY!', COL.green); Snd.good(); g.round++; if (g.round > 4) { g.win('A perfect song! Achilles plays of heroes\' glory.'); return; } g.seq.push((Math.random() * 4) | 0); g.ph = 'show'; g.k = -.8; g.i = 0; }
+      }
+    },
+    update(g, dt) {
+      g.litT = (g.litT || 0) - dt; if (g.ph !== 'show' && g.litT <= 0) g.lit = -1;
+      if (g.ph === 'show') { g.k += dt; const step = Math.floor(g.k / .65); if (g.k >= 0) { if (step < g.seq.length) { const n = g.seq[step]; if (g.lit !== n || g.lastStep !== step) { g.lit = n; g.lastStep = step; Snd.tone([392, 494, 587, 698][n], .3, 'triangle', .08); } if (g.k % .65 > .45) g.lit = -1; } else { g.ph = 'you'; g.lit = -1; g.lastStep = -1; } } }
+      g.info(g.meter(`Song ${Math.min(4, g.round)} of 4`, (g.round - 1) / 4, COL.purple) + (g.ph === 'you' ? '<div class="mgmeter">Your turn!</div>' : '<div class="mgmeter">Listen...</div>'));
+    },
+    draw(g, c, W, H) {
+      const t = g.t; camp(c, H, t); c.fillStyle = 'rgba(30,20,60,.35)'; c.fillRect(0, 0, 800, H);
+      RR(c, 150, H * .28, 500, H * .6, 40); fs(c, '#c08552', 5);
+      for (let i = 0; i < 4; i++) { const x = this.sx(i), on = g.lit === i; L(c, x, H * .32, x, H * .84, on ? 16 : 8, INK); L(c, x, H * .32, x, H * .84, on ? 10 : 4, on ? [COL.accent, COL.yellow, COL.green, COL.blue][i] : '#f1e3c8'); E(c, x, H * .9, 26, 26); fs(c, [COL.accent, COL.yellow, COL.green, COL.blue][i], 3); if (on) note(c, x + 30, H * .28 - 20, 1.5, [COL.accent, COL.yellow, COL.green, COL.blue][i]); }
+      achilles(c, 80, H * .95, .8, t, { noArmor: true, mood: 'happy' });
+      mgDrawPops(g, c);
+    } }),
+
+  // 5. drive, stop before the line
+  drive: () => ({ time: 40, ctl: [{ key: 'act', label: 'GO ▶', cls: 'go' }], hand: ['hold', 110, 420],
+    init(g) { g.x = 0; g.v = 0; g.saved = 0; g.chased = 0; },
+    timeout(g) { g.saved >= .9 && g.x < 1 ? g.win('Ships saved, and back in time!') : g.lose('Not quite! Chase them from the ships, then stop before the line.'); },
+    update(g, dt) {
+      const go = g.keys.act || g.down;
+      g.v = go ? Math.min(1, g.v + dt * 1.2) : Math.max(0, g.v - dt * 1.6);
+      g.x += g.v * dt * .14;
+      g.saved = clamp(g.x / .65, 0, 1);
+      if (g.x >= 1) { g.lose('Too far! Patroclus chased past the STOP line, all the way to Troy.'); return; }
+      if (g.saved >= 1 && g.v === 0 && !go) { g.win('Ships saved, and you stopped in time. Everyone comes home!'); return; }
+      g.info(g.meter('Ships saved', g.saved, COL.green) + g.meter('Danger', clamp((g.x - .65) / .35, 0, 1), COL.accent));
+    },
+    draw(g, c, W, H) {
+      const t = g.t, gy = H * .78; sky(c, '#ffd6a5', '#fff1d0');
+      c.fillStyle = '#e9c46a'; c.fillRect(0, gy - 40, 800, H);
+      const cam = g.x * 1400;
+      c.save(); c.translate(-cam, 0);
+      for (let i = 0; i < 3; i++) { drawShip(c, 40 + i * 140, gy - 50, .45, { t, crew: 0, sail: false, oars: false }); if (g.saved < 1) drawFlame(c, 60 + i * 140, gy - 110, 1, t + i); }
+      trojanWalls(c, 1700, gy - 40, 600, 260);
+      c.fillStyle = 'rgba(255,77,109,.18)'; c.fillRect(1310, 0, 900, H);
+      L(c, 1310, gy - 260, 1310, gy + 40, 10, COL.accent); txt(c, 'STOP', 1310, gy - 290, 34, COL.accent);
+      L(c, 910, gy - 200, 910, gy + 40, 6, COL.green); txt(c, 'SHIPS SAFE', 910, gy - 220, 24, COL.green);
+      for (let i = 0; i < 5; i++) { const ex = 520 + i * 170 + Math.max(0, cam + 360 - (520 + i * 170)) * .9; drawPerson(c, ex, gy + 10, .55, { t: t * 2, ph: i, tunic: TRO[i % 4], hat: 'plume', crest: COL.orange, mood: 'surprised' }); }
+      c.restore();
+      chariot(c, 300, gy + 20, 1, t * (.3 + g.v), { rider: (c2, x, y, s, t2) => achilles(c2, x, y + 40, s, t2, { tunic: '#06d6a0' }) });
+      mgDrawPops(g, c);
+    } }),
+
+  // 6. shield design: tap picture then ring
+  shield: () => ({ time: 75, hand: g => g.sel == null ? ['tap', 110, g.VH * .3] : ['tap', 520, g.VH * .52],
+    init(g) { g.rings = [false, false, false, false]; g.sel = null; g.miss = 0; },
+    timeout(g) { g.rings.filter(Boolean).length >= 3 ? g.win('A wonderful shield!') : g.lose('The shield isn\'t finished. Try again!'); },
+    parts: [{ n: 'Sun & stars', ring: 0 }, { n: 'Peace city', ring: 1 }, { n: 'Fields', ring: 2 }, { n: 'Ocean', ring: 3 }],
+    ringR: [50, 100, 150, 195],
+    down(g, x, y) {
+      const H = g.VH;
+      for (let i = 0; i < 4; i++) { const by = H * .14 + i * H * .2; if (x < 230 && y > by && y < by + H * .17) { if (!g.rings[i]) { g.sel = i; Snd.tap(); } return; } }
+      if (g.sel == null) return;
+      const d = Math.hypot(x - 520, y - H * .52); let ring = -1; for (let k = 0; k < 4; k++) if (d < this.ringR[k] + 6) { ring = k; break; }
+      if (ring < 0) return;
+      if (ring === this.parts[g.sel].ring) { g.rings[g.sel] = true; Snd.good(); mgPop(g, x, y - 40, 'PERFECT!', COL.green); g.sel = null; if (g.rings.every(Boolean)) g.win('The Shield of Achilles: the whole world in gold!'); }
+      else { g.miss++; Snd.bad(); mgPop(g, x, y - 40, 'Other ring!', '#ff8fa3'); }
+    },
+    update(g) { g.info(g.meter(`Rings ${g.rings.filter(Boolean).length}/4`, g.rings.filter(Boolean).length / 4, GOLD)); },
+    draw(g, c, W, H) {
+      const t = g.t; forge(c, H, t);
+      const cx = 520, cy = H * .52;
+      E(c, cx, cy, 200, 200); fs(c, GOLD, 6);
+      for (let k = 3; k >= 0; k--) { E(c, cx, cy, this.ringR[k], this.ringR[k]); c.fillStyle = g.rings[k] ? ['#1d3557', '#ffe5ec', '#d8f3dc', '#90e0ef'][k] : (g.sel != null && this.parts[g.sel].ring === k && Math.sin(t * 8) > 0 ? 'rgba(255,210,63,.35)' : GOLD); c.fill(); c.lineWidth = 3; c.strokeStyle = INK; c.stroke(); }
+      if (g.rings[3]) for (let i = 0; i < 24; i++) { const a = i / 24 * TAU + t * .3; c.beginPath(); c.arc(cx + Math.cos(a) * 172, cy + Math.sin(a) * 172, 10, a, a + Math.PI); c.lineWidth = 4; c.strokeStyle = '#0b4f7a'; c.stroke(); }
+      if (g.rings[2]) for (let i = 0; i < 12; i++) { const a = i / 12 * TAU; c.save(); c.translate(cx + Math.cos(a) * 125, cy + Math.sin(a) * 125); c.rotate(a); L(c, 0, -10, 0, 10, 4, '#d4a017'); E(c, 0, -12, 4, 8); fs(c, COL.yellow, 2); c.restore(); }
+      if (g.rings[1]) for (let i = 0; i < 8; i++) { const a = i / 8 * TAU + t * .5; c.save(); c.translate(cx + Math.cos(a) * 76, cy + Math.sin(a) * 76); E(c, 0, -10, 6, 6); fs(c, '#f2c49b', 2); L(c, 0, -4, 0, 10, 4, GRK[i % 4]); c.restore(); }
+      if (g.rings[0]) { drawSun(c, cx - 14, cy - 6, 14, t); E(c, cx + 20, cy + 12, 8, 8); fs(c, '#fffaf0', 2); drawStar(c, cx + 18, cy - 24, 6); drawStar(c, cx - 22, cy + 24, 6); }
+      this.parts.forEach((p, i) => { const by = H * .14 + i * H * .2; RR(c, 20, by, 210, H * .17, 16); fs(c, g.rings[i] ? '#c7f9e5' : g.sel === i ? COL.yellow : '#fff', 4);
+        c.save(); c.translate(75, by + H * .085); if (i === 0) drawSun(c, 0, 0, 18, t); else if (i === 1) { for (let k = 0; k < 3; k++) { E(c, -20 + k * 20, -10, 7, 7); fs(c, '#f2c49b', 2); L(c, -20 + k * 20, -3, -20 + k * 20, 14, 5, GRK[k]); } } else if (i === 2) { for (let k = 0; k < 4; k++) { L(c, -18 + k * 12, 18, -18 + k * 12, -6, 4, '#d4a017'); E(c, -18 + k * 12, -10, 4, 9); fs(c, COL.yellow, 2); } } else { waves(c, 0, -30, 30, t, '#0b4f7a', 5, 20, 4); waves(c, 12, -30, 30, t + 1, '#0b4f7a', 5, 20, 4); } c.restore();
+        txt(c, p.n, 165, by + H * .085, 20, g.rings[i] ? COL.green : '#fff', 'center', 4); });
+      hephaestus(c, 760, H * .95, .7, t);
+      mgDrawPops(g, c);
+    } }),
+
+  // 7. chariot race
+  race: () => ({ time: 40, hand: ['dragv', 200, 260],
+    init(g) { g.y = g.VH * .55; g.obs = []; g.sp = 1; g.bumps = 0; g.dist = 0; },
+    timeout(g) { g.bumps < 3 ? g.win('You finished the race fairly! Achilles gives you a prize.') : g.lose('Too many bumps. Try again!'); },
+    move(g, x, y) { if (g.down) g.y = clamp(y, g.VH * .3, g.VH * .92); }, down(g, x, y) { g.y = clamp(y, g.VH * .3, g.VH * .92); },
+    update(g, dt) {
+      if (g.keys.up) g.y -= 380 * dt; if (g.keys.down) g.y += 380 * dt; g.y = clamp(g.y, g.VH * .3, g.VH * .92);
+      g.dist += dt / 38;
+      g.sp -= dt; if (g.sp <= 0) { const r = Math.random(); g.obs.push({ x: 860, y: rand(g.VH * .32, g.VH * .9), k: r < .55 ? 'rock' : r < .85 ? 'car' : 'star', v: rand(300, 380) }); g.sp = rand(.55, .95); }
+      for (const o of g.obs) { o.x -= o.v * dt * (o.k === 'car' ? .55 : 1);
+        if (!o.hit && Math.abs(o.x - 220) < 60 && Math.abs(o.y - g.y) < 44) { o.hit = true;
+          if (o.k === 'star') { Snd.good(); mgPop(g, 220, g.y - 60, 'FAIR PLAY!', COL.green); g.bumps = Math.max(0, g.bumps - 1); }
+          else { g.bumps++; Snd.bad(); mgPop(g, 220, g.y - 60, o.k === 'car' ? 'FOUL!' : 'BUMP!', COL.accent); } } }
+      g.obs = g.obs.filter(o => o.x > -80 && !o.hit);
+      if (g.bumps >= 3) g.lose('Three bumps! Steer around rocks and other chariots.');
+      if (g.dist >= 1) g.win('Finish line! A fair race, and a prize from Achilles.');
+      g.info(g.meter('Race', g.dist, COL.blue) + g.meter(`Bumps ${g.bumps}/3`, 1 - g.bumps / 3));
+    },
+    draw(g, c, W, H) {
+      const t = g.t; sky(c); c.fillStyle = '#e9c46a'; c.fillRect(0, H * .25, 800, H);
+      for (let i = 0; i < 10; i++) { const x = ((i * 120 - t * 340) % 1200 + 1200) % 1200 - 200; L(c, x, H * .27, x + 40, H * .27, 6, '#c9b38a'); L(c, x, H * .97, x + 40, H * .97, 6, '#c9b38a'); }
+      for (const o of g.obs) { if (o.k === 'rock') { E(c, o.x, o.y, 30, 22); fs(c, '#8d8577', 4); } else if (o.k === 'star') drawStar(c, o.x, o.y, 24); else chariot(c, o.x, o.y + 20, .6, t, { car: '#06d6a0', horse: '#c08552', rider: (c2, x, y, s, t2) => drawPerson(c2, x, y + 40, s, { t: t2, tunic: '#9b2226', hat: 'crown' }) }); }
+      chariot(c, 200, g.y + 26, .7, t, { rider: (c2, x, y, s, t2) => drawPup(c2, x + 4, y + 6, s * .6, { t: t2, hat: 'helmet', body: false }) });
+      if (g.dist > .9) { const fx = 800 - (g.dist - .9) * 4000 * .5 + 300; L(c, fx, H * .27, fx, H * .97, 10, '#fff'); }
+      mgDrawPops(g, c);
+    } }),
+
+  // 8. sneak through the camp in Hermes' light
+  night: () => ({ time: 40, hand: ['drag', 400, 380],
+    init(g) { g.x = 400; g.prog = 0; g.noise = 0; },
+    timeout(g) { g.prog > .85 ? g.win('You reached Achilles\' tent!') : g.lose('Dawn came too soon. Try again!'); },
+    move(g, x) { if (g.down) g.x = clamp(x, 80, 720); }, down(g, x) { g.x = clamp(x, 80, 720); },
+    lx(g) { return 400 + Math.sin(g.t * .8) * 200 + Math.sin(g.t * 1.9) * 80; },
+    update(g, dt) {
+      if (g.keys.left) g.x -= 320 * dt; if (g.keys.right) g.x += 320 * dt; g.x = clamp(g.x, 80, 720);
+      const inL = Math.abs(g.x - this.lx(g)) < 90; g.inL = inL;
+      g.prog += dt * (inL ? .036 : .012); g.noise = clamp(g.noise + dt * (inL ? -.25 : .3), 0, 1);
+      if (g.noise >= 1) g.lose('A guard woke up! Stay inside Hermes\' glowing light.');
+      if (g.prog >= 1) g.win('You reached Achilles\' tent. Now Priam can ask for his son.');
+      g.info(g.meter('To the tent', g.prog, COL.blue) + g.meter('Guards waking', g.noise, COL.accent));
+    },
+    draw(g, c, W, H) {
+      const t = g.t; sky(c, '#1d1b4a', '#3d3b8a'); for (let i = 0; i < 14; i++) drawStar(c, 30 + i * 56, 30 + (i % 4) * 26, 6, '#fffaf0', 1.5);
+      c.fillStyle = '#4a4466'; c.fillRect(0, H * .35, 800, H);
+      for (let i = 0; i < 6; i++) { const y = H * .45 + ((i * 140 + g.prog * 1400) % 840) * .7; tent(c, i % 2 ? 90 : 710, y, .7, '#7d6a75'); drawPerson(c, i % 2 ? 180 : 620, y + 20, .5, { t, ph: i, tunic: GRK[i % 4], hat: 'helmet', mood: g.noise > .6 ? 'surprised' : 'sleep' }); }
+      const lx = this.lx(g); const grd = c.createRadialGradient(lx, H * .75, 10, lx, H * .75, 130); grd.addColorStop(0, 'rgba(255,240,170,.75)'); grd.addColorStop(1, 'rgba(255,240,170,0)'); c.fillStyle = grd; c.fillRect(lx - 140, H * .45, 280, H * .55);
+      hermes(c, lx, H * .62, .55, t, { arms: 'wave' });
+      chariot(c, g.x - 30, H * .9, .6, t, { car: '#7b2cbf', horse: '#d4c4a8', rider: (c2, x, y, s, t2) => priam(c2, x, y + 40, s, t2) });
+      if (g.prog > .8) tent(c, 400, H * .45 + (1 - g.prog) * 400, 1, '#b8a98a');
+      mgDrawPops(g, c);
+    } }),
+};
+
+// ---------------- title, map, intro, review ----------------
+function titleBg(c, w, h, t) {
+  const g = c.createLinearGradient(0, 0, 0, h); g.addColorStop(0, '#ff7b54'); g.addColorStop(.6, '#ffd6a5'); c.fillStyle = g; c.fillRect(0, 0, w, h);
+  drawSun(c, w * .82, h * .22, Math.min(w, h) * .08, t);
+  c.fillStyle = '#c9b38a'; c.fillRect(0, h * .72, w, h);
+  c.save(); c.translate(0, h * .72); trojanWalls(c, -20, 0, w * .48, h * .3); c.restore();
+  drawColumns(c, w * .2, h * .42 - 16, w * .12, h * .08, 4);
+  const s = Math.min(w, h) / 600;
+  for (let i = 0; i < 3; i++) tent(c, w * .62 + i * w * .13, h * .74, s * .7, i % 2 ? '#e9d8a6' : '#cdb4db');
+  achilles(c, w * .62, h * .97, s * 1.1, t, { arms: 'up' });
+  hector(c, w * .38, h * .97, s * 1.1, t, { flip: true });
+  drawPup(c, w * .5, h * .92 - 40 * s, s * .55, { t, hat: 'helmet', outfit: 'chiton' });
+}
+function mapBg(c, w, h, t) {
+  const g = c.createLinearGradient(0, 0, 0, h); g.addColorStop(0, '#e9c46a'); g.addColorStop(1, '#d4a373'); c.fillStyle = g; c.fillRect(0, 0, w, h);
+  const s = clamp(Math.min(w, h) / 900, .45, 1.1);
+  c.save(); c.globalAlpha = .18; for (let i = 0; i < 40; i++) { E(c, (i * 197) % w, (i * 131) % h, 30 * s, 10 * s); c.fillStyle = '#6b4226'; c.fill(); } c.restore();
+  c.fillStyle = 'rgba(76,201,240,.6)'; c.beginPath(); c.moveTo(0, h); c.quadraticCurveTo(w * .3, h * .9, w * .5, h); c.fill();
+}
+const MAP_ICONS = [
+  (c, t) => { agamemnon(c, -20, 30, .3, t, { mood: 'angry' }); achilles(c, 20, 30, .3, t, { mood: 'angry', noArmor: true, flip: true }); },
+  (c, t) => { drawCloud(c, 0, 20, 1.2); zeus(c, 0, 20, .3, t); },
+  (c, t) => { hector(c, -12, 30, .3, t, { hat: null }); baby(c, 12, -6, .5, t); },
+  (c, t) => { tent(c, 0, 30, .4, '#cdb4db'); lyre(c, 26, 0, .5); },
+  (c, t) => { achilles(c, 0, 30, .32, t, { tunic: '#06d6a0' }); },
+  (c, t) => { shieldArt(c, 0, 0, 30, 5, t); },
+  (c, t) => { scales(c, 0, -20, .3, Math.sin(t) * .2, t); },
+  (c, t) => { tent(c, 0, 30, .4, '#b8a98a'); drawStar(c, 30, -20, 8, '#fffaf0'); E(c, -30, -20, 8, 8); fs(c, '#fffaf0', 2); },
+];
+const INTRO = [
+  { ribbon: 'Meet Homer', text: 'Homer was a Greek poet, about 2,700 years ago!', more: 'Legend says he was blind. Nobody knows much about him for sure.', art: (c, t) => { sky(c, '#ffd6a5', '#fff1d0'); c.fillStyle = '#e9c46a'; c.fillRect(-100, 300, 1000, 100); drawColumns(c, 620, 300, 200, 160, 4); drawPerson(c, 360, 340, 1.4, { t, tunic: '#fffaf0', beard: '#fff', hair: '#fff', prop: 'lyre', mood: 'sleep', robe: true }); drawPup(c, 150, 280, .6, { t, hat: 'helmet', outfit: 'chiton' }); bubble(c, 520, 60, 'Hello! I\'m Homer!', 420, 150, 34); } },
+  { ribbon: 'Sung, not read', text: 'His poems were SUNG and remembered, long before books!', more: 'Singers called bards used repeated phrases, like "swift-footed Achilles," to help them remember.', art: (c, t) => { sky(c, '#2b2a4a', '#5a4f8a'); drawFlame(c, 400, 320, 2, t); for (let i = 0; i < 4; i++) drawPerson(c, 120 + i * 190 + (i > 1 ? 80 : 0), 350, .9, { t, ph: i, tunic: GRK[i] }); drawPerson(c, 290, 350, 1, { t, tunic: '#fffaf0', beard: '#fff', hair: '#fff', prop: 'lyre' }); for (let i = 0; i < 3; i++) note(c, 340 + i * 40, 150 - ((t * 30 + i * 20) % 60), 1.4); } },
+  { ribbon: 'The Trojan War', text: 'Greeks and Trojans fought for 10 years. The Iliad tells a few weeks of it.', more: 'Troy was a city across the sea from Greece. The war began when Paris of Troy took Helen from Sparta.', art: (c, t) => { troy(c, 360); for (let i = 0; i < 3; i++) tent(c, 520 + i * 100, 330, .6); dust(c, 400, 300, .6, t); } },
+  { ribbon: 'Sing, Muse!', text: 'The Iliad starts: "Sing, goddess, the anger of Achilles."', more: 'An epic is a very long poem about heroes. The Iliad has 24 parts called "books."', art: (c, t) => { sky(c, '#c77dff', '#f3d9ff'); drawCloud(c, 400, 290, 2.4); drawPerson(c, 400, 290, 1.1, { t, tunic: '#ffd23f', robe: true, long: true, hair: '#3b2a1a', hat: 'wreath', arms: 'up' }); for (let i = 0; i < 6; i++) drawStar(c, 120 + i * 120, 60 + (i % 2) * 40, 14); } },
+  { ribbon: 'Your quest', text: 'Meet the heroes, collect Theme Cards, and learn their lessons!', art: (c, t) => { troy(c, 360); achilles(c, 520, 340, 1, t, { arms: 'up' }); hector(c, 280, 340, 1, t, { flip: true }); drawPup(c, 400, 300, .5, { t, hat: 'helmet', outfit: 'chiton' }); } },
+];
+const REVIEW = [
+  { m: 'quarrel', fx: 'shout', t: 'Achilles and Agamemnon fight over a prize', th: 'pride', why: 'Both cared too much about their own honor.' },
+  { m: 'quarrel', fx: 'quit', t: 'Achilles quits and his friends suffer', th: 'wrath', why: 'His anger hurt his own side.' },
+  { m: 'olympus', fx: 'sides', t: 'Hera and Apollo cheer for different sides', th: 'gods', why: 'The gods take sides in the war.' },
+  { m: 'olympus', fx: 'nod', t: 'Zeus nods and Olympus shakes', th: 'gods', why: 'Zeus promises Thetis to help Troy for a while.' },
+  { m: 'hector', fx: 'laugh', t: 'Hector takes off his helmet for his baby', th: 'family', why: 'He loves his family, even in war.' },
+  { m: 'hector', fx: 'go', t: 'Hector goes back to battle', th: 'cost', why: 'Duty pulls him away from his family.' },
+  { m: 'embassy', fx: 'fates', t: 'Achilles picks a short, glorious life', th: 'fate', why: 'Fate offers two paths. He still chooses.' },
+  { m: 'embassy', fx: 'refuse', t: 'Achilles refuses the big gifts', th: 'pride', why: 'Pride keeps him from helping his friends.' },
+  { m: 'patroclus', fx: 'grief', t: 'Achilles weeps for Patroclus', th: 'friendship', why: 'He loved his friend so much.' },
+  { m: 'shield', fx: 'peace', t: 'A city with weddings and dancing on the shield', th: 'cost', why: 'It reminds us what war takes away.' },
+  { m: 'fate', fx: 'scales', t: 'Zeus weighs fates on golden scales', th: 'fate', why: 'The Greeks believed fate was fixed.' },
+  { m: 'fate', fx: 'duel', t: 'Achilles wins great fame', th: 'kleos', why: 'Kleos is glory that lives on in songs.' },
+  { m: 'fate', fx: 'return', t: 'Achilles\' anger turns toward Hector', th: 'wrath', why: 'Grief turned into rage.' },
+  { m: 'priam', fx: 'weep', t: 'Priam and Achilles cry together', th: 'mercy', why: 'Enemies share sadness and kindness.' },
+  { m: 'priam', fx: 'give', t: 'Achilles gives Hector back to his father', th: 'mercy', why: 'At last, mercy beats anger.' },
+];
+
+const GAME = {
+  key: 'teslagames.iliad.v1', bg: '#7a4a2a',
+  titleHTML: 'The Iliad<small>Heroes of Troy</small>',
+  tagline: 'Heroes, gods, a golden shield... and big feelings!',
+  goLabel: 'To Troy! ▶',
+  todayIcon: (c, t) => { bigRect(c, '#e3f6ff'); drawBulb(c, 50, 54, 1.1, t); },
+  other: { href: '../odyssey/', label: '⛵︎ Play The Odyssey too ▶' },
+  playLabel: 'Play! ⚔︎',
+  intro: INTRO, titleBg, mapBg,
+  mapTitle: 'Ten Years at Troy',
+  mapIcon: (c, i, x, y, s, t) => { c.save(); c.translate(x, y); c.scale(s * 1.1, s * 1.1); MAP_ICONS[i](c, t); c.restore(); },
+  drawToken: (c, x, y, s, t, flip) => { chariot(c, x, y + 10 * s, s * .55, t, { flip, rider: (c2, x2, y2, s2, t2) => drawPup(c2, x2 + 4, y2 + 6, s2 * .6, { t: t2, hat: 'helmet', body: false }) }); },
+  mapSay: i => i === 0 ? 'Tap the glowing stop!' : `Next: ${MISSIONS[i].name}! Tap it!`,
+  mapDoneSay: 'You finished the Iliad! Try the Epic Review!',
+  stopWord: 'Book', pupHat: 'helmet', pupOutfit: 'chiton', mapStyle: 'land',
+  mapRock: (c, o, s, t) => { E(c, o.x, o.y + o.r * .3, o.r * 1.1, o.r * .45); c.fillStyle = 'rgba(0,0,0,.15)'; c.fill(); E(c, o.x, o.y, o.r, o.r * .75); fs(c, '#a68a64', 3); E(c, o.x - o.r * .3, o.y - o.r * .25, o.r * .3, o.r * .18); c.fillStyle = '#c9b38a'; c.fill(); },
+  mapWhirl: (c, o, s, t) => { for (let i = 0; i < 5; i++) { E(c, o.x + Math.sin(t * 3 + i) * 6, o.y - i * 14 * s, (o.r * .5 + i * 9 * s), (o.r * .2 + i * 3 * s)); c.lineWidth = 4; c.strokeStyle = 'rgba(255,240,210,.85)'; c.stroke(); } },
+  quizBg: (c, H, t) => { sky(c, '#ffd6a5', '#fff1d0'); c.fillStyle = '#c9b38a'; c.fillRect(0, H * .8, 800, H); },
+  quizSkin: { shot: 'stone',
+    target: (c, r, t) => { E(c, 0, 0, r, r); fs(c, GOLD, 5); E(c, 0, 0, r * .78, r * .78); fs(c, null, 3); for (let i = 0; i < 12; i++) { const a = i / 12 * TAU; E(c, Math.cos(a) * r * .89, Math.sin(a) * r * .89, 4, 4); c.fillStyle = INK; c.fill(); } },
+    drawShot: (c, sh, t) => { c.save(); c.translate(sh.x, sh.y); c.rotate(t * 12); E(c, 0, 0, 16, 14); fs(c, '#8d8577', 3); E(c, -4, -4, 5, 3); c.fillStyle = '#adb5bd'; c.fill(); c.restore(); },
+    launcher: (c, x, y, a, rec, t) => { RR(c, x - 70, y - 10, 140, 34, 8); fs(c, '#8a5a2b', 4); for (const k of [-46, 46]) { E(c, x + k, y + 26, 18, 18); fs(c, '#6b4226', 3); } c.save(); c.translate(x, y); c.rotate(a + Math.PI / 2 - rec * .6); L(c, 0, 0, 0, -80, 12, INK); L(c, 0, 0, 0, -80, 7, '#c08552'); c.beginPath(); c.arc(0, -86, 16, 0, Math.PI); fs(c, '#6b4226', 3); c.restore(); drawPup(c, x + 90, y + 6, .4, { t, hat: 'helmet', body: false }); } },
+  themes: THEMES, missions: MISSIONS, review: REVIEW, games: GAMES,
+  finale: { title: 'You Know the Iliad!', text: 'From anger to mercy. That\'s the whole Iliad! (The Trojan Horse comes later, in the Odyssey.)',
+    art: (c, t) => { sky(c, '#2b2a4a', '#5a4f8a'); for (let i = 0; i < 12; i++) drawStar(c, 40 + i * 66, 30 + (i % 3) * 30, 8, '#fffaf0'); c.fillStyle = '#4a4466'; c.fillRect(-100, 260, 1000, 100); priam(c, 300, 300, .8, t); achilles(c, 480, 300, .8, t, { noArmor: true, flip: true }); drawHeart(c, 390, 90, 2); drawPup(c, 620, 270, .45, { t, hat: 'helmet', outfit: 'chiton' }); } },
+};
+// ---------- Iliad action overrides ----------
+GAMES.duel = () => ({ time: 40, ctl: [{ key: 'left', label: '◀' }, { key: 'act', label: 'BONK!', cls: 'y' }, { key: 'right', label: '▶' }], hand: ['tap', 400, 420],
+  init(g) { g.px = 300; g.ex = 520; g.pk = 0; g.ek = 0; g.ps = 1; g.es = 1; g.cd = 0; g.ecd = 1.4; g.swing = 0; g.eswing = 0; g.warn = 0; },
+  timeout(g) { g.ps >= g.es ? g.win('Night falls! The duel ends and they swap gifts.') : g.lose('Hector bonked more shields. Try again!'); },
+  press(g, k) { if (k === 'act') this.bonk(g); },
+  down(g, x) { if (x < g.px - 40) g.tx = x; else if (x > g.px + 40 && x < g.ex - 60) g.tx = x; else this.bonk(g); },
+  up(g) { g.tx = null; },
+  bonk(g) { if (g.cd > 0) return; g.cd = .45; g.swing = .25; Snd.pew(); if (Math.abs(g.ex - g.px) < 150) { if (g.eguard > 0) { Snd.bonk(); g.sparks((g.px + g.ex) / 2, g.VH * .6, '#fff', 10); g.ek = 120; mgPop(g, g.ex, g.VH * .4, 'BLOCK!', COL.blue); } else { g.es -= .12; g.ek = 320; g.boom(g.ex - 30, g.VH * .62, GOLD, 20, .8); mgPop(g, g.ex, g.VH * .4, 'BONK!', COL.yellow); } } },
+  update(g, dt) {
+    let mv = 0; if (g.keys.left) mv -= 1; if (g.keys.right) mv += 1; if (g.tx != null) mv += Math.sign(g.tx - g.px);
+    g.px = clamp(g.px + mv * 260 * dt + g.pk * dt, 80, g.ex - 90); g.pk *= Math.pow(.02, dt);
+    g.ex = clamp(g.ex + g.ek * dt, g.px + 90, 740); g.ek *= Math.pow(.02, dt);
+    g.cd -= dt; g.swing -= dt; g.eswing -= dt; g.eguard = (g.eguard || 0) - dt;
+    // enemy AI: approach, warn, swing; sometimes guard
+    const d = g.ex - g.px; if (d > 140 && g.warn <= 0) g.ex -= 120 * dt;
+    g.ecd -= dt;
+    if (g.ecd <= 0 && g.warn <= 0) { if (Math.random() < .3) { g.eguard = .8; g.ecd = 1; } else { g.warn = .6; } }
+    if (g.warn > 0) { g.warn -= dt; if (g.warn <= 0) { g.eswing = .25; g.ecd = rand(1.1, 1.8); Snd.pew(); if (g.ex - g.px < 160) { if (mv < 0 || g.px <= 82) { mgPop(g, g.px, g.VH * .4, 'DODGE!', COL.green); g.sparks(g.px + 40, g.VH * .6, COL.green, 8); } else { g.ps -= .12; g.pk = -320; g.boom(g.px + 30, g.VH * .62, '#adb5bd', 18, .7); g.shake(8, .25); } } } }
+    if (g.es <= 0) g.win('Shield-bonked! Hector and Ajax shake hands and swap gifts.');
+    if (g.ps <= 0) g.lose('Your shield got bonked too much! Step back when Hector\'s "!" flashes.');
+    g.info(g.meter('Ajax (you)', g.ps, COL.green) + g.meter('Hector', g.es, COL.purple));
+  },
+  draw(g, c, W, H) {
+    const t = g.t, gy = H * .85; troy(c, H);
+    for (let i = 0; i < 6; i++) drawPerson(c, 60 + i * 140, H * .7, .45, { t, ph: i, tunic: i < 3 ? GRK[i] : TRO[i - 3], hat: 'helmet', arms: 'up' });
+    c.save(); c.translate(g.px, gy); c.rotate(g.swing > 0 ? .25 : 0); ajax(c, 0, 0, 1, t, { arms: 'out' }); c.restore();
+    c.save(); c.translate(g.ex, gy); c.rotate(g.eswing > 0 ? -.25 : 0); hector(c, 0, 0, 1, t, { flip: true, arms: 'out', prop: 'shield', shieldCol: g.eguard > 0 ? COL.blue : '#adb5bd' }); c.restore();
+    if (g.warn > 0) { txt(c, '!', g.ex, gy - 220, 60, COL.accent); E(c, g.ex, gy - 220, 36, 36); c.lineWidth = 5; c.strokeStyle = COL.accent; c.stroke(); }
+    mgDrawPops(g, c);
+  } });
+GAMES.wall = () => ({ time: 35, hand: ['tap', 420, 260],
+  init(g) { g.fl = []; g.sp = .8; g.ships = 1; g.n = 0; },
+  timeout(g) { g.win('The wall held until night! But the Greeks still need Achilles...'); },
+  down(g, x, y) { let hit = false; for (const f of g.fl) if (!f.dead && Math.hypot(x - f.x, y - f.y) < 60) { f.dead = true; hit = true; g.n++; Snd.splash(); g.boom(f.x, f.y, COL.blue, 18, .7); mgPop(g, f.x, f.y - 30, 'SPLASH!', COL.blue); break; } if (!hit) g.sparks(x, y, COL.blue, 5); },
+  update(g, dt) {
+    g.sp -= dt; if (g.sp <= 0) { g.fl.push({ x: rand(60, 740), y: -30, vx: rand(-40, 40), vy: rand(130, 190) + g.t * 3 }); g.sp = rand(.4, .75); }
+    for (const f of g.fl) { f.x += f.vx * dt; f.y += f.vy * dt; if (!f.dead && f.y > g.VH * .78) { f.dead = true; g.ships -= .14; g.boom(f.x, g.VH * .8, COL.orange, 16, .8); g.shake(6, .2); mgPop(g, f.x, g.VH * .7, 'HOT!', COL.orange); } }
+    g.fl = g.fl.filter(f => !f.dead);
+    if (g.ships <= 0) g.lose('The ships caught fire! Splash the torches faster.');
+    g.info(g.meter('Ships safe', g.ships, COL.blue));
+  },
+  draw(g, c, W, H) {
+    const t = g.t; camp(c, H, t);
+    c.fillStyle = '#c9b38a'; c.fillRect(0, H * .86, 800, H);
+    for (let i = 0; i < 3; i++) drawShip(c, 140 + i * 260, H * .88, .7, { t, crew: 2, sail: false });
+    for (const f of g.fl) { c.save(); c.translate(f.x, f.y); c.rotate(Math.atan2(f.vy, f.vx) - Math.PI / 2); L(c, 0, -30, 0, 10, 6, '#8a5a2b'); drawFlame(c, 0, 18, 1, t); c.restore(); }
+    mgDrawPops(g, c);
+  } });
+(() => {
+  const by = id => MISSIONS.find(m => m.id === id);
+  Object.assign(by('hector').boss, { game: 'duel', name: 'Shield-Bonk Duel!', how: 'Next, Hector duels Ajax! Bonk his shield. Step back when "!" flashes!', hands: [['tap', 400, 420]] });
+  Object.assign(by('embassy').boss, { game: 'wall', name: 'Save the Ships!', how: 'Without Achilles, Trojans attack! Tap torches to splash them!', hands: [['tap', 420, 230]] });
+  by('hector').quiz.splice(2, 0, { q: 'How did Hector and Ajax\'s duel end?', o: ['Swapping gifts', 'A big fight', 'Running away'], a: 0, why: 'Night came. They swapped gifts with respect!' });
+  by('hector').quiz.length = 3; by('hector').quiz[2].moral = true; by('hector').quiz[2].q = 'Hector and Ajax swapped gifts after their duel. What does that show?'; by('hector').quiz[2].o = ['Rivals can respect each other', 'Gifts are boring', 'They were scared']; by('hector').quiz[2].why = 'Even enemies can show respect.';
+  // keep the family moral question too
+  by('hector').quiz[1] = { q: 'What does Hector\'s goodbye show about war?', moral: true, o: ['War is fun', 'War hurts families', 'Only soldiers matter'], a: 1, why: 'War hurts families on both sides.' };
+})();
+(() => {
+  const wrapU = (k, fn) => { const f = GAMES[k]; GAMES[k] = (b) => { const s = f(b); fn(s); return s; }; };
+  wrapU('calm', s => { const u = s.update; s.update = function (g, dt) { const n = g.items.length, cl = g.calm; u.call(this, g, dt); if (g.calm > cl + .03) g.boom(470, g.y, COL.accent, 14, .6); else if (g.calm < cl - .08) { g.shake(6, .2); g.flash = .2; } }; });
+  wrapU('tug', s => { const tp = s.tap; s.tap = function (g) { const r = g.rope; tp.call(this, g); if (g.rope > r) g.boom(400 + g.rope * 180, g.VH * .66, COL.yellow, 14, .6); else g.shake(4, .15); }; });
+  wrapU('drive', s => { const u = s.update; s.update = function (g, dt) { const a = g.saved; u.call(this, g, dt); if (Math.floor(g.saved * 5) > Math.floor(a * 5)) { g.poof(300 + 200, g.VH * .78, 10); mgPop(g, 520, g.VH * .6, 'POOF!', COL.yellow); } }; });
+  wrapU('shield', s => { const d = s.down; s.down = function (g, x, y) { const n = g.rings.filter(Boolean).length; d.call(this, g, x, y); if (g.rings.filter(Boolean).length > n) { g.boom(520, g.VH * .52, GOLD, 26, 1); Snd.bonk(); } }; });
+  wrapU('race', s => { const u = s.update; s.update = function (g, dt) { const b = g.bumps; for (const o of g.obs) if (o.k === 'car' && !o.hit && Math.abs(o.x - 220) < 70 && Math.abs(o.y - g.y) < 50 && g.ram) { o.hit = true; g.boom(o.x, o.y, COL.green, 20, .8); mgPop(g, o.x, o.y - 50, 'FOUL!', COL.accent); g.bumps++; } u.call(this, g, dt); if (g.bumps > b) { g.shake(9, .3); g.flash = .2; g.sparks(220, g.y, COL.yellow, 14); } for (const o of g.obs) if (o.hit && o.k === 'star') {} }; });
+  wrapU('night', s => { const u = s.update; s.update = function (g, dt) { u.call(this, g, dt); if (!g.inL && Math.random() < .1) g.sparks(g.x - 30, g.VH * .9, '#fff', 1); }; });
+})();
+
+boot(GAME);
+
+</script>
+</body>
+</html>
