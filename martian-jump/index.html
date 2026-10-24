@@ -1,0 +1,1476 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The Martian Jump</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root { --ink:#1d1b26; --paper:#fffaf0; --accent:#ff4d6d; --yellow:#ffd23f; --green:#06d6a0; --blue:#4cc9f0;
+    --purple:#9b5de5; --orange:#ff9f1c;
+    --toon:"Luckiest Guy","Comic Sans MS","Chalkboard SE",system-ui,sans-serif; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; height:100%; overflow:hidden; background:#2b2a4a; color:var(--ink);
+    font-family:Nunito,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; font-weight:800;
+    user-select:none; -webkit-user-select:none; -webkit-tap-highlight-color:transparent; }
+  button { font:inherit; cursor:pointer; color:inherit; }
+  .toon { font-family:var(--toon); font-weight:400; letter-spacing:1px; }
+  .panel { background:var(--paper); border:3px solid var(--ink); border-radius:18px; box-shadow:4px 4px 0 var(--ink); }
+  [hidden] { display:none !important; }
+
+  #app { position:fixed; inset:0; display:flex; flex-direction:column; }
+  /* ---------- top bar: step tracker + timer ---------- */
+  #topbar { display:flex; align-items:center; gap:8px; padding:8px 10px 6px; flex-wrap:wrap; }
+  #tracker { display:flex; gap:6px; flex:1 1 auto; flex-wrap:wrap; align-items:center; }
+  .stp { font-family:var(--toon); font-size:18px; padding:7px 12px 3px; border-radius:999px; background:var(--paper);
+    border:3px solid var(--ink); box-shadow:0 3px 0 var(--ink); white-space:nowrap; opacity:.75; line-height:1.2; }
+  .stp.on { background:var(--yellow); opacity:1; transform:rotate(-2deg) scale(1.06); }
+  .stp.done { background:var(--green); opacity:1; }
+  .stp .n { display:inline-block; }
+  #timerChip { font-family:var(--toon); font-size:20px; padding:7px 14px 3px; border-radius:999px; background:var(--blue);
+    border:3px solid var(--ink); box-shadow:0 3px 0 var(--ink); white-space:nowrap; line-height:1.2; }
+  #timerChip.relax { background:#ffe8a3; }
+  .round { width:60px; height:60px; border-radius:50%; border:3px solid var(--ink); background:var(--paper);
+    box-shadow:0 4px 0 var(--ink); font-size:24px; display:grid; place-items:center; padding:0; flex:none; }
+  .round:active { transform:translateY(3px); box-shadow:0 1px 0 var(--ink); }
+
+  /* ---------- stage ---------- */
+  #stage { position:relative; flex:1 1 auto; min-height:0; margin:0 8px; border:3px solid var(--ink); border-radius:18px;
+    overflow:hidden; box-shadow:4px 4px 0 var(--ink); }
+  #cv { position:absolute; inset:0; width:100%; height:100%; display:block; touch-action:none; }
+  #info { position:absolute; left:10px; top:10px; max-width:min(460px,62%); padding:8px 12px 8px; font-size:17px; line-height:1.25; }
+  #info b.big { font-family:var(--toon); font-weight:400; font-size:22px; color:var(--accent); display:block; letter-spacing:1px; }
+  #readout { font-family:var(--toon); font-size:20px; color:#1b6f9a; margin-top:4px; letter-spacing:.5px; }
+  #badgeBar { position:absolute; right:10px; top:10px; display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end; max-width:36%; }
+  .bdg { font-size:14px; padding:4px 10px 3px; border-radius:999px; border:3px solid var(--ink); background:#e8e1cf; color:#8d8577; white-space:nowrap; }
+  .bdg.got { background:var(--yellow); color:var(--ink); }
+  #toast { position:absolute; left:50%; bottom:14px; transform:translate(-50%,10px) rotate(-1deg); padding:8px 18px 6px; font-size:20px;
+    background:var(--yellow); opacity:0; transition:.25s; pointer-events:none; text-align:center; max-width:92%; }
+  #toast.show { opacity:1; transform:translate(-50%,0) rotate(-1deg); }
+  #timeup { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); padding:14px 18px; text-align:center; width:min(420px,90%); }
+  #timeup p { margin:4px 0 8px; font-size:18px; }
+
+  /* ---------- controls ---------- */
+  #controls { margin:8px; padding:8px 12px 10px; display:flex; flex-wrap:wrap; gap:8px 16px; align-items:center; }
+  .sl { display:grid; grid-template-columns:auto 1fr auto; grid-template-rows:auto auto; column-gap:8px; align-items:center; flex:1 1 300px; min-width:260px; }
+  .sl .hd { grid-column:1 / 4; display:flex; justify-content:space-between; align-items:baseline; font-size:15px; }
+  .sl .hd b { font-family:var(--toon); font-weight:400; font-size:20px; letter-spacing:1px; }
+  .sl output { font-family:var(--toon); font-size:22px; color:#1b6f9a; }
+  .sl .lock { font-size:13px; color:#8d8577; }
+  input[type=range] { -webkit-appearance:none; appearance:none; width:100%; height:44px; background:transparent; margin:0; touch-action:pan-y; }
+  input[type=range]::-webkit-slider-runnable-track { height:14px; border-radius:10px; background:#e9e2cf; border:3px solid var(--ink); }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:40px; height:40px; margin-top:-16px; border-radius:50%;
+    background:var(--yellow); border:3px solid var(--ink); box-shadow:0 3px 0 var(--ink); }
+  input[type=range]::-moz-range-track { height:10px; border-radius:10px; background:#e9e2cf; border:3px solid var(--ink); }
+  input[type=range]::-moz-range-thumb { width:36px; height:36px; border-radius:50%; background:var(--yellow); border:3px solid var(--ink); }
+  input[type=range]:disabled::-webkit-slider-thumb { background:#cfc8b6; }
+  .stepb { width:60px; height:60px; border-radius:50%; border:3px solid var(--ink); background:#fff; box-shadow:0 4px 0 var(--ink);
+    font-family:var(--toon); font-size:30px; line-height:1; padding:4px 0 0; }
+  .stepb:active { transform:translateY(3px); box-shadow:0 1px 0 var(--ink); }
+  .stepb:disabled { opacity:.4; }
+  .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .seg { display:flex; border:3px solid var(--ink); border-radius:999px; overflow:hidden; box-shadow:0 4px 0 var(--ink); }
+  .seg button { border:0; background:#fff; min-height:60px; padding:6px 14px 2px; font-family:var(--toon); font-size:19px; border-right:3px solid var(--ink); }
+  .seg button:last-child { border-right:0; }
+  .seg button.on { background:var(--ink); color:#fff; }
+  .btn { background:var(--accent); color:#fff; font-family:var(--toon); font-size:26px; min-height:60px; padding:10px 28px 4px; border-radius:999px;
+    border:3px solid var(--ink); box-shadow:0 6px 0 var(--ink); letter-spacing:1px; line-height:1.1; text-decoration:none; display:inline-block; }
+  .btn:active { transform:translateY(4px); box-shadow:0 2px 0 var(--ink); }
+  .btn.go { background:var(--green); color:var(--ink); }
+  .btn.alt { background:#fff; color:var(--ink); }
+  .btn.yel { background:var(--yellow); color:var(--ink); }
+  .btn:disabled { opacity:.5; }
+  .btn.pulse { animation:pulse 1.1s infinite; }
+  @keyframes pulse { 50% { transform:scale(1.07); } }
+  #jumpBtn { font-size:32px; padding:10px 34px 4px; }
+  #notes { flex:1 1 100%; display:flex; gap:6px; overflow-x:auto; touch-action:pan-x; padding:2px 0 4px; align-items:center; }
+  #notes .lbl { font-size:14px; white-space:nowrap; }
+  .note { font-size:14px; white-space:nowrap; padding:4px 10px 3px; border-radius:999px; border:2px solid var(--ink); background:#fff; }
+
+  /* ---------- overlays ---------- */
+  .overlay { position:fixed; inset:0; display:grid; place-items:center; background:rgba(30,20,60,.5); padding:10px; z-index:5; }
+  .card { padding:18px 22px 20px; text-align:center; width:min(900px,96vw); max-height:calc(100% - 4px); overflow:auto;
+    border-radius:26px; box-shadow:6px 6px 0 var(--ink); touch-action:pan-y; }
+  h1 { font-family:var(--toon); font-weight:400; margin:0; font-size:clamp(46px,9vw,84px); line-height:1; color:var(--yellow); -webkit-text-stroke:3px var(--ink);
+    paint-order:stroke; text-shadow:5px 5px 0 var(--ink); transform:rotate(-2deg); letter-spacing:2px; }
+  h1 span { color:var(--accent); }
+  h2 { font-family:var(--toon); font-weight:400; margin:0 0 6px; font-size:clamp(30px,5vw,42px); color:var(--accent); -webkit-text-stroke:2px var(--ink);
+    paint-order:stroke; text-shadow:3px 3px 0 var(--ink); letter-spacing:1px; line-height:1.05; }
+  .card p { margin:8px 0; font-size:18px; line-height:1.3; }
+  .mcard { text-align:left; margin:16px auto 10px; padding:14px 18px; max-width:640px; background:#fff; position:relative; }
+  .tag { display:inline-block; background:var(--yellow); border:2px solid var(--ink); border-radius:999px; font-size:13px; padding:3px 12px 1px; letter-spacing:1.5px; font-family:var(--toon); }
+  .mcard h3 { font-family:var(--toon); font-weight:400; font-size:30px; margin:6px 0 4px; color:var(--accent); letter-spacing:1px; }
+  .chips { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin:8px 0; }
+  .chip { font-size:15px; padding:5px 12px 4px; border-radius:999px; border:2px solid var(--ink); background:#fff; }
+  .titleRow { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:10px; }
+  #titleStars { font-size:30px; color:#f4a100; letter-spacing:4px; -webkit-text-stroke:1px var(--ink); }
+  .hint { font-size:15px !important; opacity:.7; }
+
+  /* discover cards */
+  #discover .card { width:min(1100px,97vw); }
+  .dgrid { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin:10px 0 12px; }
+  .dcard { text-align:left; padding:10px 12px 12px; background:#fff; }
+  .dcard h4 { font-family:var(--toon); font-weight:400; font-size:22px; margin:0 0 4px; color:var(--ink); letter-spacing:1px; }
+  .dcard canvas { width:100%; height:150px; display:block; border:3px solid var(--ink); border-radius:12px; background:#fff; }
+  .dcard p { font-size:16px !important; margin:6px 0 6px !important; min-height:2.6em; }
+  .dcard .btn { font-size:20px; padding:8px 18px 3px; }
+  .dcard.seen { background:#effcf6; }
+  .bigfact { background:var(--yellow); border:3px solid var(--ink); border-radius:14px; padding:8px 12px; display:inline-block; font-size:18px; transform:rotate(-1deg); }
+
+  /* quiz */
+  .opts { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin:14px 0; }
+  .opt { min-height:64px; background:#fff; border:3px solid var(--ink); border-radius:16px; box-shadow:0 5px 0 var(--ink); font-size:19px; padding:10px 12px; }
+  .opt:active { transform:translateY(3px); box-shadow:0 2px 0 var(--ink); }
+  .opt.right { background:var(--green); }
+  .opt.wrong { background:#ff8fa3; }
+  .opt:disabled { cursor:default; }
+  #qExplain { text-align:left; padding:10px 14px; background:#fff7d6; border-radius:14px; border:3px dashed var(--ink); font-size:18px; line-height:1.3; }
+  #qBurst { display:inline-block; font-family:var(--toon); font-size:34px; padding:18px 26px 10px; margin:0 0 6px;
+    clip-path:polygon(50% 0,61% 22%,85% 8%,78% 33%,100% 40%,80% 56%,96% 80%,70% 74%,62% 100%,48% 80%,30% 98%,28% 74%,3% 82%,18% 58%,0 40%,22% 33%,14% 8%,38% 22%);
+    background:var(--yellow); color:var(--ink); }
+  #qBurst.bad { background:#ff8fa3; }
+  .qnum { font-size:15px; opacity:.7; }
+  #resStars { font-size:64px; color:#f4a100; letter-spacing:8px; -webkit-text-stroke:2px var(--ink); line-height:1; margin:6px 0; }
+  .off { color:#e7e0cf; }
+  #mapSvg { width:100%; max-width:760px; height:auto; display:block; margin:6px auto; }
+
+  @media (max-width:700px) {
+    #topbar { flex-wrap:nowrap; gap:5px; padding:6px 6px 5px; }
+    #tracker { gap:4px; flex-wrap:nowrap; }
+    .stp { font-size:15px; padding:5px 0 1px; width:32px; text-align:center; }
+    .stp.on { width:auto; padding:5px 8px 1px; }
+    .stp .t { display:none; }
+    #timerChip { font-size:15px; padding:5px 8px 1px; }
+    #timerChip.relax { font-size:12px; }
+    .round { width:48px; height:48px; font-size:19px; }
+    #stage { margin:0 6px; }
+    #info { font-size:13px; max-width:calc(100% - 16px); left:6px; top:6px; padding:5px 9px; border-radius:14px; }
+    #info b.big { font-size:16px; }
+    #readout { font-size:15px; margin-top:2px; }
+    #badgeBar { top:auto; bottom:6px; right:6px; max-width:80%; }
+    .bdg { font-size:11px; padding:2px 6px 1px; border-width:2px; }
+    #toast { font-size:16px; padding:6px 12px 4px; bottom:auto; top:40%; }
+    #controls { padding:6px 8px 6px; gap:4px 8px; margin:6px; }
+    .sl { min-width:0; flex-basis:100%; grid-template-columns:78px auto 1fr auto; grid-template-rows:auto; column-gap:6px; }
+    .sl .hd { grid-column:1; flex-direction:column; align-items:flex-start; line-height:1.05; font-size:12px; }
+    .sl .hd b { font-size:16px; }
+    .sl output { font-size:17px; }
+    .sl .lock { display:none; }
+    .stepb { width:52px; height:52px; font-size:26px; }
+    input[type=range] { height:52px; }
+    .row { gap:6px; flex-wrap:wrap; width:100%; }
+    .seg { flex:none; }
+    .pn { display:none; }
+    #qText { -webkit-text-stroke:1.5px var(--ink); text-shadow:2px 2px 0 var(--ink); }
+    .seg button { font-size:22px; padding:6px 10px 2px; min-height:56px; }
+    .btn { font-size:20px; padding:10px 14px 4px; min-height:56px; }
+    #controls .row .btn { flex:1 1 auto; white-space:nowrap; }
+    #jumpBtn { font-size:24px; padding:10px 14px 4px; }
+    #clearBtn { flex:0 0 auto !important; padding:8px 12px 2px; }
+    #notes { padding:0; }
+    .note { font-size:12px; }
+    .dgrid { grid-template-columns:1fr; }
+    .opts { grid-template-columns:1fr; }
+    .card { padding:14px 12px 16px; }
+    .card p { font-size:16px; }
+  }
+  @media (max-height:520px) {
+    .dcard canvas { height:110px; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <header id="topbar" hidden>
+    <div id="tracker">
+      <span class="stp" data-p="challenge"><span class="n">1</span> <span class="t">Challenge</span></span>
+      <span class="stp" data-p="discover"><span class="n">2</span> <span class="t">Discover</span></span>
+      <span class="stp" data-p="experiment"><span class="n">3</span> <span class="t">Experiment</span></span>
+      <span class="stp" data-p="boss"><span class="n">4</span> <span class="t">Boss</span></span>
+      <span class="stp" data-p="quiz"><span class="n">✔</span> <span class="t">Check</span></span>
+    </div>
+    <span id="timerChip">⏱ 0:30</span>
+    <button class="round" id="homeBtn" aria-label="Mission menu">🏠</button>
+    <button class="round" id="muteBtn" aria-label="Sound on/off">🔊</button>
+  </header>
+
+  <div id="stage">
+    <canvas id="cv"></canvas>
+    <div id="info" class="panel" hidden><b class="big" id="infoTitle"></b><span id="infoText"></span><div id="readout"></div></div>
+    <div id="badgeBar" hidden></div>
+    <div id="toast" class="panel toon"></div>
+    <div id="timeup" class="panel" hidden>
+      <h2 style="font-size:30px">Time check!</h2>
+      <p id="timeupText">No rush — you can keep going or move on.</p>
+      <div class="row" style="justify-content:center">
+        <button class="btn alt" id="keepBtn">Keep going</button>
+        <button class="btn go" id="moveBtn">Next ▶</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="controls" class="panel" hidden>
+    <div class="sl" id="angleBox">
+      <div class="hd"><b>📐 Angle</b><output id="angleOut">40°</output></div>
+      <button class="stepb" data-k="angle" data-d="-1" aria-label="less angle">−</button>
+      <input type="range" id="angle" min="10" max="80" step="1" value="40" aria-label="Jump angle">
+      <button class="stepb" data-k="angle" data-d="1" aria-label="more angle">+</button>
+    </div>
+    <div class="sl" id="speedBox">
+      <div class="hd"><b>💪 Strength</b><span><span class="lock" id="speedLock"></span> <output id="speedOut">5.0 m/s</output></span></div>
+      <button class="stepb" data-k="speed" data-d="-0.1" aria-label="less strength">−</button>
+      <input type="range" id="speed" min="2" max="7" step="0.1" value="5" aria-label="Jump strength">
+      <button class="stepb" data-k="speed" data-d="0.1" aria-label="more strength">+</button>
+    </div>
+    <div class="row">
+      <div class="seg" id="planetSeg">
+        <button data-pl="earth" aria-label="Earth">🌍<span class="pn"> Earth</span></button><button data-pl="mars" class="on" aria-label="Mars">🔴<span class="pn"> Mars</span></button><button data-pl="moon" aria-label="Moon">🌙<span class="pn"> Moon</span></button>
+      </div>
+      <button class="btn go" id="jumpBtn">JUMP!</button>
+      <button class="btn alt" id="clearBtn" aria-label="Clear trails">🧽<span class="pn"> Clear</span></button>
+      <button class="btn yel" id="nextBtn">Next ▶</button>
+    </div>
+    <div id="notes" hidden></div>
+  </div>
+</div>
+
+<!-- ============ TITLE ============ -->
+<div class="overlay" id="title">
+  <div class="card panel">
+    <h1>Martian <span>Jump!</span></h1>
+    <div class="mcard panel">
+      <span class="tag">MISSION 01</span>
+      <h3>The Martian Jump</h3>
+      <p style="margin:4px 0"><b>🎯 Learning objective:</b> Understand gravity and how it affects weight.</p>
+      <p style="margin:4px 0">Captain Pup's rover is stranded on Mars! Jump craters, learn how gravity works, and get the rover fixed.</p>
+      <div class="chips">
+        <span class="chip">1 Challenge · 0:30</span><span class="chip">2 Discover · 1:00</span>
+        <span class="chip">3 Experiment · 2:00</span><span class="chip">4 Boss · 1:30</span><span class="chip">✔ Check</span>
+      </div>
+      <div id="titleStars"></div>
+    </div>
+    <div class="titleRow">
+      <button class="btn go pulse" id="startBtn">▶ Start Mission</button>
+      <button class="btn yel" id="titleMapBtn" hidden>🗺 Region Map</button>
+      <a class="btn alt" href="../">⬅ Games</a>
+    </div>
+    <p class="hint">Timers are just a guide — take your time! 🔊 sound can be turned off with the speaker button.</p>
+  </div>
+</div>
+
+<!-- ============ DISCOVER ============ -->
+<div class="overlay" id="discover" hidden>
+  <div class="card panel">
+    <h2>Discover: Gravity!</h2>
+    <p>Gravity is a planet's <b>pull</b>. <span class="bigfact">Earth pulls harder than Mars. Mars has about <b>38%</b> of Earth's surface gravity.</span></p>
+    <div class="dgrid">
+      <div class="dcard panel" id="dc0">
+        <h4>🏀 Drop test</h4>
+        <canvas id="dcv0"></canvas>
+        <p id="dt0">Drop a ball from the same height on Earth and on Mars. Which lands first?</p>
+        <button class="btn go" data-dc="0">Drop!</button>
+      </div>
+      <div class="dcard panel" id="dc1">
+        <h4>⚖️ Bathroom scale</h4>
+        <canvas id="dcv1"></canvas>
+        <p id="dt1">Captain Pup's friend weighs 100 lb on Earth. Take the scale to Mars!</p>
+        <button class="btn go" data-dc="1">Go to Mars</button>
+      </div>
+      <div class="dcard panel" id="dc2">
+        <h4>🤔 Why less pull?</h4>
+        <canvas id="dcv2"></canvas>
+        <p id="dt2">Bigger, heavier planets pull harder. Let's compare!</p>
+        <button class="btn go" data-dc="2">Show me</button>
+      </div>
+      <div class="dcard panel" id="dc3">
+        <h4>🚀 Super jump</h4>
+        <canvas id="dcv3"></canvas>
+        <p id="dt3">Same push, two planets. How high does Captain Pup go?</p>
+        <button class="btn go" data-dc="3">Jump!</button>
+      </div>
+    </div>
+    <div class="row" style="justify-content:center">
+      <button class="btn yel" id="discNext">Got it! Experiment ▶</button>
+      <button class="btn alt" id="discSkip">Skip ▶</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ REGION MAP ============ -->
+<div class="overlay" id="map" hidden>
+  <div class="card panel">
+    <h2 id="mapTitle">Region 2 unlocked!</h2>
+    <p id="mapSub">The rover is fixed! Next stop on Mars:</p>
+    <svg id="mapSvg" viewBox="0 0 760 300" role="img" aria-label="Mars region map"></svg>
+    <div class="row" style="justify-content:center">
+      <button class="btn go pulse" id="mapNext">Knowledge Check ▶</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ QUIZ ============ -->
+<div class="overlay" id="quiz" hidden>
+  <div class="card panel">
+    <div class="qnum" id="qNum">Question 1 of 3</div>
+    <h2 style="font-size:clamp(24px,4vw,34px)" id="qText"></h2>
+    <div class="opts" id="qOpts"></div>
+    <div id="qAfter" hidden>
+      <div id="qBurst">YES!</div>
+      <div id="qExplain"></div>
+      <div style="margin-top:12px"><button class="btn go" id="qNextBtn">Next ▶</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ RESULTS ============ -->
+<div class="overlay" id="results" hidden>
+  <div class="card panel">
+    <h2>Mission Complete!</h2>
+    <div id="resStars"></div>
+    <p id="resText"></p>
+    <p id="resBadges" class="hint"></p>
+    <div class="titleRow">
+      <button class="btn go" id="replayBtn">↻ Replay Mission</button>
+      <button class="btn yel" id="resMapBtn">🗺 Region Map</button>
+      <a class="btn alt" href="../">⬅ Games</a>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* =====================================================================
+   The Martian Jump — Mission 01. One file, no libraries.
+   Physics: real projectile motion integrated every frame in meters & seconds:
+   x += vx·dt ; vy -= g·dt ; y += vy·dt   (g Earth 9.8, Mars 3.7, Moon 1.6 m/s²)
+   ===================================================================== */
+const INK = '#1d1b26', TAU = Math.PI * 2;
+const G = { earth: 9.8, mars: 3.7, moon: 1.6 };
+const PCOL = { earth: '#2f8fe0', mars: '#ff6a1a', moon: '#9b5de5' };
+const PNAME = { earth: 'Earth', mars: 'Mars', moon: 'Moon' };
+const PEMO = { earth: '🌍', mars: '🔴', moon: '🌙' };
+const TIMES = { challenge: 30, discover: 60, experiment: 120, boss: 90 };
+const CH_SPEED = 5.0;                       // "jump the way you'd jump on Earth" (m/s)
+const SKEY = 'tg-martian-jump-v1';
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const $ = id => document.getElementById(id);
+const rangeOf = (v, deg, g) => v * v * Math.sin(2 * deg * Math.PI / 180) / g;
+
+/* ---------------- save data (always safe) ---------------- */
+let save = { done: false, stars: 0, badges: [], region2: false };
+try { const s = JSON.parse(localStorage.getItem(SKEY) || 'null'); if (s && typeof s === 'object') save = Object.assign(save, s); } catch (e) {}
+function persist() { try { localStorage.setItem(SKEY, JSON.stringify(save)); } catch (e) {} }
+
+/* ---------------- sound (Web Audio, made on first tap) ---------------- */
+let actx = null, muted = false;
+try { muted = localStorage.getItem(SKEY + '-mute') === '1'; } catch (e) {}
+function ensureAudio() {
+  if (actx) { if (actx.state === 'suspended') actx.resume(); return; }
+  try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { actx = null; }
+}
+function tone(f, dur = 0.12, type = 'sine', vol = 0.13, f2 = null, delay = 0) {
+  if (!actx || muted) return;
+  try {
+    const t0 = actx.currentTime + delay, o = actx.createOscillator(), g = actx.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t0);
+    if (f2) o.frequency.exponentialRampToValueAtTime(f2, t0 + dur);
+    g.gain.setValueAtTime(vol, t0); g.gain.exponentialRampToValueAtTime(0.0008, t0 + dur);
+    o.connect(g); g.connect(actx.destination); o.start(t0); o.stop(t0 + dur + 0.02);
+  } catch (e) {}
+}
+const sfx = {
+  click() { tone(660, 0.06, 'square', 0.05); },
+  jump() { tone(220, 0.35, 'triangle', 0.14, 720); },
+  land() { tone(140, 0.16, 'sine', 0.2, 60); },
+  good() { [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.18, 'triangle', 0.12, null, i * 0.09)); },
+  bad() { tone(392, 0.18, 'triangle', 0.1, null, 0); tone(294, 0.3, 'triangle', 0.1, null, 0.15); },
+  badge() { [784, 988, 1319].forEach((f, i) => tone(f, 0.14, 'square', 0.05, null, i * 0.07)); },
+  boing() { tone(300, 0.25, 'sine', 0.12, 600); },
+};
+function setMuteIcon() { $('muteBtn').textContent = muted ? '🔇' : '🔊'; }
+setMuteIcon();
+$('muteBtn').onclick = () => { muted = !muted; setMuteIcon(); try { localStorage.setItem(SKEY + '-mute', muted ? '1' : '0'); } catch (e) {} sfx.click(); };
+document.addEventListener('pointerdown', ensureAudio, { capture: true });
+document.addEventListener('keydown', ensureAudio, { capture: true });
+
+/* ---------------- canvas ---------------- */
+const cv = $('cv'), mainCtx = cv.getContext('2d');
+let ctx = mainCtx;   // helpers draw on ctx; art functions swap it to their target canvas
+let W = 800, H = 500, DPR = 1;
+function resize() {
+  const r = $('stage').getBoundingClientRect();
+  DPR = Math.min(2, window.devicePixelRatio || 1);
+  W = Math.max(100, r.width); H = Math.max(100, r.height);
+  cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+}
+window.addEventListener('resize', resize);
+function ell(x, y, rx, ry, rot = 0) { ctx.beginPath(); ctx.ellipse(x, y, Math.max(0.1, rx), Math.max(0.1, ry), rot, 0, TAU); }
+function rrect(x, y, w, h, r) { ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, w, h, r) : ctx.rect(x, y, w, h); }
+function toonFont(px) { return `${Math.round(px)}px "Luckiest Guy","Comic Sans MS","Chalkboard SE",system-ui,sans-serif`; }
+function inkText(c, txt, x, y, px, fill = '#fff', align = 'center', lw = null) {
+  c.font = toonFont(px); c.textAlign = align; c.textBaseline = 'middle'; c.lineJoin = 'round';
+  c.lineWidth = lw || Math.max(3, px * 0.18); c.strokeStyle = INK; c.strokeText(txt, x, y);
+  c.fillStyle = fill; c.fillText(txt, x, y);
+}
+function hash(n) { const s = Math.sin(n * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); }
+
+/* =====================================================================
+   CAPTAIN PUP — Japanese Chin pup in a space suit with a bubble helmet.
+   (x,y) = point between the feet on the ground; r = head radius in px.
+   Total height ≈ 4.5·r.
+   ===================================================================== */
+function drawPup(c, x, y, r, o = {}) { const prev = ctx; ctx = c; try { drawPupInner(c, x, y, r, o); } finally { ctx = prev; } }
+function drawPupInner(c, x, y, r, o) {
+  const pose = o.pose || 'stand', t = o.t || 0, lw = Math.max(1.6, r * 0.13);
+  c.save(); c.translate(x, y);
+  if (o.tilt) c.rotate(o.tilt);
+  if (o.squash) c.scale(1 + o.squash, 1 - o.squash);
+  if (o.ghost) c.globalAlpha = 0.42;
+  c.lineWidth = lw; c.strokeStyle = INK; c.lineJoin = 'round'; c.lineCap = 'round';
+  const suit = o.ghost ? '#d9ecff' : '#ffffff';
+  // backpack (life support)
+  c.fillStyle = '#c9ccd6'; rrect(-r * 0.95, -r * 2.45, r * 1.9, r * 1.35, r * 0.3); c.fill(); c.stroke();
+  // boots
+  const fly = pose === 'fly';
+  for (const sd of [-1, 1]) {
+    const bx = sd * r * 0.45, by = fly ? -r * 0.5 : -r * 0.24;
+    c.fillStyle = suit; ell(bx, by, r * 0.42, r * 0.27, fly ? sd * 0.5 : 0); c.fill(); c.stroke();
+    c.fillStyle = '#ff9f1c'; ell(bx, by - r * 0.2, r * 0.3, r * 0.09, fly ? sd * 0.5 : 0); c.fill();
+  }
+  // arms (behind body edge)
+  const wave = pose === 'stand' ? Math.sin(t * 3) * 0.15 : 0;
+  for (const sd of [-1, 1]) {
+    let ax, ay, rot;
+    if (fly) { ax = sd * r * 1.05; ay = -r * 2.05; rot = -sd * 0.7; }
+    else if (pose === 'cheer') { ax = sd * r * 1.05; ay = -r * 2.1; rot = -sd * 0.5 + Math.sin(t * 10) * 0.15; }
+    else if (pose === 'sad') { ax = sd * r * 0.92; ay = -r * 1.05; rot = sd * 0.15; }
+    else { ax = sd * r * 0.98; ay = -r * 1.25; rot = sd * 0.35 + (sd > 0 ? wave : 0); }
+    c.fillStyle = suit; ell(ax, ay, r * 0.25, r * 0.52, rot); c.fill(); c.stroke();
+    const up = fly || pose === 'cheer' ? -1 : 1;
+    const gx = ax - up * Math.sin(rot) * r * 0.48, gy = ay + up * Math.cos(rot) * r * 0.48;
+    c.fillStyle = '#ff9f1c'; ell(gx, gy, r * 0.2, r * 0.2); c.fill(); c.stroke();
+  }
+  // body
+  c.fillStyle = suit; ell(0, -r * 1.25, r * 0.95, r * 1.02); c.fill();
+  c.save(); ell(0, -r * 1.25, r * 0.95, r * 1.02); c.clip();
+  c.fillStyle = '#ff9f1c'; c.fillRect(-r, -r * 0.82, r * 2, r * 0.2);
+  c.restore();
+  ell(0, -r * 1.25, r * 0.95, r * 1.02); c.stroke();
+  // chest panel
+  c.fillStyle = '#4cc9f0'; rrect(-r * 0.42, -r * 1.78, r * 0.84, r * 0.5, r * 0.12); c.fill(); c.lineWidth = lw * 0.7; c.stroke();
+  [['#ff4d6d', -0.22], ['#ffd23f', 0], ['#06d6a0', 0.22]].forEach(([col, dx]) => { c.fillStyle = col; ell(dx * r, -r * 1.53, r * 0.08, r * 0.08); c.fill(); });
+  c.lineWidth = lw;
+  // helmet collar
+  c.fillStyle = '#9aa0b4'; ell(0, -r * 2.2, r * 0.9, r * 0.24); c.fill(); c.stroke();
+  // ---- head inside the bubble ----
+  const hy = -r * 3.1 + (pose === 'stand' ? Math.sin(t * 2.4) * r * 0.04 : 0);
+  c.fillStyle = 'rgba(190,235,255,.35)'; ell(0, hy, r * 1.48, r * 1.42); c.fill();
+  c.fillStyle = '#1f1d22';                       // floppy black ears
+  for (const sd of [-1, 1]) { ell(sd * r * 0.88, hy + r * 0.2, r * 0.34, r * 0.66, sd * 0.28); c.fill(); }
+  c.fillStyle = '#fff'; ell(0, hy, r * 0.98, r * 0.9); c.fill(); c.lineWidth = lw * 0.8; c.stroke();
+  c.fillStyle = '#1f1d22';                       // eye patches with white blaze between
+  for (const sd of [-1, 1]) { ell(sd * r * 0.46, hy - r * 0.12, r * 0.34, r * 0.42, sd * 0.38); c.fill(); }
+  const blink = (t % 3.7) < 0.12;
+  for (const sd of [-1, 1]) {
+    const ex = sd * r * 0.43, ey = hy - r * 0.08, er = r * 0.21;
+    if (blink || pose === 'happy') {
+      c.strokeStyle = '#fff'; c.lineWidth = Math.max(1.2, r * 0.08);
+      c.beginPath(); c.moveTo(ex - er, ey); c.quadraticCurveTo(ex, ey - er * (pose === 'happy' ? 1.1 : -0.4), ex + er, ey); c.stroke();
+      c.strokeStyle = INK; continue;
+    }
+    c.fillStyle = '#7a4524'; ell(ex, ey, er, er); c.fill();
+    c.fillStyle = '#140a07'; ell(ex + r * 0.03, ey + r * 0.02, er * 0.55, er * 0.55); c.fill();
+    c.fillStyle = '#fff'; ell(ex + er * 0.35, ey - er * 0.35, er * 0.26, er * 0.26); c.fill();
+    ell(ex - er * 0.3, ey + er * 0.35, er * 0.1, er * 0.1); c.fill();
+  }
+  c.fillStyle = '#2e2729'; ell(0, hy + r * 0.24, r * 0.15, r * 0.1); c.fill();   // button nose
+  c.fillStyle = 'rgba(255,255,255,.6)'; ell(-r * 0.05, hy + r * 0.21, r * 0.05, r * 0.03); c.fill();
+  // mouth
+  c.strokeStyle = INK; c.lineWidth = Math.max(1.2, r * 0.07);
+  if (pose === 'sad') {
+    c.beginPath(); c.moveTo(-r * 0.2, hy + r * 0.55); c.quadraticCurveTo(0, hy + r * 0.42, r * 0.2, hy + r * 0.55); c.stroke();
+  } else {
+    c.fillStyle = '#5a1a2a';
+    c.beginPath(); c.moveTo(-r * 0.26, hy + r * 0.38); c.quadraticCurveTo(0, hy + r * 0.78, r * 0.26, hy + r * 0.38);
+    c.quadraticCurveTo(0, hy + r * 0.46, -r * 0.26, hy + r * 0.38); c.fill(); c.stroke();
+    c.fillStyle = '#ff8fb1'; ell(r * 0.04, hy + r * 0.63, r * 0.12, r * 0.15); c.fill(); c.lineWidth = Math.max(1, r * 0.05); c.stroke();
+  }
+  // whiskers
+  c.strokeStyle = 'rgba(40,30,30,.5)'; c.lineWidth = Math.max(0.8, r * 0.03); c.beginPath();
+  for (const sd of [-1, 1]) for (const k of [-1, 1]) { c.moveTo(sd * r * 0.22, hy + r * 0.32 + k * r * 0.05); c.lineTo(sd * r * 0.82, hy + r * 0.26 + k * r * 0.14); }
+  c.stroke();
+  // bubble glass
+  c.strokeStyle = INK; c.lineWidth = lw; ell(0, hy, r * 1.48, r * 1.42); c.stroke();
+  c.strokeStyle = 'rgba(255,255,255,.85)'; c.lineWidth = Math.max(1.5, r * 0.14);
+  c.beginPath(); c.ellipse(0, hy, r * 1.2, r * 1.14, 0, Math.PI * 1.08, Math.PI * 1.42); c.stroke();
+  c.beginPath(); ell(-r * 0.25, hy - r * 1.05, r * 0.07, r * 0.07); c.fillStyle = 'rgba(255,255,255,.9)'; c.fill();
+  // antenna
+  c.strokeStyle = INK; c.lineWidth = lw * 0.8;
+  c.beginPath(); c.moveTo(r * 0.7, hy - r * 1.22); c.lineTo(r * 0.95, hy - r * 1.8); c.stroke();
+  c.fillStyle = '#ffd23f'; ell(r * 0.97, hy - r * 1.86, r * 0.16, r * 0.16); c.fill(); c.lineWidth = lw * 0.6; c.stroke();
+  c.restore();
+}
+
+/* ---------------- rover & repair station ---------------- */
+function drawRover(c, x, y, u, fixed, t) {
+  ctx = c;
+  // u = px per meter, rover ≈ 2.4 m wide
+  const lw = Math.max(2, u * 0.05);
+  c.save(); c.translate(x, y); c.lineWidth = lw; c.strokeStyle = INK; c.lineJoin = 'round';
+  const bob = fixed ? Math.abs(Math.sin(t * 6)) * u * 0.05 * (roverHop > 0 ? 1 : 0) : 0;
+  c.translate(0, -bob);
+  // mast + camera
+  c.beginPath(); c.moveTo(u * 0.6, -u * 1.15); c.lineTo(u * 0.6, -u * 1.85); c.stroke();
+  c.fillStyle = '#e8e8f0'; rrect(u * 0.38, -u * 2.1, u * 0.5, u * 0.3, u * 0.06); c.fill(); c.stroke();
+  c.fillStyle = '#4cc9f0'; ell(u * 0.78, -u * 1.95, u * 0.07, u * 0.07); c.fill();
+  // solar panel
+  c.fillStyle = '#3a56c5'; c.beginPath(); c.moveTo(-u * 1.3, -u * 1.25); c.lineTo(u * 0.3, -u * 1.25); c.lineTo(u * 0.1, -u * 1.45); c.lineTo(-u * 1.45, -u * 1.45); c.closePath(); c.fill(); c.stroke();
+  c.strokeStyle = 'rgba(255,255,255,.5)'; c.lineWidth = lw * 0.5;
+  for (let i = 1; i < 4; i++) { c.beginPath(); c.moveTo(-u * 1.3 + i * u * 0.4, -u * 1.25); c.lineTo(-u * 1.45 + i * u * 0.39, -u * 1.45); c.stroke(); }
+  c.strokeStyle = INK; c.lineWidth = lw;
+  // body
+  c.fillStyle = '#f4f1ea'; rrect(-u * 1.2, -u * 1.25, u * 2.4, u * 0.7, u * 0.14); c.fill(); c.stroke();
+  c.fillStyle = '#ff9f1c'; c.fillRect(-u * 1.17, -u * 0.86, u * 2.34, u * 0.13);
+  // status light
+  const on = fixed || (t % 0.8) < 0.4;
+  c.fillStyle = fixed ? '#06d6a0' : (on ? '#ff4d6d' : '#7a2a3a'); ell(-u * 0.9, -u * 1.05, u * 0.1, u * 0.1); c.fill(); c.lineWidth = lw * 0.6; c.stroke();
+  // wheels (3 visible)
+  c.lineWidth = lw;
+  for (const k of [-0.85, 0, 0.85]) {
+    c.strokeStyle = INK; c.beginPath(); c.moveTo(k * u, -u * 0.55); c.lineTo(k * u, -u * 0.32); c.stroke();
+    c.fillStyle = '#3b3842'; ell(k * u, -u * 0.3, u * 0.3, u * 0.3); c.fill(); c.stroke();
+    c.fillStyle = '#9aa0b4'; ell(k * u, -u * 0.3, u * 0.12, u * 0.12); c.fill();
+    const a = fixed ? t * 4 : 0;
+    c.strokeStyle = '#9aa0b4'; c.lineWidth = lw * 0.5;
+    c.beginPath(); c.moveTo(k * u + Math.cos(a) * u * 0.25, -u * 0.3 + Math.sin(a) * u * 0.25); c.lineTo(k * u - Math.cos(a) * u * 0.25, -u * 0.3 - Math.sin(a) * u * 0.25); c.stroke();
+    c.lineWidth = lw;
+  }
+  if (fixed) { c.fillStyle = '#06d6a0'; inkText(c, '♥', u * 0.15, -u * 2.4 - Math.sin(t * 3) * u * 0.08, Math.max(14, u * 0.45), '#ff4d6d'); }
+  c.restore();
+}
+function drawStation(c, x, y, u, t) {
+  ctx = c;
+  const lw = Math.max(2, u * 0.05);
+  c.save(); c.translate(x, y); c.lineWidth = lw; c.strokeStyle = INK; c.lineJoin = 'round';
+  // dish
+  c.beginPath(); c.moveTo(u * 0.5, -u * 1.3); c.lineTo(u * 0.75, -u * 1.85); c.stroke();
+  c.fillStyle = '#e9e4f0'; c.beginPath(); c.ellipse(u * 0.8, -u * 1.95, u * 0.3, u * 0.14, -0.5, 0, TAU); c.fill(); c.stroke();
+  // dome
+  c.fillStyle = '#f4f1ea'; c.beginPath(); c.moveTo(-u * 1.0, 0); c.lineTo(-u * 1.0, -u * 0.6); c.quadraticCurveTo(-u * 1.0, -u * 1.55, 0, -u * 1.55);
+  c.quadraticCurveTo(u * 1.0, -u * 1.55, u * 1.0, -u * 0.6); c.lineTo(u * 1.0, 0); c.closePath(); c.fill(); c.stroke();
+  c.fillStyle = '#9b5de5'; c.fillRect(-u * 0.97, -u * 0.72, u * 1.94, u * 0.14);
+  // door
+  c.fillStyle = '#4cc9f0'; rrect(-u * 0.25, -u * 0.6, u * 0.5, u * 0.6, u * 0.1); c.fill(); c.stroke();
+  // sign
+  c.fillStyle = '#ffd23f'; rrect(-u * 0.6, -u * 1.33, u * 1.2, u * 0.36, u * 0.08); c.fill(); c.stroke();
+  inkText(c, '🔧 REPAIR', 0, -u * 1.14, Math.max(9, u * 0.22), INK, 'center', 0.1);
+  // beacon
+  c.fillStyle = (t % 1) < 0.5 ? '#06d6a0' : '#0a8f6c'; ell(0, -u * 1.62, u * 0.1, u * 0.1); c.fill(); c.lineWidth = lw * 0.6; c.stroke();
+  c.restore();
+}
+
+/* =====================================================================
+   WORLD + PHYSICS
+   ===================================================================== */
+const world = { planet: 'mars', craters: [], pads: [], flags: [], view: [-3, 8], viewH: 3.5, depth: 1.4,
+  rover: null, station: null };
+let roverFixed = false, roverHop = 0;
+function groundY(x) {
+  for (const p of world.pads) if (x >= p.x0 && x <= p.x1) return 0;
+  for (const cr of world.craters) if (x > cr.x0 && x < cr.x1) return -cr.d;
+  return 0;
+}
+let jumpers = [], trails = [], pupState = { x: 0, y: 0, pose: 'stand', squash: 0, sad: false };
+let flying = false, crouch = 0, pendingLaunch = null;
+const aim = { speed: 5, angle: 40, locked: false };
+
+function makeJumper(planet, ghost) {
+  const a = aim.angle * Math.PI / 180, v = ghost ? CH_SPEED : aim.speed;
+  return { planet, g: G[planet], ghost, x: 0, y: 0, vx: v * Math.cos(a), vy: v * Math.sin(a), v, angle: aim.angle,
+    t: 0, trail: [[0, 0]], landed: false, crossX: null, maxY: 0, nextDot: 0.045, landT: 0 };
+}
+function stepJumper(j, dt) {
+  if (j.landed) { j.landT += dt; return; }
+  const sub = 8, h = dt / sub;
+  for (let i = 0; i < sub && !j.landed; i++) {
+    j.vy -= j.g * h;                       // gravity pulls down
+    let nx = j.x + j.vx * h, ny = j.y + j.vy * h;
+    if (j.crossX === null && j.y >= 0 && ny < 0 && j.vy < 0) j.crossX = j.x + (nx - j.x) * (j.y / (j.y - ny));
+    const gy = groundY(nx);
+    if (ny <= gy) {
+      if (j.y >= gy - 1e-6) { j.x = nx; j.y = gy; j.landed = true; break; }          // landed from above
+      // hit a crater wall from the side: slide down it
+      nx = j.x; j.vx = 0;
+      if (ny <= groundY(nx)) { j.x = nx; j.y = groundY(nx); j.landed = true; break; }
+    }
+    j.x = nx; j.y = ny; j.t += h;
+    j.maxY = Math.max(j.maxY, j.y);
+    if (j.t >= j.nextDot) { j.trail.push([j.x, j.y]); j.nextDot += 0.045; }
+  }
+  if (j.landed) { j.trail.push([j.x, j.y]); onLand(j); }
+}
+
+/* ---------------- camera ---------------- */
+const cam = { x0: -3, x1: 8, scale: 50, ox: 0, gy: 400, viewH: 3.5 };
+function updateCamera(dt, snap) {
+  let [x0, x1] = world.view, vh = world.viewH;
+  if (phase === 'experiment') {
+    let far = 14, hi = 4;
+    for (const tr of trails) { far = Math.max(far, tr.landX + 2.5); hi = Math.max(hi, tr.maxY + 1.6); }
+    for (const j of jumpers) { far = Math.max(far, j.x + 2.5); hi = Math.max(hi, j.maxY + 1.6); }
+    x1 = far; vh = Math.min(hi, 22);
+  }
+  const k = snap ? 1 : 1 - Math.exp(-dt * 3);
+  cam.x0 = lerp(cam.x0, x0, k); cam.x1 = lerp(cam.x1, x1, k); cam.viewH = lerp(cam.viewH, vh, k);
+  const depth = world.depth + (phase === 'experiment' ? 0.9 : 0.5);
+  const vw = cam.x1 - cam.x0;
+  cam.scale = Math.min(W / vw, (H - 16) / (cam.viewH + depth));
+  cam.ox = (W - vw * cam.scale) / 2 - cam.x0 * cam.scale;
+  cam.gy = H - depth * cam.scale;
+  const spare = cam.gy - (cam.viewH + 0.3) * cam.scale;      // tall portrait screens: lift the ground
+  if (spare > 120) cam.gy -= (spare - 120) * 0.45;
+}
+const SX = x => cam.ox + x * cam.scale, SY = y => cam.gy - y * cam.scale;
+const pupR = () => clamp(cam.scale * 0.25, 9, 44);
+
+/* ---------------- scenery ---------------- */
+const stars = Array.from({ length: 90 }, (_, i) => [hash(i), hash(i + 99), hash(i + 7)]);
+function drawSky(planet, t) {
+  let g = ctx.createLinearGradient(0, 0, 0, cam.gy);
+  if (planet === 'mars') { g.addColorStop(0, '#d98a5c'); g.addColorStop(0.55, '#f0c08c'); g.addColorStop(1, '#f6b4a3'); }
+  else if (planet === 'earth') { g.addColorStop(0, '#5fb6ef'); g.addColorStop(1, '#d4efff'); }
+  else { g.addColorStop(0, '#0d0b18'); g.addColorStop(1, '#262240'); }
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  if (planet === 'moon') {
+    for (const [a, b, c] of stars) { ctx.fillStyle = `rgba(255,255,255,${0.4 + 0.6 * Math.abs(Math.sin(t * (0.5 + c) + a * 9))})`; ctx.fillRect(a * W, b * cam.gy * 0.9, 2, 2); }
+    const ex = W * 0.8, ey = Math.min(H * 0.2, cam.gy * 0.35), er = Math.max(18, Math.min(W, H) * 0.07);
+    ctx.fillStyle = '#2f8fe0'; ell(ex, ey, er, er); ctx.fill();
+    ctx.fillStyle = '#06d6a0'; ell(ex - er * 0.3, ey - er * 0.2, er * 0.35, er * 0.25, 0.4); ctx.fill(); ell(ex + er * 0.35, ey + er * 0.3, er * 0.28, er * 0.2); ctx.fill();
+    ctx.lineWidth = 3; ctx.strokeStyle = INK; ell(ex, ey, er, er); ctx.stroke();
+  } else if (planet === 'mars') {
+    // little Earth dot in the sky
+    const ex = W * 0.86, ey = Math.max(26, Math.min(H * 0.16, cam.gy * 0.3));
+    ctx.fillStyle = 'rgba(255,255,255,.35)'; ell(ex, ey, 9, 9); ctx.fill();
+    ctx.fillStyle = '#3d8be0'; ell(ex, ey, 4.5, 4.5); ctx.fill();
+    ctx.font = '700 12px Nunito, system-ui'; ctx.fillStyle = 'rgba(80,40,30,.75)'; ctx.textAlign = 'center'; ctx.fillText('Earth', ex, ey + 18);
+    ctx.fillStyle = 'rgba(255,250,235,.8)'; ell(W * 0.14, Math.max(30, cam.gy * 0.22), 13, 13); ctx.fill();   // small far-away Sun
+  } else {
+    ctx.fillStyle = '#ffd23f'; ell(W * 0.14, Math.max(34, cam.gy * 0.2), 26, 26); ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = INK; ctx.stroke();
+    ctx.fillStyle = '#fff';
+    for (const [cx, s] of [[0.45, 1], [0.72, 0.8]]) { const x = W * cx + Math.sin(t * 0.1) * 20, y = cam.gy * 0.25; ell(x, y, 40 * s, 16 * s); ctx.fill(); ell(x + 22 * s, y - 10 * s, 24 * s, 16 * s); ctx.fill(); }
+  }
+  // far hills (parallax-free, simple)
+  const hill = (col, amp, base, seed) => {
+    ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(0, cam.gy);
+    for (let x = 0; x <= W + 20; x += 20) ctx.lineTo(x, cam.gy - base - amp * (0.5 + 0.5 * Math.sin(x * 0.006 + seed) * Math.sin(x * 0.013 + seed * 2)));
+    ctx.lineTo(W, cam.gy); ctx.closePath(); ctx.fill();
+  };
+  const hs = Math.min(H * 0.18, 140);
+  if (planet === 'mars') { hill('#d9825a', hs, hs * 0.2, 1); hill('#c2643f', hs * 0.6, hs * 0.05, 4); }
+  else if (planet === 'earth') { hill('#9fd88a', hs, hs * 0.15, 2); hill('#74c46a', hs * 0.6, hs * 0.04, 5); }
+  else { hill('#5d5a70', hs * 0.8, hs * 0.1, 3); hill('#7b7890', hs * 0.5, 0, 6); }
+}
+function drawGround(planet) {
+  const top = { mars: '#c84a1a', earth: '#59b84a', moon: '#b9b6c2' }[planet];
+  const body = { mars: '#a33c14', earth: '#8a5a32', moon: '#99969f' }[planet];
+  const inner = { mars: '#7a2c10', earth: '#6a4426', moon: '#77748a' }[planet];
+  const L = -50, R = 200;
+  // breakpoints
+  const brk = new Set([L, R]);
+  for (const c of world.craters) { brk.add(c.x0); brk.add(c.x1); }
+  for (const p of world.pads) { brk.add(p.x0); brk.add(p.x1); }
+  const xs = [...brk].sort((a, b) => a - b);
+  ctx.beginPath(); ctx.moveTo(SX(L), H + 10);
+  for (let i = 0; i < xs.length - 1; i++) {
+    const a = xs[i], b = xs[i + 1], y = groundY((a + b) / 2);
+    ctx.lineTo(SX(a), SY(y)); ctx.lineTo(SX(b), SY(y));
+  }
+  ctx.lineTo(SX(R), H + 10); ctx.closePath();
+  ctx.fillStyle = body; ctx.fill();
+  // crater insides (darker), drawn as bowls
+  for (const c of world.craters) {
+    ctx.fillStyle = inner; ctx.fillRect(SX(c.x0), SY(0), SX(c.x1) - SX(c.x0), c.d * cam.scale);
+    ctx.fillStyle = 'rgba(0,0,0,.12)'; ctx.fillRect(SX(c.x0), SY(0), SX(c.x1) - SX(c.x0), c.d * cam.scale * 0.35);
+  }
+  // pads (rock pillars) redrawn on top
+  for (const p of world.pads) {
+    ctx.fillStyle = body; ctx.fillRect(SX(p.x0), SY(0), SX(p.x1) - SX(p.x0), H);
+    ctx.lineWidth = 3; ctx.strokeStyle = INK; ctx.strokeRect(SX(p.x0), SY(0), SX(p.x1) - SX(p.x0), H);
+    ctx.fillStyle = '#ffd23f'; ctx.fillRect(SX(p.x0), SY(0) - 4, SX(p.x1) - SX(p.x0), 8);
+    ctx.strokeRect(SX(p.x0), SY(0) - 4, SX(p.x1) - SX(p.x0), 8);
+  }
+  // surface strip + outline
+  ctx.lineWidth = 3; ctx.strokeStyle = INK; ctx.lineJoin = 'round';
+  ctx.beginPath(); ctx.moveTo(SX(L), SY(0));
+  for (let i = 0; i < xs.length - 1; i++) {
+    const a = xs[i], b = xs[i + 1], y = groundY((a + b) / 2);
+    ctx.lineTo(SX(a), SY(y)); ctx.lineTo(SX(b), SY(y));
+  }
+  ctx.stroke();
+  ctx.fillStyle = top;
+  for (let i = 0; i < xs.length - 1; i++) {
+    const a = xs[i], b = xs[i + 1];
+    if (groundY((a + b) / 2) === 0) ctx.fillRect(SX(a), SY(0) + 1.5, SX(b) - SX(a), Math.max(5, cam.scale * 0.12));
+  }
+  // rocks
+  for (let k = -20; k < 120; k++) {
+    const x = k * 1.37 + hash(k) * 0.9;
+    if (SX(x) < -20 || SX(x) > W + 20 || groundY(x) !== 0 || groundY(x - 0.3) !== 0 || groundY(x + 0.3) !== 0) continue;
+    if (hash(k + 50) < 0.45) continue;
+    const s = clamp(cam.scale * (0.08 + hash(k + 3) * 0.1), 3, 14);
+    ctx.fillStyle = inner; ell(SX(x), SY(0) - s * 0.3, s * 1.3, s * 0.8); ctx.fill(); ctx.lineWidth = 2; ctx.stroke();
+  }
+}
+function drawRuler() {
+  const s = cam.scale, step = s > 45 ? 1 : s > 20 ? 2 : 5;
+  const y = SY(0) + Math.max(14, s * 0.32);
+  ctx.save();
+  // measuring line across everything at ground level (dashed over craters)
+  ctx.setLineDash([6, 6]); ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 2;
+  for (const c of world.craters) { ctx.beginPath(); ctx.moveTo(SX(c.x0), SY(0)); ctx.lineTo(SX(c.x1), SY(0)); ctx.stroke(); }
+  ctx.setLineDash([]);
+  for (let m = 0; m <= 60; m += step) {
+    const x = SX(m); if (x > W + 10) break;
+    ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(x, SY(0) - 4); ctx.lineTo(x, SY(0) + 6); ctx.stroke();
+    if (cam.gy + 22 < H) inkText(ctx, m + ' m', x, Math.min(y, H - 10), clamp(s * 0.28, 11, 18), '#fff', 'center', 3);
+  }
+  ctx.restore();
+}
+function drawFlag(f, t) {
+  const x = SX(f.x), y = SY(0), h = clamp(cam.scale * 1.2, 34, 90);
+  ctx.lineWidth = 3; ctx.strokeStyle = INK;
+  ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y - h); ctx.stroke();
+  const wv = Math.sin(t * 4 + f.x) * 4;
+  ctx.fillStyle = f.hit ? '#06d6a0' : f.col;
+  ctx.beginPath(); ctx.moveTo(x, y - h); ctx.lineTo(x + h * 0.55, y - h * 0.82 + wv * 0.3); ctx.lineTo(x, y - h * 0.62); ctx.closePath(); ctx.fill(); ctx.stroke();
+  inkText(ctx, f.x + ' m', x + h * 0.2, y - h - 12, clamp(cam.scale * 0.3, 12, 20), f.hit ? '#06d6a0' : '#ffd23f', 'center', 3);
+  // target zone marks
+  ctx.fillStyle = 'rgba(255,255,255,.28)'; ctx.fillRect(SX(f.x - 0.6), y - 3, SX(f.x + 0.6) - SX(f.x - 0.6), 6);
+}
+function drawTrail(tr, alpha) {
+  ctx.save(); ctx.globalAlpha = alpha;
+  const rr = clamp(cam.scale * 0.06, 2.2, 5);
+  ctx.fillStyle = tr.color; ctx.strokeStyle = INK; ctx.lineWidth = 1.2;
+  for (const [x, y] of tr.pts) { ell(SX(x), SY(y), rr, rr); ctx.fill(); ctx.stroke(); }
+  ctx.restore();
+}
+
+/* ---------------- particles, bursts, confetti ---------------- */
+let smoke = [], bursts = [], confetti = [], sparkles = [];
+function addBurst(text, x, y, col = '#ffd23f', size = 1) { bursts.push({ text, x, y, col, t: 0, size }); }
+function drawBursts(dt) {
+  for (let i = bursts.length - 1; i >= 0; i--) {
+    const b = bursts[i]; b.t += dt; if (b.t > 1.4) { bursts.splice(i, 1); continue; }
+    const k = b.t < 0.15 ? b.t / 0.15 : 1, a = b.t > 1.1 ? (1.4 - b.t) / 0.3 : 1;
+    const R = clamp(Math.min(W, H) * 0.12, 46, 110) * k * b.size;
+    ctx.save(); ctx.globalAlpha = a; ctx.translate(b.x, b.y - b.t * 20); ctx.rotate(-0.08);
+    ctx.beginPath();
+    for (let s = 0; s < 28; s++) { const ang = s / 28 * TAU, rr = s % 2 ? R * 0.62 : R; ctx.lineTo(Math.cos(ang) * rr * 1.25, Math.sin(ang) * rr * 0.8); }
+    ctx.closePath(); ctx.fillStyle = b.col; ctx.fill(); ctx.lineWidth = 4; ctx.strokeStyle = INK; ctx.stroke();
+    inkText(ctx, b.text, 0, 3, R * 0.42, '#fff', 'center', Math.max(4, R * 0.08));
+    ctx.restore();
+  }
+}
+function confettiBurst(n = 140) {
+  const cols = ['#ff4d6d', '#ffd23f', '#06d6a0', '#4cc9f0', '#9b5de5', '#ff9f1c'];
+  for (let i = 0; i < n; i++) confetti.push({ x: W / 2 + (Math.random() - 0.5) * W * 0.4, y: H * 0.35, vx: (Math.random() - 0.5) * 700,
+    vy: -300 - Math.random() * 500, r: Math.random() * TAU, vr: (Math.random() - 0.5) * 12, c: cols[i % cols.length], life: 3 + Math.random() });
+}
+function drawParticles(dt, t) {
+  // rover smoke
+  if (world.rover && !roverFixed && Math.random() < dt * 9) {
+    const u = cam.scale;
+    smoke.push({ x: SX(world.rover.x) + u * (Math.random() * 0.6 - 0.3), y: SY(0) - u * 1.3, vx: 10 + Math.random() * 14, vy: -25 - Math.random() * 20, r: u * 0.15, t: 0 });
+  }
+  for (let i = smoke.length - 1; i >= 0; i--) {
+    const s = smoke[i]; s.t += dt; if (s.t > 2.6) { smoke.splice(i, 1); continue; }
+    s.x += s.vx * dt; s.y += s.vy * dt; s.r += dt * cam.scale * 0.2;
+    ctx.fillStyle = `rgba(90,80,90,${0.45 * (1 - s.t / 2.6)})`; ell(s.x, s.y, s.r, s.r); ctx.fill();
+  }
+  for (let i = sparkles.length - 1; i >= 0; i--) {
+    const s = sparkles[i]; s.t += dt; if (s.t > 0.9) { sparkles.splice(i, 1); continue; }
+    s.x += s.vx * dt; s.y += s.vy * dt;
+    ctx.save(); ctx.translate(s.x, s.y); ctx.rotate(s.t * 4); ctx.globalAlpha = 1 - s.t / 0.9;
+    ctx.fillStyle = '#ffd23f'; ctx.beginPath();
+    for (let k = 0; k < 8; k++) { const a = k / 8 * TAU, rr = k % 2 ? 3 : 9; ctx.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); }
+    ctx.closePath(); ctx.fill(); ctx.restore();
+  }
+  for (let i = confetti.length - 1; i >= 0; i--) {
+    const p = confetti[i]; p.life -= dt; if (p.life <= 0 || p.y > H + 30) { confetti.splice(i, 1); continue; }
+    p.vy += 700 * dt; p.vx *= 0.99; p.x += p.vx * dt; p.y += p.vy * dt; p.r += p.vr * dt;
+    ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.fillStyle = p.c; ctx.fillRect(-6, -3, 12, 7); ctx.restore();
+  }
+}
+
+/* =====================================================================
+   PHASES
+   ===================================================================== */
+let phase = 'title', phaseLeft = 0, timeUpShown = false, timerRelaxed = false;
+const PH_ORDER = ['challenge', 'discover', 'experiment', 'boss', 'quiz'];
+let challengeTried = false, boss = { D: 8, half: 1.0, attempts: 0, won: false, anim: 0, misses: 0 };
+let notes = [], badges = new Set(save.badges || []), drone = null;
+const BADGES = [
+  { id: 'f4', name: '🚩 4 m flag' }, { id: 'f8', name: '🚩 8 m flag' }, { id: 'f12', name: '🚩 12 m flag' },
+  { id: 'moon', name: '🌙 Moon hop' }, { id: 'hopper', name: '🪐 Planet hopper' }, { id: 'angle', name: '📐 Angle ace' },
+];
+
+function show(id, on) { $(id).hidden = !on; }
+function setTracker() {
+  const idx = PH_ORDER.indexOf(phase === 'map' ? 'boss' : phase === 'results' ? 'quiz' : phase);
+  document.querySelectorAll('.stp').forEach(el => {
+    const i = PH_ORDER.indexOf(el.dataset.p);
+    el.classList.toggle('on', i === idx && phase !== 'results');
+    el.classList.toggle('done', i < idx || phase === 'results' || (phase === 'map' && i === idx));
+  });
+}
+function fmt(s) { s = Math.max(0, Math.ceil(s)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+function updateTimerChip() {
+  const chip = $('timerChip');
+  if (!(phase in TIMES)) { chip.hidden = true; return; }
+  chip.hidden = false;
+  if (phaseLeft > 0) { chip.textContent = '⏱ ' + fmt(phaseLeft); chip.classList.remove('relax'); }
+  else { chip.textContent = '⏳ Take your time'; chip.classList.add('relax'); }
+}
+function setInfo(title, text) { $('infoTitle').textContent = title; $('infoText').innerHTML = text; }
+function setReadout(t) { $('readout').textContent = t; }
+let toastTimer = 0;
+function toast(msg, ms = 2600) { const el = $('toast'); el.textContent = msg; el.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), ms); }
+
+function hideOverlays() { ['title', 'discover', 'map', 'quiz', 'results'].forEach(id => show(id, false)); show('timeup', false); }
+
+function goto(p) {
+  hideOverlays();
+  phase = p; timeUpShown = false;
+  phaseLeft = TIMES[p] || 0;
+  show('topbar', p !== 'title');
+  const play = p === 'challenge' || p === 'experiment' || p === 'boss';
+  show('controls', play); show('info', play);
+  show('badgeBar', p === 'experiment');
+  jumpers = []; flying = false; pendingLaunch = null; crouch = 0; bursts = [];
+  pupState = { x: 0, y: 0, pose: 'stand', squash: 0, sad: false };
+  setReadout('');
+  $('jumpBtn').textContent = 'JUMP!'; $('jumpBtn').dataset.retry = ''; $('jumpBtn').disabled = false;
+  if (p === 'title') { setupTitleScene(); refreshTitle(); show('title', true); }
+  if (p === 'challenge') setupChallenge();
+  if (p === 'discover') { setupTitleScene(); openDiscover(); }
+  if (p === 'experiment') setupExperiment();
+  if (p === 'boss') setupBoss();
+  if (p === 'quiz') { setupTitleScene(); startQuiz(); }
+  setTracker(); updateTimerChip();
+  requestAnimationFrame(() => { resize(); updateCamera(0, true); });
+}
+
+function setControls({ speedLocked, planets, clear, next, notesOn }) {
+  aim.locked = speedLocked;
+  $('speed').disabled = speedLocked;
+  document.querySelectorAll('.stepb[data-k=speed]').forEach(b => b.disabled = speedLocked);
+  $('speedLock').textContent = speedLocked ? '🔒 Earth-style jump' : '';
+  show('planetSeg', planets); show('clearBtn', clear);
+  if (next) { $('nextBtn').textContent = next; show('nextBtn', true); } else show('nextBtn', false);
+  $('nextBtn').classList.remove('pulse');
+  show('notes', notesOn);
+  syncSliders();
+}
+function syncSliders() {
+  $('angle').value = aim.angle; $('speed').value = aim.speed;
+  $('angleOut').textContent = Math.round(aim.angle) + '°';
+  $('speedOut').textContent = aim.speed.toFixed(1) + ' m/s';
+}
+function setPlanet(pl) {
+  world.planet = pl;
+  document.querySelectorAll('#planetSeg button').forEach(b => b.classList.toggle('on', b.dataset.pl === pl));
+}
+
+function setupTitleScene() {
+  setPlanet('mars');
+  world.craters = [{ x0: 1.2, x1: 4.8, d: 1.3 }]; world.pads = []; world.flags = [];
+  world.view = [-3.4, 8]; world.viewH = 3.4; world.depth = 1.3;
+  world.rover = { x: -1.9 }; world.station = { x: 6.6 };
+  trails = []; jumpers = [];
+}
+function setupChallenge() {
+  setPlanet('mars');
+  world.craters = [{ x0: 0.45, x1: 4.6, d: 1.4 }]; world.pads = []; world.flags = [];
+  world.view = [-3.3, 8.6]; world.viewH = 3.2; world.depth = 1.4;
+  world.rover = { x: -1.9 }; world.station = { x: 7.0 };
+  trails = []; aim.speed = CH_SPEED; aim.angle = 40; challengeTried = false;
+  setControls({ speedLocked: true, planets: false, clear: false, next: null, notesOn: false });
+  setInfo('🛰 Your rover is stranded!', 'Jump across the crater to the repair station. Strength is set to a normal <b>Earth-style jump</b>. Pick an angle (or drag on the scene), then tap <b>JUMP!</b>');
+}
+function setupExperiment() {
+  setPlanet('mars');
+  world.craters = []; world.pads = []; world.depth = 0;
+  world.flags = [{ x: 4, col: '#ff4d6d', id: 'f4' }, { x: 8, col: '#ffd23f', id: 'f8' }, { x: 12, col: '#9b5de5', id: 'f12' }];
+  world.view = [-1.6, 14]; world.viewH = 4; world.rover = null; world.station = null;
+  trails = []; aim.speed = 5; aim.angle = 45;
+  setControls({ speedLocked: false, planets: true, clear: true, next: 'Boss Jump ▶', notesOn: true });
+  setInfo('🧪 Jump lab', 'Change <b>strength</b>, <b>angle</b> and <b>planet</b>. Hit the flags! Tip: same strength at 30°, 45° and 60° — which goes farthest?');
+  renderBadges(); renderNotes();
+}
+function setupBoss() {
+  setPlanet('mars'); boss.won = false; boss.anim = 0; boss.attempts = 0; boss.misses = 0; boss.half = 1.0; drone = null;
+  roverFixed = false; roverHop = 0;
+  setControls({ speedLocked: false, planets: false, clear: false, next: null, notesOn: true });
+  aim.speed = 5; aim.angle = 45; syncSliders();
+  newBossRound();
+}
+function newBossRound() {
+  boss.D = Math.round((6 + Math.random() * 5) * 10) / 10;   // 6.0 – 11.0 m
+  const D = boss.D, hf = boss.half;
+  world.craters = [{ x0: 0.45, x1: D + hf + 2.2, d: 2.2 }];
+  world.pads = [{ x0: D - hf, x1: D + hf }];
+  world.flags = []; world.depth = 2.2;
+  world.view = [-3.4, D + hf + 3.2]; world.viewH = 3.6;
+  world.rover = { x: -2.0 }; world.station = { x: D + hf * 0.35 };
+  trails = []; jumpers = []; flying = false; pupState = { x: 0, y: 0, pose: 'stand', squash: 0, sad: false };
+  setInfo('⭐ Boss: ONE jump!', `The repair pad is <b>${D.toFixed(1)} m</b> away (center). Use your Mars notes, pick strength + angle, then JUMP! Mars gravity: 3.7 m/s².`);
+  setReadout(`Distance to platform: ${D.toFixed(1)} m`);
+  $('jumpBtn').disabled = false; $('jumpBtn').textContent = 'JUMP!';
+  show('nextBtn', false); renderNotes();
+}
+
+/* ---------------- jumping ---------------- */
+function doJump() {
+  if (flying || pendingLaunch) return;
+  if (phase === 'boss' && boss.won) return;
+  if (phase === 'boss' && $('jumpBtn').dataset.retry === '1') { $('jumpBtn').dataset.retry = ''; newBossRound(); return; }
+  sfx.click();
+  if (phase === 'experiment' && trails.length > 9) trails.shift();
+  if (phase !== 'experiment') trails = [];
+  jumpers = [];
+  pupState = { x: 0, y: 0, pose: 'stand', squash: 0, sad: false };
+  crouch = 0.22; pendingLaunch = true; flying = true;
+  $('jumpBtn').disabled = true;
+}
+function launch() {
+  pendingLaunch = null;
+  jumpers.push(makeJumper(world.planet, false));
+  if (phase === 'challenge') jumpers.push(makeJumper('earth', true));
+  sfx.jump();
+}
+function onLand(j) {
+  if (j.ghost) {
+    trails.push({ pts: j.trail, color: PCOL.earth, planet: 'earth', landX: j.x, maxY: j.maxY, ghost: true,
+      label: `Earth: ${(j.crossX ?? j.x).toFixed(1)} m`, lx: j.crossX ?? j.x });
+    return;
+  }
+  sfx.land();
+  const dist = j.crossX ?? j.x, inCrater = j.y < -0.01;
+  trails.push({ pts: j.trail, color: PCOL[j.planet], planet: j.planet, landX: j.x, maxY: j.maxY,
+    label: `${PEMO[j.planet]} ${dist.toFixed(1)} m`, lx: dist });
+  pupState = { x: j.x, y: j.y, pose: inCrater ? 'sad' : 'happy', squash: 0.25, sad: inCrater };
+  const sx = SX(j.x), sy = SY(j.y) - pupR() * 5;
+  if (phase === 'experiment' || phase === 'boss') {
+    notes.unshift({ planet: j.planet, v: j.v, a: j.angle, d: dist });
+    if (notes.length > 30) notes.pop();
+  }
+  if (phase === 'challenge') {
+    challengeTried = true;
+    const ok = !inCrater && j.x > world.craters[0].x1;
+    const earthD = rangeOf(CH_SPEED, j.angle, G.earth);
+    if (ok) { addBurst('WOW!', sx, sy); sfx.good(); }
+    else { addBurst('OOPS!', sx, sy, '#ff8fa3'); sfx.bad(); }
+    setInfo(ok ? '🎉 You made it across!' : '😅 Into the crater!',
+      (ok ? `On Mars you flew <b>${dist.toFixed(1)} m</b>! ` : `You went <b>${dist.toFixed(1)} m</b> — try a different angle! `) +
+      `The faded blue pup shows the <b>same jump on Earth</b>: only <b>${earthD.toFixed(1)} m</b>. Why is Mars so different? 🤔`);
+    setReadout(`Mars: ${dist.toFixed(1)} m · Earth: ${earthD.toFixed(1)} m`);
+    setControls({ speedLocked: true, planets: false, clear: false, next: 'Discover ▶', notesOn: false });
+    $('nextBtn').classList.add('pulse');
+    $('jumpBtn').textContent = 'Try again';
+  }
+  if (phase === 'experiment') {
+    setReadout(`${PEMO[j.planet]} ${j.v.toFixed(1)} m/s · ${j.angle}° → ${dist.toFixed(1)} m (peak ${j.maxY.toFixed(1)} m)`);
+    for (const f of world.flags) if (Math.abs(dist - f.x) <= 0.6) { f.hit = true; addBurst('BULLSEYE!', SX(f.x), SY(0) - 120); earnBadge(f.id); }
+    if (j.planet === 'moon') earnBadge('moon');
+    const same = notes.filter(n => Math.abs(n.v - j.v) < 0.05 && n.a === j.angle);
+    if (same.some(n => n.planet === 'earth') && same.some(n => n.planet === 'mars')) {
+      if (earnBadge('hopper')) toast('Same jump, Mars went about 2.6× farther than Earth!', 4200);
+    }
+    const sp = notes.filter(n => n.planet === j.planet && Math.abs(n.v - j.v) < 0.05);
+    const angles = new Set(sp.map(n => n.a));
+    if (angles.has(45) && angles.size >= 3) {
+      const best = sp.reduce((a, b) => (b.d > a.d ? b : a));
+      if (Math.abs(best.a - 45) <= 0 && earnBadge('angle')) toast('Look! On flat ground, 45° goes farthest!', 4500);
+    }
+    renderNotes();
+  }
+  if (phase === 'boss') {
+    boss.attempts++;
+    const p = world.pads[0], ok = !inCrater && j.x >= p.x0 && j.x <= p.x1;
+    if (ok) bossWin(j);
+    else {
+      boss.misses++;
+      addBurst('SO CLOSE!', sx, sy, '#ff8fa3'); sfx.bad();
+      const short = dist < boss.D;
+      setInfo('💪 Almost!', `You went <b>${dist.toFixed(1)} m</b> — the pad was at <b>${boss.D.toFixed(1)} m</b>. Next time try a little <b>${short ? 'MORE' : 'LESS'}</b> strength${Math.abs(j.angle - 45) > 8 ? ', or an angle closer to 45°' : ''}. You get a new pad distance each try!`);
+      setReadout(`Missed by ${Math.abs(dist - boss.D).toFixed(1)} m`);
+      if (boss.misses >= 3 && boss.half < 1.5) { boss.half = 1.5; toast('Bonus: the repair pad got BIGGER! 🛠', 3200); }
+      $('jumpBtn').textContent = 'Try again ↻'; $('jumpBtn').dataset.retry = '1';
+      renderNotes();
+    }
+  }
+}
+function bossWin(j) {
+  boss.won = true; boss.anim = 0;
+  addBurst('YES!', SX(j.x), SY(0) - pupR() * 6, '#06d6a0', 1.2); sfx.good(); confettiBurst();
+  pupState.pose = 'cheer';
+  setInfo('🏆 Perfect landing!', 'Captain Pup reached the repair station! Sending a repair drone to the rover…');
+  setReadout(`Landed ${(j.crossX ?? j.x).toFixed(1)} m — on the pad!`);
+  drone = { t: 0, from: { x: world.station.x, y: 1.6 }, to: { x: world.rover.x, y: 2.2 } };
+  save.region2 = true; persist();
+  $('jumpBtn').disabled = true;
+}
+function earnBadge(id) {
+  if (badges.has(id)) return false;
+  badges.add(id); save.badges = [...badges]; persist(); sfx.badge();
+  const b = BADGES.find(x => x.id === id); toast('New badge: ' + b.name + '!');
+  renderBadges(); return true;
+}
+function renderBadges() {
+  $('badgeBar').innerHTML = BADGES.map(b => `<span class="bdg ${badges.has(b.id) ? 'got' : ''}">${b.name}</span>`).join('');
+}
+function renderNotes() {
+  const list = phase === 'boss' ? notes.filter(n => n.planet === 'mars') : notes;
+  $('notes').innerHTML = `<span class="lbl">📒 ${phase === 'boss' ? 'Your Mars notes:' : 'Notes:'}</span>` +
+    (list.length ? list.slice(0, 12).map(n => `<span class="note">${PEMO[n.planet]} ${n.v.toFixed(1)} m/s · ${n.a}° → <b>${n.d.toFixed(1)} m</b></span>`).join('')
+      : '<span class="note">No jumps yet — your results will show up here.</span>');
+}
+
+/* ---------------- timer-up prompt ---------------- */
+function onTimeUp() {
+  if (timeUpShown) return; timeUpShown = true;
+  if (phase === 'discover') { $('discNext').classList.add('pulse'); return; }
+  const txt = {
+    challenge: challengeTried ? 'Ready to find out why Mars jumps are so big?' : 'No rush! Keep trying, or move on to find out the secret.',
+    experiment: 'Great experimenting! Keep playing, or head to the Boss jump.',
+    boss: 'Take your time! Want a bigger landing pad to help?',
+  }[phase];
+  const mv = { challenge: 'Discover ▶', experiment: 'Boss Jump ▶', boss: 'Bigger pad 🛠' }[phase];
+  if (!txt) return;
+  if (phase === 'challenge' && challengeTried) { $('nextBtn').classList.add('pulse'); return; }
+  $('timeupText').textContent = txt; $('moveBtn').textContent = mv; show('timeup', true);
+}
+$('keepBtn').onclick = () => { sfx.click(); show('timeup', false); };
+$('moveBtn').onclick = () => {
+  sfx.click(); show('timeup', false);
+  if (phase === 'challenge') goto('discover');
+  else if (phase === 'experiment') goto('boss');
+  else if (phase === 'boss') { boss.half = 1.6; if (!flying) newBossRound(); toast('The repair pad got BIGGER! 🛠'); }
+};
+
+/* =====================================================================
+   DISCOVER CARDS (mini canvases)
+   ===================================================================== */
+const disc = { seen: new Set(), drop: null, scale: { on: false, val: 100 }, why: 0, jump: null };
+function openDiscover() {
+  show('discover', true); disc.seen.clear(); disc.drop = null; disc.scale = { on: false, val: 100 }; disc.why = 0; disc.jump = null;
+  document.querySelectorAll('.dcard').forEach(c => c.classList.remove('seen'));
+  $('dt0').textContent = 'Drop a ball from the same height (2 m) on Earth and on Mars. Which lands first?';
+  $('dt1').textContent = 'Captain Pup\'s friend weighs 100 lb on Earth. Take the scale to Mars!';
+  $('dt2').textContent = 'Bigger, heavier planets pull harder. Let\'s compare!';
+  $('dt3').textContent = 'Same push, two planets. How high does Captain Pup go?';
+  document.querySelector('[data-dc="1"]').textContent = 'Go to Mars';
+  $('discNext').classList.remove('pulse');
+  $('discover').querySelector('.card').scrollTop = 0;
+}
+document.querySelectorAll('[data-dc]').forEach(b => b.onclick = () => {
+  const i = +b.dataset.dc; sfx.click(); disc.seen.add(i); $('dc' + i).classList.add('seen');
+  if (i === 0) { disc.drop = { t: 0 }; $('dt0').innerHTML = 'Watch… Earth pulls harder, so its ball speeds up faster.'; }
+  if (i === 1) {
+    disc.scale.on = !disc.scale.on; b.textContent = disc.scale.on ? 'Back to Earth' : 'Go to Mars';
+    $('dt1').innerHTML = disc.scale.on ? 'On Mars the scale shows <b>about 38 lb</b>! Same pup, same <b>mass</b> (amount of stuff) — only the <b>weight</b> (the pull) changed.'
+      : 'On Earth: <b>100 lb</b>. Weight = how hard the planet pulls on you.';
+  }
+  if (i === 2) { disc.why = 0.001; $('dt2').innerHTML = 'Mars is about <b>half as wide</b> as Earth and has only about <b>1/10 of its mass</b>. Less mass → less pull!'; }
+  if (i === 3) { disc.jump = { t: 0 }; sfx.boing(); $('dt3').innerHTML = 'With the same push you go about <b>2.6× as high</b> on Mars! (Because 100 ÷ 38 ≈ 2.6)'; }
+  if (disc.seen.size === 4) $('discNext').classList.add('pulse');
+});
+$('discNext').onclick = () => { sfx.click(); goto('experiment'); };
+$('discSkip').onclick = () => { sfx.click(); goto('experiment'); };
+
+function prepMini(id) {
+  const c = $(id), r = c.getBoundingClientRect(), d = Math.min(2, window.devicePixelRatio || 1);
+  const w = Math.max(50, r.width), h = Math.max(50, r.height);
+  if (c.width !== Math.round(w * d) || c.height !== Math.round(h * d)) { c.width = Math.round(w * d); c.height = Math.round(h * d); }
+  const x = c.getContext('2d'); x.setTransform(d, 0, 0, d, 0, 0); x.clearRect(0, 0, w, h); return [x, w, h];
+}
+function miniSky(x, x0, w, h, pl) {
+  const g = x.createLinearGradient(0, 0, 0, h);
+  if (pl === 'mars') { g.addColorStop(0, '#d98a5c'); g.addColorStop(1, '#f6b4a3'); } else { g.addColorStop(0, '#5fb6ef'); g.addColorStop(1, '#d4efff'); }
+  x.fillStyle = g; x.fillRect(x0, 0, w, h);
+  x.fillStyle = pl === 'mars' ? '#c84a1a' : '#59b84a'; x.fillRect(x0, h - 18, w, 18);
+  x.strokeStyle = INK; x.lineWidth = 2; x.beginPath(); x.moveTo(x0, h - 18); x.lineTo(x0 + w, h - 18); x.stroke();
+  inkText(x, pl === 'mars' ? 'MARS' : 'EARTH', x0 + w / 2, 14, 15, '#fff', 'center', 3);
+}
+function drawDiscover(dt, t) {
+  // card 0: drop test, real fall times from 2 m
+  {
+    const [x, w, h] = prepMini('dcv0'); const hw = w / 2;
+    if (disc.drop) disc.drop.t += dt;
+    const tt = disc.drop ? Math.max(0, disc.drop.t - 0.3) : 0;
+    ['earth', 'mars'].forEach((pl, i) => {
+      const x0 = i * hw; miniSky(x, x0, hw, h, pl);
+      const top = 34, bot = h - 18 - 10, H2 = 2;
+      const fallT = Math.sqrt(2 * H2 / G[pl]);
+      const yM = Math.max(0, H2 - 0.5 * G[pl] * tt * tt);
+      const by = top + (1 - yM / H2) * (bot - top);
+      x.fillStyle = '#ff9f1c'; x.beginPath(); x.arc(x0 + hw / 2, by, 10, 0, TAU); x.fill(); x.lineWidth = 2.5; x.strokeStyle = INK; x.stroke();
+      x.beginPath(); x.moveTo(x0 + hw / 2 - 10, by); x.quadraticCurveTo(x0 + hw / 2, by - 4, x0 + hw / 2 + 10, by); x.stroke();
+      const shown = Math.min(tt, fallT);
+      if (disc.drop) inkText(x, shown.toFixed(2) + ' s' + (tt >= fallT ? ' ✔' : ''), x0 + hw / 2, h - 8, 14, tt >= fallT ? '#ffd23f' : '#fff', 'center', 3);
+    });
+    x.fillStyle = INK; x.fillRect(hw - 1.5, 0, 3, h);
+    if (disc.drop && disc.drop.t > 1.9) disc.drop.t = 1.9;   // freeze at end
+  }
+  // card 1: bathroom scale
+  {
+    const [x, w, h] = prepMini('dcv1'); const pl = disc.scale.on ? 'mars' : 'earth';
+    miniSky(x, 0, w, h, pl);
+    const target = disc.scale.on ? 38 : 100; disc.scale.val = lerp(disc.scale.val, target, 1 - Math.exp(-dt * 4));
+    const cx = w * 0.62, sy = h - 30, sw = Math.min(110, w * 0.32);
+    x.fillStyle = '#f4f1ea'; x.strokeStyle = INK; x.lineWidth = 3; x.beginPath(); x.roundRect ? x.roundRect(cx - sw / 2, sy - 14, sw, 22, 8) : x.rect(cx - sw / 2, sy - 14, sw, 22); x.fill(); x.stroke();
+    // dial
+    const dx = w * 0.2 + 10, dy = h * 0.55, dr = Math.min(42, h * 0.3);
+    x.fillStyle = '#fff'; x.beginPath(); x.arc(dx, dy, dr, 0, TAU); x.fill(); x.stroke();
+    for (let k = 0; k <= 10; k++) { const a = Math.PI * 0.75 + k / 10 * Math.PI * 1.5; x.beginPath(); x.moveTo(dx + Math.cos(a) * dr * 0.78, dy + Math.sin(a) * dr * 0.78); x.lineTo(dx + Math.cos(a) * dr * 0.92, dy + Math.sin(a) * dr * 0.92); x.lineWidth = 1.5; x.stroke(); }
+    const a = Math.PI * 0.75 + disc.scale.val / 120 * Math.PI * 1.5;
+    x.strokeStyle = '#ff4d6d'; x.lineWidth = 3; x.beginPath(); x.moveTo(dx, dy); x.lineTo(dx + Math.cos(a) * dr * 0.8, dy + Math.sin(a) * dr * 0.8); x.stroke();
+    inkText(x, Math.round(disc.scale.val) + ' lb', dx, dy + dr * 0.45, 16, '#ffd23f', 'center', 3);
+    drawPup(x, cx, sy - 14, Math.min(15, h * 0.11), { t, pose: disc.scale.on ? 'cheer' : 'stand' });
+    x.font = '800 12px Nunito, system-ui'; x.fillStyle = INK; x.textAlign = 'center';
+    x.fillText('mass: same pup ✔', cx, h - 4);
+  }
+  // card 2: planet sizes to scale + gravity arrows
+  {
+    const [x, w, h] = prepMini('dcv2'); x.fillStyle = '#14121f'; x.fillRect(0, 0, w, h);
+    for (const [a, b] of stars.slice(0, 30)) { x.fillStyle = 'rgba(255,255,255,.7)'; x.fillRect(a * w, b * h, 1.5, 1.5); }
+    if (disc.why) disc.why = Math.min(1, disc.why + dt * 0.9);
+    const k = disc.why, R = Math.min(h * 0.36, w * 0.19);
+    const ex = w * 0.3, my = h * 0.5, mx = w * 0.74, Rm = R * 0.53;   // Mars ≈ 53% of Earth's diameter
+    x.lineWidth = 3; x.strokeStyle = INK;
+    x.fillStyle = '#2f8fe0'; x.beginPath(); x.arc(ex, my, R, 0, TAU); x.fill();
+    x.fillStyle = '#06d6a0'; x.beginPath(); x.ellipse(ex - R * 0.3, my - R * 0.2, R * 0.35, R * 0.22, 0.4, 0, TAU); x.fill(); x.beginPath(); x.ellipse(ex + R * 0.35, my + R * 0.35, R * 0.25, R * 0.18, 0, 0, TAU); x.fill();
+    x.beginPath(); x.arc(ex, my, R, 0, TAU); x.stroke();
+    x.fillStyle = '#d4582a'; x.beginPath(); x.arc(mx, my, Rm, 0, TAU); x.fill(); x.stroke();
+    x.fillStyle = '#a33c14'; x.beginPath(); x.arc(mx - Rm * 0.3, my + Rm * 0.2, Rm * 0.18, 0, TAU); x.fill();
+    inkText(x, 'EARTH', ex, my + R + 12, 13, '#fff', 'center', 3); inkText(x, 'MARS', mx, my + Rm + 12, 13, '#fff', 'center', 3);
+    if (k > 0) {
+      const arrow = (cx, cy, rr, len) => {
+        for (let i = 0; i < 6; i++) {
+          const ang = i / 6 * TAU + 0.3, ox = cx + Math.cos(ang) * (rr + 6 + len * k), oy = cy + Math.sin(ang) * (rr + 6 + len * k);
+          const ix = cx + Math.cos(ang) * (rr + 6), iy = cy + Math.sin(ang) * (rr + 6);
+          x.strokeStyle = '#ffd23f'; x.lineWidth = 3; x.beginPath(); x.moveTo(ox, oy); x.lineTo(ix, iy); x.stroke();
+          const hx = ix, hy = iy, ba = ang; x.fillStyle = '#ffd23f';
+          x.beginPath(); x.moveTo(hx, hy); x.lineTo(hx + Math.cos(ba + 0.5) * 7, hy + Math.sin(ba + 0.5) * 7); x.lineTo(hx + Math.cos(ba - 0.5) * 7, hy + Math.sin(ba - 0.5) * 7); x.closePath(); x.fill();
+        }
+      };
+      arrow(ex, my, R, Math.min(26, h * 0.18)); arrow(mx, my, Rm, Math.min(26, h * 0.18) * 0.38);
+      inkText(x, 'BIG PULL', ex, 12, 13, '#ffd23f', 'center', 3); inkText(x, 'small pull', mx, 12, 13, '#ffd23f', 'center', 3);
+    }
+  }
+  // card 3: jump height Earth vs Mars, same push (h = v²/2g)
+  {
+    const [x, w, h] = prepMini('dcv3'); const hw = w / 2;
+    if (disc.jump) disc.jump.t += dt;
+    const v0 = 3.0, top = 26, base = h - 18, pr = Math.min(13, h * 0.08);
+    const hMars = v0 * v0 / (2 * G.mars), pxPerM = Math.max(8, (base - top - pr * 4.7) / hMars);
+    ['earth', 'mars'].forEach((pl, i) => {
+      const x0 = i * hw; miniSky(x, x0, hw, h, pl);
+      let yy = 0;
+      if (disc.jump) {
+        const flight = 2 * v0 / G[pl]; const tt = (disc.jump.t % (flight + 0.6));
+        yy = tt < flight ? v0 * tt - 0.5 * G[pl] * tt * tt : 0;
+      }
+      const peak = v0 * v0 / (2 * G[pl]);
+      if (disc.jump) {
+        x.setLineDash([5, 4]); x.strokeStyle = INK; x.lineWidth = 2; x.beginPath(); x.moveTo(x0 + 8, base - peak * pxPerM - 4); x.lineTo(x0 + hw - 8, base - peak * pxPerM - 4); x.stroke(); x.setLineDash([]);
+        inkText(x, peak.toFixed(2) + ' m', x0 + hw - 30, base - peak * pxPerM - 14, 13, '#ffd23f', 'center', 3);
+      }
+      drawPup(x, x0 + hw * 0.4, base - yy * pxPerM, pr, { t, pose: yy > 0.02 ? 'fly' : 'stand' });
+    });
+    x.fillStyle = INK; x.fillRect(hw - 1.5, 0, 3, h);
+  }
+}
+
+/* =====================================================================
+   REGION MAP
+   ===================================================================== */
+function renderMap(fromWin) {
+  const r2 = save.region2;
+  const nodes = [
+    { x: 110, y: 200, n: 1, name: 'Crater Camp', st: save.region2 ? 'done' : 'open' },
+    { x: 300, y: 110, n: 2, name: 'Dusty Dunes', st: r2 ? 'unlocked' : 'locked' },
+    { x: 480, y: 200, n: 3, name: 'Polar Ice Caps', st: 'locked' },
+    { x: 650, y: 100, n: 4, name: 'Giant Volcano', st: 'locked' },
+  ];
+  let s = `<defs><pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="2.4" fill="#b8532a" opacity=".5"/></pattern></defs>
+  <rect x="3" y="3" width="754" height="294" rx="22" fill="#e07a4a" stroke="${INK}" stroke-width="4"/>
+  <rect x="3" y="3" width="754" height="294" rx="22" fill="url(#dots)"/>
+  <ellipse cx="210" cy="240" rx="50" ry="16" fill="#b8532a" stroke="${INK}" stroke-width="3"/>
+  <ellipse cx="560" cy="80" rx="36" ry="12" fill="#b8532a" stroke="${INK}" stroke-width="3"/>
+  <path d="M600 150 l60 -70 l60 70 z" fill="#a33c14" stroke="${INK}" stroke-width="3" opacity=".8"/>
+  <path d="M420 270 q40 -30 80 0" fill="none" stroke="#fff" stroke-width="10" opacity=".6"/>
+  <path d="M110 200 Q200 100 300 110 T480 200 T650 100" fill="none" stroke="${INK}" stroke-width="5" stroke-dasharray="4 12" stroke-linecap="round"/>`;
+  for (const nd of nodes) {
+    const fill = nd.st === 'done' ? '#06d6a0' : nd.st === 'unlocked' || nd.st === 'open' ? '#ffd23f' : '#c9c2b2';
+    const icon = nd.st === 'done' ? '✔' : nd.st === 'locked' ? '🔒' : nd.n;
+    s += `<g${nd.st === 'unlocked' ? ' class="bob"' : ''}><circle cx="${nd.x}" cy="${nd.y}" r="34" fill="${fill}" stroke="${INK}" stroke-width="4"/>
+      <text x="${nd.x}" y="${nd.y + 11}" text-anchor="middle" font-family="Luckiest Guy, Comic Sans MS, system-ui" font-size="30" fill="${INK}">${icon}</text></g>
+      <rect x="${nd.x - 86}" y="${nd.y + 40}" width="172" height="${nd.st === 'done' ? 30 : 46}" rx="12" fill="#fffaf0" stroke="${INK}" stroke-width="3"/>
+      <text x="${nd.x}" y="${nd.y + 61}" text-anchor="middle" font-family="Nunito, system-ui" font-weight="900" font-size="16" fill="${INK}">${nd.n}. ${nd.name}</text>`;
+    if (nd.st !== 'done') s += `<text x="${nd.x}" y="${nd.y + 78}" text-anchor="middle" font-family="Nunito, system-ui" font-weight="800" font-size="13" fill="#7a4a3a">${nd.st === 'unlocked' ? 'Unlocked · coming soon!' : nd.st === 'open' ? 'You are here' : 'Coming soon'}</text>`;
+  }
+  $('mapSvg').innerHTML = s;
+  $('mapTitle').textContent = r2 ? 'Region 2 unlocked!' : 'Mars Region Map';
+  $('mapSub').textContent = fromWin ? 'The rover is fixed! Region 1 complete. Next stop on Mars:' : r2 ? 'Region 1 complete! New regions are coming soon.' : 'Beat the Boss jump to unlock Region 2.';
+  $('mapNext').textContent = fromWin ? 'Knowledge Check ▶' : 'Close';
+  $('mapNext').onclick = () => { sfx.click(); if (fromWin) goto('quiz'); else { show('map', false); if (phase === 'map') goto('title'); } };
+}
+function openMap(fromWin) {
+  renderMap(fromWin); show('map', true);
+}
+
+/* =====================================================================
+   QUIZ
+   ===================================================================== */
+const QUIZ = [
+  { q: 'If you weigh 100 pounds on Earth, about what would a scale (made for Earth) show on Mars?',
+    o: ['About 38 pounds', 'About 62 pounds', '100 pounds — no change', 'About 260 pounds'], a: 0,
+    e: 'Mars pulls with only about <b>38%</b> of Earth\'s gravity, and 38% of 100 is <b>38</b>. (62 is just 100 − 38. 100 would mean Mars pulls the same as Earth. 260 is backwards — that\'s more like how much <i>farther</i> you can jump on Mars!)' },
+  { q: 'When Captain Pup flies to Mars, does his MASS change?',
+    o: ['No — he\'s made of the same amount of stuff', 'Yes — it drops to 38%', 'Yes — it gets bigger', 'Only while he\'s jumping'], a: 0,
+    e: '<b>Mass</b> is how much stuff you\'re made of — it\'s the same everywhere. <b>Weight</b> is how hard a planet pulls on that stuff. So on Mars, the mass stays the same and only the weight goes down.' },
+  { q: 'Why does Mars pull on you less than Earth does?',
+    o: ['Mars is farther from the Sun', 'Mars is smaller and has less mass', 'Mars has very thin air', 'Because Mars is red'], a: 1,
+    e: 'Gravity comes from <b>mass</b>. Mars is about half as wide as Earth and has only about a tenth of Earth\'s mass, so its pull is weaker. Air, color and distance from the Sun don\'t set a planet\'s surface gravity!' },
+];
+let qi = 0, qScore = 0;
+function startQuiz() { qi = 0; qScore = 0; show('quiz', true); renderQ(); }
+function renderQ() {
+  const Q = QUIZ[qi];
+  $('qNum').textContent = `Quick knowledge check · Question ${qi + 1} of ${QUIZ.length}`;
+  $('qText').textContent = Q.q; show('qAfter', false);
+  $('qOpts').innerHTML = Q.o.map((o, i) => `<button class="opt" data-i="${i}">${o}</button>`).join('');
+  $('qOpts').querySelectorAll('.opt').forEach(b => b.onclick = () => answer(+b.dataset.i));
+}
+function answer(i) {
+  const Q = QUIZ[qi], right = i === Q.a;
+  if (right) qScore++;
+  $('qOpts').querySelectorAll('.opt').forEach((b, k) => { b.disabled = true; if (k === Q.a) b.classList.add('right'); else if (k === i) b.classList.add('wrong'); });
+  $('qBurst').textContent = right ? ['YES!', 'WOW!', 'NAILED IT!'][qi % 3] : 'GOOD TRY!';
+  $('qBurst').classList.toggle('bad', !right);
+  $('qExplain').innerHTML = (right ? '' : 'The answer is <b>' + Q.o[Q.a] + '</b>. ') + Q.e;
+  $('qNextBtn').textContent = qi < QUIZ.length - 1 ? 'Next ▶' : 'See my stars ⭐';
+  show('qAfter', true); right ? sfx.good() : sfx.bad();
+  setTimeout(() => $('qAfter').scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 50);
+}
+$('qNextBtn').onclick = () => { sfx.click(); qi++; if (qi < QUIZ.length) renderQ(); else finish(); };
+function finish() {
+  const stars = Math.max(1, qScore);
+  save.done = true; save.stars = Math.max(save.stars || 0, stars); persist();
+  hideOverlays(); phase = 'results'; setTracker(); updateTimerChip();
+  $('resStars').innerHTML = [0, 1, 2].map(i => i < stars ? '★' : '<span class="off">★</span>').join('');
+  $('resText').innerHTML = `You got <b>${qScore} of ${QUIZ.length}</b> right! Remember: Mars pulls about <b>38%</b> as hard as Earth, so you weigh less and jump way farther — but your mass stays the same.`;
+  $('resBadges').textContent = `Lab badges: ${badges.size} of ${BADGES.length}` + (badges.size < BADGES.length ? ' — replay the Experiment to collect them all!' : ' — all collected! 🏅');
+  show('results', true); confettiBurst(100); sfx.good();
+}
+$('replayBtn').onclick = () => { sfx.click(); notes = []; goto('challenge'); };
+$('resMapBtn').onclick = () => { sfx.click(); openMap(false); };
+
+/* ---------------- title ---------------- */
+function refreshTitle() {
+  $('titleStars').innerHTML = save.done ? 'Best: ' + [0, 1, 2].map(i => i < save.stars ? '★' : '<span class="off">★</span>').join('') : '';
+  show('titleMapBtn', !!save.region2);
+}
+$('startBtn').onclick = () => { sfx.click(); notes = []; goto('challenge'); };
+$('titleMapBtn').onclick = () => { sfx.click(); openMap(false); };
+$('homeBtn').onclick = () => { sfx.click(); goto('title'); };
+
+/* ---------------- controls wiring ---------------- */
+$('angle').oninput = e => { aim.angle = +e.target.value; syncSliders(); };
+$('speed').oninput = e => { if (!aim.locked) aim.speed = +e.target.value; syncSliders(); };
+document.querySelectorAll('.stepb').forEach(b => b.onclick = () => {
+  sfx.click();
+  if (b.dataset.k === 'angle') aim.angle = clamp(aim.angle + +b.dataset.d, 10, 80);
+  else if (!aim.locked) aim.speed = Math.round(clamp(aim.speed + +b.dataset.d, 2, 7) * 10) / 10;
+  syncSliders();
+});
+document.querySelectorAll('#planetSeg button').forEach(b => b.onclick = () => { if (flying) return; sfx.click(); setPlanet(b.dataset.pl); });
+$('jumpBtn').onclick = doJump;
+$('clearBtn').onclick = () => { sfx.click(); trails = []; world.flags.forEach(f => f.hit = false); };
+$('nextBtn').onclick = () => {
+  sfx.click();
+  if (phase === 'challenge') goto('discover');
+  else if (phase === 'experiment') goto('boss');
+};
+window.addEventListener('keydown', e => {
+  if (!['challenge', 'experiment', 'boss'].includes(phase)) return;
+  if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); doJump(); }
+  if (e.code === 'ArrowUp') { aim.angle = clamp(aim.angle + 1, 10, 80); syncSliders(); }
+  if (e.code === 'ArrowDown') { aim.angle = clamp(aim.angle - 1, 10, 80); syncSliders(); }
+  if (e.code === 'ArrowRight' && !aim.locked) { aim.speed = Math.round(clamp(aim.speed + 0.1, 2, 7) * 10) / 10; syncSliders(); }
+  if (e.code === 'ArrowLeft' && !aim.locked) { aim.speed = Math.round(clamp(aim.speed - 0.1, 2, 7) * 10) / 10; syncSliders(); }
+});
+// drag on the scene to aim (angle from the pup; arrow length = strength)
+let dragging = false;
+function aimFromPointer(e) {
+  const r = cv.getBoundingClientRect(), px = e.clientX - r.left, py = e.clientY - r.top;
+  const cx = SX(0), cy = SY(0) - pupR() * 2;
+  const dx = px - cx, dy = cy - py;
+  if (dx < 4) return;
+  aim.angle = Math.round(clamp(Math.atan2(dy, dx) * 180 / Math.PI, 10, 80));
+  if (!aim.locked) { const maxLen = Math.min(W, H) * 0.45; aim.speed = Math.round(clamp(2 + (Math.hypot(dx, dy) / maxLen) * 5, 2, 7) * 10) / 10; }
+  syncSliders();
+}
+cv.addEventListener('pointerdown', e => {
+  if (!['challenge', 'experiment', 'boss'].includes(phase) || flying) return;
+  dragging = true; try { cv.setPointerCapture(e.pointerId); } catch (_) {} aimFromPointer(e);
+});
+cv.addEventListener('pointermove', e => { if (dragging && !flying) aimFromPointer(e); });
+cv.addEventListener('pointerup', () => { dragging = false; });
+cv.addEventListener('pointercancel', () => { dragging = false; });
+
+/* =====================================================================
+   MAIN LOOP
+   ===================================================================== */
+let last = performance.now(), T = 0;
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now; T += dt;
+  const sw = Math.round(W * DPR), r = $('stage').getBoundingClientRect();
+  if (Math.abs(r.width - W) > 1 || Math.abs(r.height - H) > 1 || cv.width !== sw) resize();
+
+  // timer (gentle)
+  if (phase in TIMES && phaseLeft > 0) {
+    phaseLeft -= dt; if (phaseLeft <= 0) { phaseLeft = 0; updateTimerChip(); onTimeUp(); }
+    updateTimerChip.acc = (updateTimerChip.acc || 0) + dt;
+    if (updateTimerChip.acc > 0.25) { updateTimerChip.acc = 0; updateTimerChip(); }
+  }
+
+  // physics
+  if (crouch > 0) { crouch -= dt; if (crouch <= 0 && pendingLaunch) launch(); }
+  for (const j of jumpers) stepJumper(j, dt);
+  const main = jumpers.find(j => !j.ghost);
+  if (flying && main && jumpers.every(j => j.landed) && main.landT > 0.35) {
+    flying = false;
+    if (!(phase === 'boss' && boss.won)) $('jumpBtn').disabled = false;
+  }
+  if (main && !main.landed && phase !== 'boss') setReadout(`Distance: ${Math.max(0, main.x).toFixed(1)} m · Height: ${Math.max(0, main.y).toFixed(1)} m`);
+  if (main && !main.landed && phase === 'boss') setReadout(`Distance: ${Math.max(0, main.x).toFixed(1)} m (pad at ${boss.D.toFixed(1)} m)`);
+  if (pupState.squash > 0) pupState.squash = Math.max(0, pupState.squash - dt * 1.5);
+
+  // boss win animation: drone flies to the rover, sparkles, rover fixed
+  if (drone) {
+    drone.t += dt;
+    if (drone.t > 0.6 && drone.t < 2.2) {
+      const k = clamp((drone.t - 0.6) / 1.6, 0, 1);
+      drone.x = lerp(drone.from.x, drone.to.x, k); drone.y = lerp(drone.from.y, drone.to.y, k) + Math.sin(k * Math.PI) * 2;
+    }
+    if (drone.t >= 2.2 && !roverFixed) {
+      roverFixed = true; roverHop = 2; sfx.good(); smoke = [];
+      for (let i = 0; i < 30; i++) sparkles.push({ x: SX(world.rover.x), y: SY(0) - cam.scale * 1, vx: (Math.random() - 0.5) * 300, vy: (Math.random() - 0.8) * 300, t: 0 });
+      addBurst('FIXED!', Math.max(SX(world.rover.x) + cam.scale, 120), Math.max(SY(0) - cam.scale * 3, H * 0.42), '#06d6a0');
+      setInfo('🔧 Rover repaired!', 'Great jumping, Captain! Region 1 is complete.');
+    }
+    if (drone.t > 4.2 && phase === 'boss') { drone = null; phase = 'map'; setTracker(); updateTimerChip(); openMap(true); }
+  }
+  if (roverHop > 0) roverHop -= dt;
+
+  updateCamera(dt, false);
+  render(dt);
+  if (!$('discover').hidden) drawDiscover(dt, T);
+  requestAnimationFrame(frame);
+}
+
+function render(dt) {
+  ctx = mainCtx;
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+  drawSky(world.planet, T);
+  drawGround(world.planet);
+  drawRuler();
+  const u = cam.scale;
+  if (world.station) drawStation(ctx, SX(world.station.x), SY(0), u, T);
+  if (world.rover) drawRover(ctx, SX(world.rover.x), SY(0), u, roverFixed, T);
+  for (const f of world.flags) drawFlag(f, T);
+  // pad target label (boss)
+  if (phase === 'boss' && world.pads[0]) {
+    const p = world.pads[0];
+    inkText(ctx, 'LANDING PAD', SX(boss.D), SY(0) + Math.min(u * 0.9, 40) + 46, clamp(u * 0.28, 11, 18), '#fff');
+    inkText(ctx, '⬇ ' + boss.D.toFixed(1) + ' m', SX(boss.D), SY(0) + Math.min(u * 0.9, 40) + 16, clamp(u * 0.4, 14, 26), '#ffd23f');
+    ctx.setLineDash([8, 6]); ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(SX(0), SY(0) + 8); ctx.lineTo(SX(boss.D), SY(0) + 8); ctx.stroke(); ctx.setLineDash([]);
+  }
+  // trails
+  trails.forEach((tr, i) => {
+    const alpha = phase === 'experiment' ? (i === trails.length - 1 ? 1 : 0.55) : tr.ghost ? 0.6 : 1;
+    drawTrail(tr, alpha);
+    if (tr.label) {
+      const latest = i === trails.length - 1 && !tr.ghost && !jumpers.some(j => !j.ghost && !j.landed);
+      const lx = SX(tr.landX), ly = SY(groundY(tr.landX)) - 14 - (latest || tr.ghost ? pupR() * 4.8 : (i % 4) * 24);
+      ctx.globalAlpha = alpha;
+      inkText(ctx, tr.label, lx, ly, clamp(u * 0.32, 12, 20), tr.color === PCOL.mars ? '#ffd23f' : '#fff', 'center', 3);
+      ctx.globalAlpha = 1;
+    }
+  });
+  for (const j of jumpers) if (!j.landed) drawTrail({ pts: j.trail, color: j.ghost ? PCOL.earth : PCOL[j.planet] }, j.ghost ? 0.6 : 1);
+  // ghost Earth pup
+  const R = pupR();
+  for (const j of jumpers) if (j.ghost) {
+    drawPup(ctx, SX(j.x), SY(j.y), R, { t: T, pose: j.landed ? 'sad' : 'fly', ghost: true });
+    if (!j.landed || j.landT < 3) inkText(ctx, 'Earth jump', SX(j.x), SY(j.y) - R * 5.2, clamp(u * 0.26, 11, 16), '#bfe3ff', 'center', 3);
+  }
+  // aim arrow
+  if (['challenge', 'experiment', 'boss'].includes(phase) && !flying && !(phase === 'boss' && boss.won)) {
+    const a = aim.angle * Math.PI / 180, len = Math.min(W, H) * 0.45 * ((aim.speed - 2) / 5) * 0.8 + R * 2;
+    const cx = SX(0), cy = SY(0) - R * 2, ex = cx + Math.cos(a) * len, ey = cy - Math.sin(a) * len;
+    ctx.lineCap = 'round'; ctx.strokeStyle = INK; ctx.lineWidth = 11; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(ex, ey); ctx.stroke();
+    ctx.strokeStyle = '#ffd23f'; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(ex, ey); ctx.stroke();
+    ctx.fillStyle = '#ffd23f'; ctx.strokeStyle = INK; ctx.lineWidth = 3; ctx.beginPath();
+    ctx.moveTo(ex + Math.cos(a) * 16, ey - Math.sin(a) * 16);
+    ctx.lineTo(ex + Math.cos(a + 2.4) * 14, ey - Math.sin(a + 2.4) * 14);
+    ctx.lineTo(ex + Math.cos(a - 2.4) * 14, ey - Math.sin(a - 2.4) * 14); ctx.closePath(); ctx.fill(); ctx.stroke();
+    // angle arc
+    ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(cx, cy, R * 2.2, -a, 0); ctx.stroke();
+    inkText(ctx, aim.angle + '°', cx + R * 2.9, cy - R * 0.6, clamp(R * 0.8, 12, 22), '#fff', 'left', 3);
+  }
+  // Captain Pup
+  const m = jumpers.find(j => !j.ghost);
+  if (m) {
+    const pose = m.landed ? (pupState.pose) : 'fly';
+    const sq = m.landed ? pupState.squash : 0;
+    drawPup(ctx, SX(m.x), SY(m.y), R, { t: T, pose, squash: sq, tilt: m.landed ? 0 : clamp(-m.vy * 0.03, -0.3, 0.3) });
+    const top = SY(m.y) - R * 4.6;
+    if (top < 0) { inkText(ctx, '▲ ' + m.y.toFixed(1) + ' m high!', clamp(SX(m.x), 70, W - 70), 18, 16, '#ffd23f'); }
+  } else {
+    const cr = crouch > 0 ? 0.18 : 0;
+    drawPup(ctx, SX(pupState.x), SY(pupState.y), R, { t: T, pose: phase === 'title' ? 'stand' : pupState.pose, squash: cr });
+  }
+  // repair drone
+  if (drone && drone.x !== undefined) {
+    const dx = SX(drone.x), dy = SY(drone.y), s = clamp(u * 0.35, 10, 26);
+    ctx.fillStyle = '#9b5de5'; ctx.strokeStyle = INK; ctx.lineWidth = 3; rrect(dx - s, dy - s * 0.5, s * 2, s, s * 0.3); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = INK; ctx.beginPath(); ctx.moveTo(dx - s * 1.4, dy - s * 0.9 + Math.sin(T * 40) * 2); ctx.lineTo(dx - s * 0.4, dy - s * 0.9); ctx.moveTo(dx + s * 0.4, dy - s * 0.9); ctx.lineTo(dx + s * 1.4, dy - s * 0.9 - Math.sin(T * 40) * 2); ctx.stroke();
+    inkText(ctx, '🔧', dx, dy + s * 0.9, s, '#fff', 'center', 1);
+    if (Math.random() < 0.5) sparkles.push({ x: dx, y: dy, vx: (Math.random() - 0.5) * 60, vy: 40, t: 0.4 });
+  }
+  drawParticles(dt, T);
+  drawBursts(dt);
+}
+
+/* ---------------- test hook ---------------- */
+window.__game = {
+  get phase() { return phase; }, setTimeLeft(s) { phaseLeft = s; }, goto, aim, jump: doJump, boss, get flying() { return flying; },
+  setAim(v, a) { if (!aim.locked) aim.speed = v; aim.angle = a; syncSliders(); },
+  setPlanet, answer, get badges() { return [...badges]; }, rangeOf, G, world,
+  solveBoss() { const v = Math.sqrt(boss.D * G.mars); aim.speed = Math.round(v * 10) / 10; aim.angle = 45; syncSliders(); },
+};
+
+resize(); goto('title'); updateCamera(0, true);
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
