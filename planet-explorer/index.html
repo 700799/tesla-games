@@ -1,0 +1,1992 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Planet Explorer</title>
+<link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root { --ink:#1d1b26; --paper:#fffaf0; --accent:#ff4d6d; --yellow:#ffd23f; --green:#06d6a0; --blue:#4cc9f0;
+    --purple:#9b5de5; --orange:#ff9f1c; --toon:"Luckiest Guy","Comic Sans MS","Chalkboard SE",system-ui,sans-serif; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; height:100%; overflow:hidden; background:#16133a; color:var(--ink);
+    font-family:Nunito,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; font-weight:800;
+    user-select:none; -webkit-user-select:none; -webkit-tap-highlight-color:transparent; }
+  #sky { position:fixed; inset:0; width:100vw; height:100vh; display:block; }
+  button, a.btn { font:inherit; cursor:pointer; color:inherit; text-decoration:none; }
+  .toon { font-family:var(--toon); font-weight:400; letter-spacing:1px; }
+  .panel { background:var(--paper); border:3px solid var(--ink); border-radius:18px; box-shadow:4px 4px 0 var(--ink); }
+  .screen { position:fixed; inset:0; display:flex; flex-direction:column; }
+  .screen[hidden] { display:none; }
+
+  h1 { margin:0; font-family:var(--toon); font-weight:400; font-size:clamp(46px,8vw,92px); line-height:.95; color:var(--yellow);
+    -webkit-text-stroke:3px var(--ink); paint-order:stroke; text-shadow:5px 5px 0 var(--ink); transform:rotate(-2deg); letter-spacing:2px; }
+  h1 span { color:var(--accent); }
+  h2 { margin:0; font-family:var(--toon); font-weight:400; font-size:clamp(28px,4vw,42px); color:var(--yellow); letter-spacing:1px;
+    -webkit-text-stroke:2px var(--ink); paint-order:stroke; text-shadow:3px 3px 0 var(--ink); line-height:1.05; }
+  h3 { margin:0; font-family:var(--toon); font-weight:400; font-size:26px; letter-spacing:1px; color:var(--accent);
+    -webkit-text-stroke:1.5px var(--ink); paint-order:stroke; text-shadow:2px 2px 0 var(--ink); line-height:1.1; }
+
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:60px; background:var(--accent); color:#fff;
+    font-family:var(--toon); font-weight:400; font-size:24px; padding:10px 26px 6px; border-radius:999px; border:3px solid var(--ink);
+    box-shadow:0 6px 0 var(--ink); letter-spacing:1px; transition:transform .05s; touch-action:manipulation; }
+  .btn:active, .btn.down { transform:translateY(4px); box-shadow:0 2px 0 var(--ink); }
+  .btn.alt { background:#fff; color:var(--ink); }
+  .btn.go { background:var(--green); color:var(--ink); }
+  .btn.yel { background:var(--yellow); color:var(--ink); }
+  .btn.blue { background:var(--blue); color:var(--ink); }
+  .btn.purple { background:var(--purple); }
+  .btn.small { min-height:52px; font-size:19px; padding:8px 16px 4px; }
+  .btn[disabled] { background:#d9d2c2; color:#8d8577; box-shadow:0 6px 0 #8d8577; border-color:#8d8577; cursor:default; }
+  .btn.round { width:60px; height:60px; padding:0; font-size:26px; border-radius:50%; flex:none; }
+  .btn.wide { width:100%; }
+
+  /* ---------- title ---------- */
+  #title { align-items:center; justify-content:center; overflow:auto; padding:16px; }
+  .tcard { position:relative; padding:20px 30px 24px; text-align:center; max-width:min(900px,96vw); width:100%; border-radius:26px; box-shadow:6px 6px 0 var(--ink); }
+  .tgrid { display:flex; align-items:center; gap:18px; justify-content:center; flex-wrap:wrap; }
+  #titlePup { width:min(300px,56vw); height:min(300px,56vw); }
+  .chips { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin:16px 0 6px; }
+  .chip { border:3px solid var(--ink); border-radius:999px; padding:4px 14px 2px; font-family:var(--toon); font-size:18px; letter-spacing:1px; }
+  .tcard p { font-size:19px; margin:10px auto; max-width:620px; }
+  .row { display:flex; gap:12px; justify-content:center; align-items:center; flex-wrap:wrap; margin-top:12px; }
+  .corner { position:absolute; top:12px; right:12px; }
+
+  /* ---------- hub ---------- */
+  .bar { display:flex; align-items:center; gap:10px; padding:10px 12px; flex-wrap:wrap; position:relative; z-index:2; }
+  .bar h2 { margin-right:auto; }
+  #hubMain { flex:1; min-height:0; display:grid; grid-template-columns:1fr minmax(280px,340px); gap:14px; padding:0 12px 12px; overflow:auto; }
+  #stops { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; align-content:start; position:relative; }
+  .stop { position:relative; padding:10px 10px 12px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:4px;
+    cursor:pointer; border-radius:20px; transition:transform .1s; }
+  .stop:active { transform:scale(.97); }
+  .stop canvas { width:100%; max-width:min(240px,26vh); aspect-ratio:1; }
+  .stop .nm { font-family:var(--toon); font-size:30px; letter-spacing:1px; line-height:1; }
+  .stop .q { font-size:15px; line-height:1.2; min-height:36px; }
+  .stop .st { font-size:28px; letter-spacing:3px; color:#f4a100; -webkit-text-stroke:1.5px var(--ink); line-height:1; }
+  .stop .st .off { color:#e7e0cf; }
+  .stop .need { font-size:14px; background:#ffe1e7; border:2px solid var(--ink); border-radius:12px; padding:4px 8px; line-height:1.2; }
+  .stop.locked { background:#cfc8b8; }
+  .stop.locked canvas { filter:grayscale(.8) brightness(.8); }
+  .stop.next { animation:glow 1.4s infinite; }
+  @keyframes glow { 50% { box-shadow:4px 4px 0 var(--ink), 0 0 0 6px var(--yellow); } }
+  .stop .badge { position:absolute; top:-12px; left:50%; transform:translateX(-50%) rotate(-3deg); background:var(--yellow); border:3px solid var(--ink);
+    border-radius:999px; padding:3px 12px 0; font-family:var(--toon); font-size:16px; white-space:nowrap; }
+  .stop .extra { font-size:14px; color:#6a3cc0; text-decoration:underline; padding:6px; }
+  #locker { padding:12px; align-self:start; }
+  #locker h3 { margin-bottom:6px; }
+  .gearGrid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .gear { border:3px solid var(--ink); border-radius:14px; background:#fff; padding:6px 4px; text-align:center; font-size:14px; line-height:1.15; }
+  .gear canvas { width:64px; height:64px; display:block; margin:0 auto 2px; }
+  .gear.off { background:#e7e0cf; color:#8d8577; border-style:dashed; }
+  .gear.off canvas { opacity:.25; filter:grayscale(1); }
+  .gear small { display:block; font-size:12px; opacity:.75; }
+  .hubHint { font-size:15px; margin:8px 2px 0; }
+
+  /* ---------- mission ---------- */
+  .topbar { display:flex; align-items:center; gap:8px; padding:8px 10px; flex-wrap:wrap; }
+  .topbar .pname { font-family:var(--toon); font-size:28px; color:var(--yellow); -webkit-text-stroke:1.5px var(--ink); paint-order:stroke;
+    text-shadow:2px 2px 0 var(--ink); letter-spacing:1px; }
+  #tracker { display:flex; gap:4px; flex-wrap:wrap; margin:0 auto; }
+  #tracker span { border:3px solid var(--ink); border-radius:999px; background:#fff; padding:4px 10px 1px; font-family:var(--toon); font-size:16px;
+    letter-spacing:1px; opacity:.6; }
+  #tracker span.done { background:var(--green); opacity:1; }
+  #tracker span.on { background:var(--yellow); opacity:1; transform:scale(1.08); box-shadow:2px 2px 0 var(--ink); }
+  #timer { border:3px solid var(--ink); border-radius:999px; background:#fff; padding:4px 12px 1px; font-family:var(--toon); font-size:20px; min-width:84px; text-align:center; }
+  #timer.low { background:#ffe1e7; }
+  #timer[hidden] { display:none; }
+  #stage { flex:1; min-height:0; position:relative; padding:0 10px 10px; }
+  .play { height:100%; display:grid; grid-template-columns:1fr minmax(300px,390px); gap:12px; }
+  .cvbox { position:relative; min-height:0; min-width:0; border:3px solid var(--ink); border-radius:18px; overflow:hidden; box-shadow:4px 4px 0 var(--ink); background:#000; }
+  .cvbox canvas { position:absolute; inset:0; width:100%; height:100%; touch-action:none; }
+  .side { overflow:auto; padding:14px; display:flex; flex-direction:column; gap:10px; min-height:0; }
+  .side > *, #bs > * { flex-shrink:0; }
+  #bs { display:flex; flex-direction:column; gap:10px; }
+  .side p { margin:0; font-size:18px; line-height:1.3; }
+  .msg { font-size:18px; line-height:1.3; border:3px solid var(--ink); border-radius:14px; padding:8px 12px; background:#fff; }
+  .msg:empty { display:none; }
+  .msg.good { background:#c7f9e5; }
+  .msg.bad { background:#ffe1e7; }
+  .msg.info { background:#fff3c4; }
+  .nav { margin-top:auto; display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; padding-top:6px; }
+  .opts { display:grid; grid-template-columns:1fr; gap:10px; }
+  .opts.two { grid-template-columns:1fr 1fr; }
+  .opt { min-height:60px; border:3px solid var(--ink); border-radius:16px; background:#fff; box-shadow:0 5px 0 var(--ink); font-size:18px;
+    padding:8px 12px; text-align:left; display:flex; align-items:center; gap:10px; line-height:1.2; touch-action:manipulation; }
+  .opt:active { transform:translateY(3px); box-shadow:0 2px 0 var(--ink); }
+  .opt.sel { background:var(--yellow); }
+  .opt.right { background:#c7f9e5; }
+  .opt.wrong { background:#ffd0d8; }
+  .opt canvas { width:48px; height:48px; flex:none; }
+  .opt[disabled] { cursor:default; }
+  .slider { display:flex; flex-direction:column; gap:2px; }
+  .slider label { display:flex; justify-content:space-between; font-size:17px; gap:8px; }
+  .slider label b { font-family:var(--toon); font-weight:400; font-size:20px; color:var(--purple); letter-spacing:1px; }
+  input[type=range] { -webkit-appearance:none; appearance:none; width:100%; height:44px; background:transparent; margin:0; touch-action:pan-y; }
+  input[type=range]::-webkit-slider-runnable-track { height:16px; border-radius:10px; background:#e9e2cf; border:3px solid var(--ink); }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:38px; height:38px; margin-top:-14px; border-radius:50%;
+    background:var(--yellow); border:3px solid var(--ink); box-shadow:0 3px 0 var(--ink); }
+  input[type=range]::-moz-range-track { height:12px; border-radius:10px; background:#e9e2cf; border:3px solid var(--ink); }
+  input[type=range]::-moz-range-thumb { width:34px; height:34px; border-radius:50%; background:var(--yellow); border:3px solid var(--ink); }
+  .tasks { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
+  .tasks li { border:3px solid var(--ink); border-radius:12px; padding:6px 10px; background:#fff; font-size:16px; line-height:1.25; display:flex; gap:8px; }
+  .tasks li::before { content:"☐"; font-size:18px; }
+  .tasks li.ok { background:#c7f9e5; }
+  .tasks li.ok::before { content:"✔"; color:#078a66; }
+  .tabs { display:flex; gap:8px; }
+  .tabs .btn { flex:1; }
+  .tabs .btn.on { background:var(--yellow); color:var(--ink); }
+  .meter { height:22px; border:3px solid var(--ink); border-radius:12px; background:#e9e2cf; overflow:hidden; }
+  .meter i { display:block; height:100%; width:0; background:var(--green); transition:width .1s; }
+  .mlabel { font-size:16px; display:flex; justify-content:space-between; }
+  .holdrow { display:flex; gap:10px; }
+  .holdrow .btn { flex:1; min-height:76px; font-size:26px; }
+
+  /* discover cards */
+  .disc { height:100%; overflow:auto; display:flex; flex-direction:column; gap:12px; }
+  .dhead { padding:10px 14px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .dhead p { margin:0; font-size:18px; flex:1; min-width:200px; }
+  .cards { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+  .card { padding:10px; cursor:pointer; display:flex; flex-direction:column; gap:6px; text-align:left; transition:transform .1s; }
+  .card:active { transform:scale(.98); }
+  .card canvas { width:100%; aspect-ratio:4/3; border:3px solid var(--ink); border-radius:12px; background:#111; }
+  .card .ct { font-family:var(--toon); font-size:22px; letter-spacing:1px; line-height:1.05; }
+  .card .cf { font-size:17px; line-height:1.3; }
+  .card .tap { font-size:16px; background:var(--yellow); border:3px solid var(--ink); border-radius:999px; padding:6px 12px; text-align:center; }
+  .card.shown .tap.first { display:none; }
+  .card:not(.shown) .cf { display:none; }
+  .card .tap.again { background:var(--blue); }
+  .card:not(.shown) .tap.again { display:none; }
+
+  /* quiz */
+  .quiz { height:100%; overflow:auto; display:flex; justify-content:center; align-items:flex-start; padding-top:6px; }
+  .qcard { width:min(820px,100%); padding:18px 20px; display:flex; flex-direction:column; gap:12px; }
+  .qcard .qn { font-size:16px; opacity:.7; }
+  .qcard .qq { font-size:24px; line-height:1.25; }
+  .bigstars { font-size:64px; color:#f4a100; letter-spacing:8px; -webkit-text-stroke:2px var(--ink); line-height:1; text-align:center; }
+  .bigstars .off { color:#e7e0cf; }
+  .award { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+  .award .gear { width:150px; animation:popIn .6s cubic-bezier(.3,1.6,.5,1) both; font-size:16px; }
+  .award .gear canvas { width:90px; height:90px; }
+  @keyframes popIn { from { transform:scale(0) rotate(-20deg); } to { transform:scale(1) rotate(0); } }
+
+  /* overlays */
+  .overlay { position:fixed; inset:0; display:grid; place-items:center; background:rgba(20,10,50,.55); z-index:20; padding:12px; }
+  .overlay[hidden] { display:none; }
+  .ocard { padding:18px 20px; max-width:min(760px,96vw); max-height:92vh; overflow:auto; border-radius:22px; box-shadow:6px 6px 0 var(--ink); }
+  #logList h4 { font-family:var(--toon); font-weight:400; font-size:22px; margin:12px 0 4px; letter-spacing:1px; }
+  #logList ul { margin:0; padding-left:22px; }
+  #logList li { font-size:17px; line-height:1.3; margin:4px 0; }
+  #timeup { position:fixed; left:50%; bottom:18px; transform:translateX(-50%); z-index:15; padding:10px 14px; display:flex; gap:10px; align-items:center;
+    flex-wrap:wrap; justify-content:center; max-width:94vw; background:#fff3c4; }
+  #timeup[hidden] { display:none; }
+  #timeup span { font-size:18px; }
+
+  .burst { position:fixed; z-index:30; pointer-events:none; width:220px; height:150px; margin:-75px 0 0 -110px; animation:burst .9s ease-out forwards; }
+  .burst svg { width:100%; height:100%; overflow:visible; }
+  @keyframes burst { 0% { transform:scale(.2) rotate(-12deg); opacity:1; } 18% { transform:scale(1.15) rotate(4deg); } 30% { transform:scale(1) rotate(0); }
+    75% { opacity:1; } 100% { transform:scale(1) translateY(-30px); opacity:0; } }
+  #toast { position:fixed; top:78px; left:50%; transform:translate(-50%,-10px) rotate(-1deg); padding:8px 18px 6px; font-size:20px; opacity:0;
+    transition:.25s; z-index:25; background:var(--yellow); max-width:92vw; text-align:center; pointer-events:none; }
+  #toast.show { opacity:1; transform:translate(-50%,0) rotate(-1deg); }
+
+  @media (max-width:1100px) { .cards { grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:900px) { #hubMain { grid-template-columns:1fr; } #stops { grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:860px), (max-aspect-ratio:1/1) {
+    .play { grid-template-columns:1fr; grid-template-rows:minmax(200px,46%) 1fr; }
+    .topbar .pname { font-size:22px; }
+    #tracker span { font-size:13px; padding:3px 7px 0; }
+    #tracker span em { display:none; }
+  }
+  @media (max-width:520px) {
+    .cards { grid-template-columns:1fr; }
+    .card canvas { aspect-ratio:16/9; }
+    .tcard { padding:16px 12px 18px; }
+    .btn { font-size:21px; padding:10px 18px 6px; }
+    .stop .nm { font-size:24px; }
+    .stop .q { font-size:13px; }
+    .opts.two { grid-template-columns:1fr; }
+    .side p, .msg { font-size:16px; }
+    h3 { font-size:22px; }
+    .bar h2 { font-size:26px; width:100%; }
+  }
+</style>
+</head>
+<body>
+<canvas id="sky"></canvas>
+
+<!-- TITLE -->
+<section id="title" class="screen">
+  <div class="tcard panel">
+    <button class="btn alt round corner mute" aria-label="Sound on/off">🔊</button>
+    <div class="tgrid">
+      <canvas id="titlePup" width="300" height="300"></canvas>
+      <div>
+        <h1>Planet<br><span>Explorer</span></h1>
+        <div class="chips">
+          <span class="chip" style="background:var(--blue)">Physics</span>
+          <span class="chip" style="background:var(--yellow)">Astronomy</span>
+          <span class="chip" style="background:var(--green)">Chemistry</span>
+        </div>
+      </div>
+    </div>
+    <p>Fly with <b>Captain Pup</b> to Mars, Jupiter, Saturn and Europa! Learn one big science idea on each world, earn new space gear, and use it to explore further.</p>
+    <div class="row">
+      <button class="btn go" id="startBtn" style="font-size:32px;padding:12px 40px 8px">🚀 Blast off!</button>
+      <a class="btn alt" href="../">⬅ Games</a>
+    </div>
+  </div>
+</section>
+
+<!-- HUB / STAR MAP -->
+<section id="hub" class="screen" hidden>
+  <div class="bar">
+    <h2>⭐ Star Map</h2>
+    <button class="btn yel small" id="logBtn">📖 Captain's Log</button>
+    <button class="btn alt small" id="toTitle">⌂ Title</button>
+    <button class="btn alt round mute" aria-label="Sound on/off">🔊</button>
+  </div>
+  <div id="hubMain">
+    <div>
+      <div id="stops"></div>
+      <p class="hubHint panel" style="padding:8px 12px" id="hubHint"></p>
+    </div>
+    <div id="locker" class="panel">
+      <h3>🧰 Gear Locker</h3>
+      <div class="gearGrid" id="gearGrid"></div>
+    </div>
+  </div>
+</section>
+
+<!-- MISSION -->
+<section id="mission" class="screen" hidden>
+  <div class="topbar">
+    <button class="btn alt round" id="exitBtn" aria-label="Back to star map">✕</button>
+    <span class="pname" id="pname">Mars</span>
+    <div id="tracker"></div>
+    <span id="timer">0:30</span>
+    <button class="btn alt round mute" aria-label="Sound on/off">🔊</button>
+  </div>
+  <div id="stage"></div>
+</section>
+
+<div id="timeup" class="panel" hidden></div>
+<div id="toast" class="panel"></div>
+
+<div id="logOv" class="overlay" hidden>
+  <div class="ocard panel">
+    <h2>📖 Captain's Log</h2>
+    <div id="logList"></div>
+    <div class="row"><button class="btn go" id="logClose">Close</button></div>
+  </div>
+</div>
+<script>
+'use strict';
+// ================= core helpers =================
+const INK = '#1d1b26', TAU = Math.PI * 2;
+const $ = id => document.getElementById(id);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const rand = (a, b) => a + Math.random() * (b - a);
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+function el(html) { const d = document.createElement('div'); d.innerHTML = html.trim(); return d.firstElementChild; }
+function ell(c, x, y, rx, ry, rot = 0) { c.beginPath(); c.ellipse(x, y, Math.max(0.1, rx), Math.max(0.1, ry), rot, 0, TAU); }
+function rr(c, x, y, w, h, r) { c.beginPath(); if (c.roundRect) c.roundRect(x, y, w, h, r); else c.rect(x, y, w, h); }
+function hx(h) { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+function mix(a, b, t) { const A = hx(a), B = hx(b); t = clamp(t, 0, 1); return '#' + A.map((v, i) => Math.round(v + (B[i] - v) * t).toString(16).padStart(2, '0')).join(''); }
+function fs(c, fill, stroke = true) { c.fillStyle = fill; c.fill(); if (stroke) c.stroke(); }
+function txt(c, s, x, y, size = 20, color = '#fff', align = 'center', stroke = true) {
+  c.font = `${size}px "Luckiest Guy","Comic Sans MS",system-ui,sans-serif`;
+  c.textAlign = align; c.textBaseline = 'middle'; c.lineJoin = 'round';
+  if (stroke) { c.strokeStyle = INK; c.lineWidth = Math.max(3, size * 0.22); c.strokeText(s, x, y); }
+  c.fillStyle = color; c.fillText(s, x, y);
+}
+function ntxt(c, s, x, y, size = 16, color = INK, align = 'center') {
+  c.font = `900 ${size}px Nunito,system-ui,sans-serif`; c.textAlign = align; c.textBaseline = 'middle'; c.fillStyle = color; c.fillText(s, x, y);
+}
+
+// ================= save =================
+const KEY = 'planetExplorer.v1';
+let save = { done: {}, gear: [], muted: false };
+try { const s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s && typeof s === 'object') save = Object.assign(save, s); } catch (_) {}
+if (!save.done || typeof save.done !== 'object') save.done = {};
+if (!Array.isArray(save.gear)) save.gear = [];
+function persist() { try { localStorage.setItem(KEY, JSON.stringify(save)); } catch (_) {} }
+const hasGear = g => save.gear.includes(g);
+
+// ================= sound =================
+let actx = null;
+function audio() {
+  if (!actx) { try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (_) { actx = null; } }
+  try { if (actx && actx.state === 'suspended') actx.resume(); } catch (_) {}
+}
+function tone(f, d, type = 'sine', v = 0.12, when = 0, slide = 0) {
+  if (save.muted || !actx) return;
+  try {
+    const t = actx.currentTime + when, o = actx.createOscillator(), g = actx.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t);
+    if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(30, f + slide), t + d);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t + d + 0.05);
+  } catch (_) {}
+}
+const sfx = {
+  tap() { tone(660, 0.07, 'square', 0.04); },
+  pop() { tone(700, 0.09, 'sine', 0.12, 0, 500); },
+  good() { [523, 659, 784].forEach((f, i) => tone(f, 0.16, 'triangle', 0.13, i * 0.08)); },
+  bad() { tone(240, 0.28, 'sawtooth', 0.06, 0, -110); },
+  whoosh() { tone(200, 0.45, 'sine', 0.09, 0, 600); },
+  win() { [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, 0.24, 'triangle', 0.14, i * 0.1)); },
+  drill() { tone(110 + Math.random() * 40, 0.06, 'square', 0.025); },
+};
+document.addEventListener('pointerdown', audio, { capture: true });
+document.addEventListener('click', e => { if (e.target.closest('button,.btn,.opt,.card,.stop')) sfx.tap(); });
+function updMute() { document.querySelectorAll('.mute').forEach(b => { b.textContent = save.muted ? '🔇' : '🔊'; }); }
+document.addEventListener('click', e => { if (e.target.closest('.mute')) { save.muted = !save.muted; persist(); updMute(); } });
+
+// ================= feedback =================
+function burst(text, color = '#ffd23f', x, y) {
+  if (x == null) { x = innerWidth / 2; y = innerHeight * 0.42; }
+  let pts = '';
+  for (let i = 0; i < 24; i++) { const a = i / 24 * TAU, r = i % 2 ? 0.72 : 1; pts += `${(Math.cos(a) * 100 * r).toFixed(1)},${(Math.sin(a) * 66 * r).toFixed(1)} `; }
+  const b = el(`<div class="burst"><svg viewBox="-110 -75 220 150"><polygon points="${pts}" fill="${color}" stroke="${INK}" stroke-width="5" stroke-linejoin="round"/>
+    <text x="0" y="12" text-anchor="middle" font-family="Luckiest Guy, Comic Sans MS, system-ui" font-size="${text.length > 6 ? 28 : 36}" fill="#fff" stroke="${INK}" stroke-width="6" paint-order="stroke" stroke-linejoin="round">${text}</text></svg></div>`);
+  b.style.left = clamp(x, 110, innerWidth - 110) + 'px'; b.style.top = clamp(y, 80, innerHeight - 80) + 'px';
+  document.body.appendChild(b); setTimeout(() => b.remove(), 950);
+}
+let toastT = 0;
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2400); }
+function setMsg(node, kind, html) { if (!node) return; node.className = 'msg ' + (kind || ''); node.innerHTML = html; }
+
+// ================= canvas registry & main loop =================
+const anims = new Set();
+function anim(cv, fn) { const a = { cv, fn }; anims.add(a); return a; }
+function fit(cv) {
+  const d = Math.min(2, window.devicePixelRatio || 1), w = cv.clientWidth, h = cv.clientHeight;
+  const pw = Math.round(w * d), ph = Math.round(h * d);
+  if (cv.width !== pw || cv.height !== ph) { cv.width = pw; cv.height = ph; }
+  const c = cv.getContext('2d'); c.setTransform(d, 0, 0, d, 0, 0); return { c, W: w, H: h };
+}
+function pointer(cv, h) {
+  const pos = e => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+  let down = false;
+  cv.addEventListener('pointerdown', e => { down = true; try { cv.setPointerCapture(e.pointerId); } catch (_) {} h.down && h.down(...pos(e)); e.preventDefault(); });
+  cv.addEventListener('pointermove', e => { h.move && h.move(...pos(e), down); });
+  const up = e => { if (!down) return; down = false; h.up && h.up(...pos(e)); };
+  cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+}
+// a "hold" button that works with touch, mouse and keyboard keys
+function holdBtn(btn, onChange) {
+  let on = false;
+  const set = v => { if (v === on) return; on = v; btn.classList.toggle('down', v); onChange(v); };
+  btn.addEventListener('pointerdown', e => { e.preventDefault(); try { btn.setPointerCapture(e.pointerId); } catch (_) {} set(true); });
+  ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(n => btn.addEventListener(n, () => set(false)));
+  btn.addEventListener('contextmenu', e => e.preventDefault());
+  return set;
+}
+const keys = {};
+addEventListener('keydown', e => { keys[e.key] = true; if ([' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key) && !e.target.closest('input')) e.preventDefault(); });
+addEventListener('keyup', e => { keys[e.key] = false; });
+
+// ================= starry background =================
+const STARS = Array.from({ length: 170 }, () => ({ x: Math.random(), y: Math.random(), r: rand(0.6, 2.2), p: rand(0, TAU) }));
+function drawSky(t) {
+  const { c, W, H } = fit($('sky'));
+  const g = c.createLinearGradient(0, 0, W, H); g.addColorStop(0, '#1b1650'); g.addColorStop(0.55, '#2a1d5e'); g.addColorStop(1, '#0f2a52');
+  c.fillStyle = g; c.fillRect(0, 0, W, H);
+  const n = c.createRadialGradient(W * 0.8, H * 0.2, 10, W * 0.8, H * 0.2, Math.max(W, H) * 0.45);
+  n.addColorStop(0, 'rgba(155,93,229,.35)'); n.addColorStop(1, 'rgba(155,93,229,0)'); c.fillStyle = n; c.fillRect(0, 0, W, H);
+  const m = c.createRadialGradient(W * 0.12, H * 0.85, 10, W * 0.12, H * 0.85, Math.max(W, H) * 0.4);
+  m.addColorStop(0, 'rgba(76,201,240,.25)'); m.addColorStop(1, 'rgba(76,201,240,0)'); c.fillStyle = m; c.fillRect(0, 0, W, H);
+  for (const s of STARS) { c.globalAlpha = 0.45 + 0.55 * Math.abs(Math.sin(t * 1.3 + s.p)); c.fillStyle = '#fff'; ell(c, s.x * W, s.y * H, s.r, s.r); c.fill(); }
+  c.globalAlpha = 1;
+}
+
+// ================= Captain Pup =================
+// head centre at (x,y); s = head radius. Whole pup spans roughly y-1.3s .. y+2.5s
+function drawPup(c, x, y, s, o = {}) {
+  const t = o.t || 0, lw = Math.max(1.5, s * 0.075);
+  c.save(); c.translate(x, y + (o.bob === false ? 0 : Math.sin(t * 3) * s * 0.04));
+  if (o.flip) c.scale(-1, 1);
+  if (o.rot) c.rotate(o.rot);
+  if (o.squash) c.scale(1 + (1 - o.squash) * 0.6, o.squash);
+  c.lineJoin = 'round'; c.lineCap = 'round'; c.strokeStyle = INK; c.lineWidth = lw;
+  const suit = o.suit || '#f4f1ff', trim = o.trim || '#ff9f1c', helmet = o.helmet !== false;
+  if (o.body !== false) {
+    if (helmet) { c.fillStyle = '#b9c2d6'; rr(c, -s * 0.8, s * 0.75, s * 1.6, s * 1.1, s * 0.25); c.fill(); c.stroke(); }
+    const step = o.walk ? Math.sin(t * 11) * s * 0.16 : 0;
+    for (const sd of [-1, 1]) {
+      const st = sd > 0 ? step : -step;
+      c.fillStyle = suit; rr(c, sd * s * 0.36 - s * 0.25 + st * 0.5, s * 1.72, s * 0.5, s * 0.62, s * 0.18); c.fill(); c.stroke();
+      c.fillStyle = helmet ? trim : '#fff'; ell(c, sd * s * 0.38 + st, s * 2.36, s * 0.32, s * 0.17); c.fill(); c.stroke();
+    }
+    c.fillStyle = suit; ell(c, 0, s * 1.42, s * 0.78, s * 0.62); c.fill(); c.stroke();
+    if (helmet) {
+      c.fillStyle = trim; rr(c, -s * 0.3, s * 1.27, s * 0.6, s * 0.36, s * 0.08); c.fill(); c.stroke();
+      c.fillStyle = '#06d6a0'; ell(c, -s * 0.13, s * 1.45, s * 0.07, s * 0.07); c.fill();
+      c.fillStyle = '#ff4d6d'; ell(c, s * 0.13, s * 1.45, s * 0.07, s * 0.07); c.fill();
+    }
+    for (const sd of [-1, 1]) {
+      c.save(); c.translate(sd * s * 0.66, s * 1.18);
+      let a = -sd * 0.45;
+      if (sd > 0 && o.wave) a = -2.5 + Math.sin(t * 8) * 0.35;
+      if (o.arms === 'up') a = sd > 0 ? -2.6 : 2.6;
+      if (o.reach && sd > 0) a = -1.7;
+      c.rotate(a);
+      c.fillStyle = suit; rr(c, -s * 0.18, 0, s * 0.36, s * 0.72, s * 0.17); c.fill(); c.stroke();
+      c.fillStyle = helmet ? trim : '#fff'; ell(c, 0, s * 0.74, s * 0.2, s * 0.18); c.fill(); c.stroke();
+      c.restore();
+    }
+    if (helmet) { c.fillStyle = '#c9d1e3'; rr(c, -s * 0.72, s * 0.95, s * 1.44, s * 0.26, s * 0.12); c.fill(); c.stroke(); }
+  }
+  // floppy black ears
+  c.fillStyle = '#1f1d22';
+  for (const sd of [-1, 1]) { ell(c, sd * s * 0.86, s * 0.2 + Math.sin(t * 4 + sd) * s * 0.03, s * 0.3, s * 0.6, -sd * 0.35); c.fill(); c.stroke(); }
+  // fluffy white head with cheek tufts
+  c.fillStyle = '#fff';
+  for (const sd of [-1, 1]) { ell(c, sd * s * 0.78, s * 0.36, s * 0.24, s * 0.2, sd * 0.4); c.fill(); c.stroke(); }
+  ell(c, 0, 0, s * 0.95, s * 0.86); c.fill(); c.stroke();
+  for (const sd of [-1, 1]) { ell(c, sd * s * 0.74, s * 0.33, s * 0.2, s * 0.17); c.fill(); }
+  // black cap + eye patches, white blaze in the middle
+  c.save(); ell(c, 0, 0, s * 0.95 - lw / 2, s * 0.86 - lw / 2); c.clip();
+  c.fillStyle = '#1f1d22';
+  ell(c, 0, -s * 0.78, s * 0.85, s * 0.34); c.fill();
+  for (const sd of [-1, 1]) { ell(c, sd * s * 0.42, -s * 0.12, s * 0.33, s * 0.38, -sd * 0.35); c.fill(); }
+  c.fillStyle = '#fff'; ell(c, 0, -s * 0.42, s * 0.12, s * 0.62); c.fill();
+  c.restore();
+  // eyes
+  const blink = o.blink || ((t % 3.7) < 0.12 && o.t);
+  for (const sd of [-1, 1]) {
+    const ex = sd * s * 0.39, ey = -s * 0.07;
+    if (blink) { c.lineWidth = lw * 0.8; c.strokeStyle = '#fff'; c.beginPath(); c.moveTo(ex - s * 0.15, ey); c.quadraticCurveTo(ex, ey + s * 0.1, ex + s * 0.15, ey); c.stroke(); c.strokeStyle = INK; continue; }
+    c.lineWidth = lw * 0.6;
+    c.fillStyle = '#8a5530'; ell(c, ex, ey, s * 0.2, s * 0.21); c.fill(); c.stroke();
+    c.fillStyle = '#2b1810'; ell(c, ex + s * 0.02, ey + s * 0.02, s * 0.11, s * 0.11); c.fill();
+    c.fillStyle = '#fff'; ell(c, ex + s * 0.07, ey - s * 0.07, s * 0.065, s * 0.065); c.fill();
+    ell(c, ex - s * 0.07, ey + s * 0.08, s * 0.03, s * 0.03); c.fill();
+  }
+  c.lineWidth = lw;
+  // blush
+  c.fillStyle = 'rgba(255,120,150,.45)'; for (const sd of [-1, 1]) { ell(c, sd * s * 0.62, s * 0.3, s * 0.12, s * 0.07); c.fill(); }
+  // nose + mouth + tongue
+  c.fillStyle = INK; ell(c, 0, s * 0.2, s * 0.11, s * 0.08); c.fill();
+  if (o.mood === 'oops') {
+    c.fillStyle = '#7a1f35'; ell(c, 0, s * 0.46, s * 0.1, s * 0.12); c.fill(); c.stroke();
+    c.fillStyle = '#7fd4ff'; c.beginPath(); c.moveTo(s * 0.72, -s * 0.62); c.quadraticCurveTo(s * 0.86, -s * 0.38, s * 0.72, -s * 0.34); c.quadraticCurveTo(s * 0.58, -s * 0.38, s * 0.72, -s * 0.62); c.fill(); c.lineWidth = lw * 0.6; c.stroke(); c.lineWidth = lw;
+  } else {
+    c.beginPath(); c.moveTo(0, s * 0.26); c.lineTo(0, s * 0.34); c.stroke();
+    c.fillStyle = '#7a1f35'; c.beginPath(); c.moveTo(-s * 0.23, s * 0.34); c.quadraticCurveTo(0, s * 0.78, s * 0.23, s * 0.34); c.closePath(); c.fill(); c.stroke();
+    c.fillStyle = '#ff8fb1'; c.lineWidth = lw * 0.6; ell(c, 0, s * 0.58, s * 0.12, s * 0.12); c.fill(); c.stroke();
+    c.strokeStyle = '#e0607f'; c.lineWidth = lw * 0.35; c.beginPath(); c.moveTo(0, s * 0.5); c.lineTo(0, s * 0.64); c.stroke();
+  }
+  // whiskers
+  c.strokeStyle = INK; c.lineWidth = Math.max(1, lw * 0.35);
+  for (const sd of [-1, 1]) { c.beginPath(); c.moveTo(sd * s * 0.3, s * 0.24); c.lineTo(sd * s * 0.7, s * 0.14); c.moveTo(sd * s * 0.3, s * 0.3); c.lineTo(sd * s * 0.7, s * 0.34); c.stroke(); }
+  c.lineWidth = lw;
+  if (o.hat === 'cap') {
+    c.fillStyle = '#4cc9f0'; c.beginPath(); c.arc(0, -s * 0.55, s * 0.6, Math.PI * 1.05, Math.PI * 1.95); c.closePath(); c.fill(); c.stroke();
+    rr(c, s * 0.2, -s * 0.62, s * 0.75, s * 0.14, s * 0.07); c.fill(); c.stroke();
+  }
+  if (helmet) {
+    if (o.fog) { c.fillStyle = `rgba(190,110,60,${0.6 * o.fog})`; ell(c, 0, -s * 0.02, s * 1.28, s * 1.22); c.fill(); }
+    c.fillStyle = 'rgba(180,225,255,.2)'; ell(c, 0, -s * 0.02, s * 1.28, s * 1.22); c.fill(); c.stroke();
+    c.strokeStyle = 'rgba(255,255,255,.9)'; c.lineWidth = lw * 1.3;
+    c.beginPath(); c.ellipse(0, -s * 0.02, s * 1.07, s * 1.01, 0, 3.55, 4.35); c.stroke();
+    c.beginPath(); c.ellipse(0, -s * 0.02, s * 1.07, s * 1.01, 0, 4.5, 4.62); c.stroke();
+  }
+  c.restore();
+}
+
+// ================= planets =================
+const CRACKS = [[-.7, -.3, .2, .5], [-.4, -.8, .5, .1], [-.9, .3, .6, .7], [.1, -.9, .8, -.2], [-.5, .6, .4, -.4], [-.2, .2, .9, .4], [-.8, -.6, -.1, .9]];
+function drawPlanet(c, id, x, y, r, t = 0, opt = {}) {
+  c.save(); c.lineJoin = 'round'; const lw = Math.max(2, r * 0.05); c.lineWidth = lw; c.strokeStyle = INK;
+  const ring = (front) => {
+    c.save(); c.beginPath(); if (front) c.rect(x - r * 3, y, r * 6, r * 3); else c.rect(x - r * 3, y - r * 3, r * 6, r * 3); c.clip();
+    c.translate(x, y); c.rotate(-0.18);
+    c.beginPath(); c.ellipse(0, 0, r * 2.15, r * 0.6, 0, 0, TAU); c.ellipse(0, 0, r * 1.35, r * 0.34, 0, 0, TAU);
+    c.fillStyle = '#e9cf98'; c.fill('evenodd'); c.stroke();
+    c.beginPath(); c.ellipse(0, 0, r * 1.78, r * 0.48, 0, 0, TAU); c.strokeStyle = 'rgba(120,80,40,.6)'; c.lineWidth = lw * 0.9; c.stroke();
+    c.beginPath(); c.ellipse(0, 0, r * 1.55, r * 0.41, 0, 0, TAU); c.strokeStyle = 'rgba(120,80,40,.3)'; c.lineWidth = lw * 1.5; c.stroke();
+    c.restore();
+  };
+  if (id === 'saturn') ring(false);
+  c.save(); ell(c, x, y, r, r); c.clip();
+  if (id === 'mars') {
+    c.fillStyle = '#e2703a'; c.fillRect(x - r, y - r, 2 * r, 2 * r);
+    c.fillStyle = '#b74a2a';
+    for (const [a, b, s] of [[-.4, -.1, .35], [.3, .35, .28], [.45, -.4, .2], [-.2, .5, .22]]) { ell(c, x + a * r, y + b * r, s * r, s * r * 0.6, a); c.fill(); }
+    c.fillStyle = '#fff6ea'; ell(c, x, y - r * 0.98, r * 0.45, r * 0.2); c.fill();
+  } else if (id === 'jupiter' || id === 'saturn') {
+    const cols = id === 'jupiter' ? ['#f2dcb3', '#d79c6a', '#f6e7c9', '#c0794c', '#f2dcb3', '#d9a273', '#efe0c4', '#b97a55', '#f2dcb3']
+                                  : ['#f3e1b5', '#e5c98f', '#f6e8c6', '#d9b77a', '#f3e1b5', '#e8cf9c', '#f3e1b5'];
+    const n = cols.length;
+    cols.forEach((col, i) => { c.fillStyle = col; c.fillRect(x - r, y - r + i * 2 * r / n - 1, 2 * r, 2 * r / n + 2); });
+    if (id === 'jupiter') { c.fillStyle = '#c8553d'; ell(c, x + r * 0.28 + Math.sin(t * 0.3) * r * 0.05, y + r * 0.36, r * 0.24, r * 0.13); c.fill(); c.lineWidth = lw * 0.6; c.stroke(); c.lineWidth = lw; }
+  } else if (id === 'europa') {
+    c.fillStyle = '#f1e6cf'; c.fillRect(x - r, y - r, 2 * r, 2 * r);
+    c.fillStyle = '#e2d0ad'; ell(c, x - r * 0.3, y + r * 0.3, r * 0.5, r * 0.35); c.fill();
+    c.strokeStyle = '#b0683f'; c.lineWidth = Math.max(1.2, r * 0.035);
+    for (const [a, b, cc, d] of CRACKS) { c.beginPath(); c.moveTo(x + a * r, y + b * r); c.quadraticCurveTo(x + (a + cc) / 2 * r + r * 0.2, y + (b + d) / 2 * r, x + cc * r, y + d * r); c.stroke(); }
+    c.strokeStyle = INK; c.lineWidth = lw;
+  } else if (id === 'earth') {
+    c.fillStyle = '#3a86ff'; c.fillRect(x - r, y - r, 2 * r, 2 * r);
+    c.fillStyle = '#06d6a0'; for (const [a, b, s] of [[-.4, -.3, .4], [.35, .2, .35], [-.1, .6, .2]]) { ell(c, x + a * r, y + b * r, s * r, s * r * 0.7, a); c.fill(); }
+    c.fillStyle = '#fff'; ell(c, x, y - r, r * 0.5, r * 0.15); c.fill();
+  } else if (id === 'moon') {
+    c.fillStyle = '#cfcfd6'; c.fillRect(x - r, y - r, 2 * r, 2 * r);
+    c.fillStyle = '#a9a9b5'; for (const [a, b, s] of [[-.3, -.3, .2], [.35, .1, .25], [-.1, .5, .15]]) { ell(c, x + a * r, y + b * r, s * r, s * r); c.fill(); }
+  } else {
+    c.fillStyle = opt.color || '#9b5de5'; c.fillRect(x - r, y - r, 2 * r, 2 * r);
+  }
+  const sh = c.createRadialGradient(x - r * 0.4, y - r * 0.4, r * 0.1, x, y, r * 1.05);
+  sh.addColorStop(0, 'rgba(255,255,255,.25)'); sh.addColorStop(0.5, 'rgba(0,0,0,0)'); sh.addColorStop(1, 'rgba(10,0,40,.35)');
+  c.fillStyle = sh; c.fillRect(x - r, y - r, 2 * r, 2 * r);
+  c.restore();
+  c.strokeStyle = INK; c.lineWidth = lw; ell(c, x, y, r, r); c.stroke();
+  if (id === 'saturn') ring(true);
+  c.restore();
+}
+
+// ================= gear =================
+const GEAR = {
+  suit:   { name: 'Pressure Suit', emoji: '🧑‍🚀', from: 'Mars', use: 'Keeps air pressing on you where the air is too thin.' },
+  filter: { name: 'Dust Filter', emoji: '😷', from: 'Mars', use: 'Catches super-fine dust and little bits.' },
+  boost:  { name: 'Gravity Boosters', emoji: '🚀', from: 'Jupiter', use: 'Extra push to fight strong gravity.' },
+  nav:    { name: 'Orbit Navigator', emoji: '🧭', from: 'Saturn', use: 'Finds the just-right speed to orbit.' },
+  kit:    { name: 'Life-Finder Kit', emoji: '🧪', from: 'Europa', use: 'Tests for water, chemicals and energy.' },
+};
+const GEAR_ORDER = ['suit', 'filter', 'boost', 'nav', 'kit'];
+function drawGear(c, id, x, y, s, t = 0) {
+  c.save(); c.translate(x, y); c.lineJoin = 'round'; c.lineCap = 'round'; c.strokeStyle = INK; c.lineWidth = Math.max(2, s * 0.06);
+  if (id === 'suit') {
+    rr(c, -s * 0.45, -s * 0.02, s * 0.9, s * 0.75, s * 0.2); fs(c, '#f4f1ff');
+    rr(c, -s * 0.45, s * 0.22, s * 0.9, s * 0.14, 2); fs(c, '#ff9f1c');
+    ell(c, 0, -s * 0.36, s * 0.38, s * 0.36); fs(c, '#f4f1ff');
+    ell(c, 0, -s * 0.36, s * 0.26, s * 0.22); fs(c, '#4cc9f0');
+    c.strokeStyle = '#fff'; c.beginPath(); c.arc(0, -s * 0.36, s * 0.16, 3.6, 4.4); c.stroke();
+  } else if (id === 'filter') {
+    c.beginPath(); c.moveTo(-s * 0.55, -s * 0.15); c.lineTo(-s * 0.3, -s * 0.05); c.moveTo(s * 0.55, -s * 0.15); c.lineTo(s * 0.3, -s * 0.05); c.stroke();
+    ell(c, 0, s * 0.05, s * 0.42, s * 0.36); fs(c, '#d8dbe6');
+    ell(c, 0, s * 0.05, s * 0.26, s * 0.22); fs(c, '#06d6a0');
+    c.lineWidth = Math.max(1, s * 0.03);
+    for (let i = -2; i <= 2; i++) { c.beginPath(); c.moveTo(i * s * 0.08, -s * 0.12); c.lineTo(i * s * 0.08, s * 0.22); c.stroke(); }
+    c.fillStyle = '#c1623a'; for (let i = 0; i < 6; i++) { const a = t * 2 + i; ell(c, Math.cos(a) * s * 0.6, Math.sin(a * 1.3) * s * 0.4, s * 0.04, s * 0.04); c.fill(); }
+  } else if (id === 'boost') {
+    for (const sd of [-1, 1]) {
+      const fl = s * (0.3 + 0.12 * Math.sin(t * 20 + sd));
+      c.beginPath(); c.moveTo(sd * s * 0.25 - s * 0.14, s * 0.32); c.lineTo(sd * s * 0.25, s * 0.32 + fl); c.lineTo(sd * s * 0.25 + s * 0.14, s * 0.32); fs(c, '#ffd23f');
+      rr(c, sd * s * 0.25 - s * 0.18, -s * 0.45, s * 0.36, s * 0.8, s * 0.16); fs(c, '#ff4d6d');
+      rr(c, sd * s * 0.25 - s * 0.18, -s * 0.1, s * 0.36, s * 0.12, 2); fs(c, '#ffd23f');
+    }
+  } else if (id === 'nav') {
+    ell(c, 0, 0, s * 0.55, s * 0.55); fs(c, '#2b2a5a');
+    c.strokeStyle = '#4cc9f0'; c.setLineDash([s * 0.08, s * 0.06]); ell(c, 0, 0, s * 0.38, s * 0.38); c.stroke(); c.setLineDash([]);
+    c.strokeStyle = INK; ell(c, 0, 0, s * 0.13, s * 0.13); fs(c, '#ffd23f');
+    const a = t * 2; ell(c, Math.cos(a) * s * 0.38, Math.sin(a) * s * 0.38, s * 0.08, s * 0.08); fs(c, '#ff4d6d');
+  } else if (id === 'kit') {
+    const cols = ['#4cc9f0', '#06d6a0', '#ffd23f'];
+    for (let i = 0; i < 3; i++) {
+      const xx = (i - 1) * s * 0.32;
+      rr(c, xx - s * 0.11, -s * 0.5, s * 0.22, s * 0.95, s * 0.11); fs(c, '#fff');
+      c.save(); rr(c, xx - s * 0.11, -s * 0.5, s * 0.22, s * 0.95, s * 0.11); c.clip();
+      c.fillStyle = cols[i]; c.fillRect(xx - s * 0.12, s * 0.05 + Math.sin(t * 3 + i) * s * 0.04, s * 0.24, s * 0.5); c.restore();
+      rr(c, xx - s * 0.11, -s * 0.5, s * 0.22, s * 0.95, s * 0.11); c.stroke();
+    }
+  }
+  c.restore();
+}
+</script>
+<script>
+'use strict';
+// ================= game engine =================
+const PLANETS = [];   // filled by the mission scripts below
+const PHASES = [
+  { key: 'challenge', n: '1', name: 'Challenge', secs: 30 },
+  { key: 'discover', n: '2', name: 'Discover', secs: 60 },
+  { key: 'experiment', n: '3', name: 'Experiment', secs: 120 },
+  { key: 'boss', n: '4', name: 'Boss', secs: 90 },
+  { key: 'check', n: '✔', name: 'Check', secs: 0 },
+];
+let cur = null, view = 'title';
+
+function show(id) {
+  view = id;
+  for (const s of ['title', 'hub', 'mission']) $(s).hidden = s !== id;
+  $('timeup').hidden = true;
+  if (id !== 'mission') { cleanupPhase(); cur = null; }
+  if (id === 'hub') renderHub();
+  if (id === 'title') startTitle();
+}
+
+// ---------- title ----------
+let titleAnim = null;
+function startTitle() {
+  if (titleAnim) anims.delete(titleAnim);
+  titleAnim = anim($('titlePup'), (c, W, H, t) => {
+    c.clearRect(0, 0, W, H);
+    drawPlanet(c, 'saturn', W * 0.8, H * 0.2, W * 0.1, t);
+    drawPlanet(c, 'mars', W * 0.15, H * 0.78, W * 0.07, t);
+    drawPup(c, W * 0.5, H * 0.36 + Math.sin(t * 1.6) * 6, W * 0.17, { t, wave: true, rot: Math.sin(t * 0.8) * 0.06 });
+  });
+}
+
+// ---------- hub ----------
+function isUnlocked(i) { return i === 0 || !!save.done[PLANETS[i - 1].id]; }
+function missingGear(P) { return (P.needs || []).filter(g => !hasGear(g)); }
+function starStr(n, size = '') { let s = ''; for (let i = 0; i < 3; i++) s += i < n ? '★' : '<span class="off">★</span>'; return s; }
+function renderHub() {
+  const box = $('stops'); box.innerHTML = '';
+  for (const a of [...anims]) if (a.hub) anims.delete(a);
+  let nextIdx = PLANETS.findIndex((P, i) => isUnlocked(i) && !save.done[P.id]);
+  PLANETS.forEach((P, i) => {
+    const open = isUnlocked(i) && !missingGear(P).length, done = save.done[P.id];
+    const d = el(`<div class="stop panel ${open ? '' : 'locked'} ${i === nextIdx && open ? 'next' : ''}" role="button" tabindex="0" data-i="${i}">
+      ${i === nextIdx && open ? '<span class="badge">GO HERE!</span>' : ''}
+      <canvas></canvas><div class="nm">${P.name}</div><div class="q">${P.q}</div>
+      ${done ? `<div class="st">${starStr(done.stars || 0)}</div>` : open ? '<div class="st">' + starStr(0) + '</div>' :
+        `<div class="need">🔒 ${!isUnlocked(i) ? 'Finish ' + PLANETS[i - 1].name + ' first' : ''}${(P.needs || []).length ? (!isUnlocked(i) ? '<br>' : '') + 'Needs: ' + P.needs.map(g => GEAR[g].emoji + ' ' + GEAR[g].name).join(', ') : ''}</div>`}
+      ${P.extra ? P.extra : ''}</div>`);
+    box.appendChild(d);
+    const cv = d.querySelector('canvas');
+    const a = anim(cv, (c, W, H, t) => { c.clearRect(0, 0, W, H); drawPlanet(c, P.id, W / 2, H / 2, W * (P.id === 'saturn' ? 0.22 : 0.36), t);
+      if (!open) { txt(c, '🔒', W * 0.82, H * 0.18, W * 0.14, '#fff', 'center', false); } });
+    a.hub = true;
+    d.addEventListener('click', e => {
+      if (e.target.closest('a')) return;
+      if (!open) {
+        const mg = missingGear(P);
+        toast(!isUnlocked(i) ? `Finish ${PLANETS[i - 1].name} first!` : `You need: ${mg.map(g => GEAR[g].name).join(' + ')}`);
+        sfx.bad(); return;
+      }
+      startMission(i);
+    });
+  });
+  // gear locker
+  const gg = $('gearGrid'); gg.innerHTML = '';
+  for (const g of GEAR_ORDER) {
+    const has = hasGear(g);
+    const d = el(`<div class="gear ${has ? '' : 'off'}"><canvas></canvas><b>${has ? GEAR[g].name : '???'}</b><small>${has ? GEAR[g].use : 'Earn it on ' + GEAR[g].from}</small></div>`);
+    gg.appendChild(d);
+    const a = anim(d.querySelector('canvas'), (c, W, H, t) => { c.clearRect(0, 0, W, H); drawGear(c, g, W / 2, H / 2, W * 0.42, has ? t : 0); }); a.hub = true;
+  }
+  const n = PLANETS.filter(P => save.done[P.id]).length;
+  $('hubHint').innerHTML = n === 0 ? '👆 Tap <b>Mars</b> to start your first mission! Each planet gives you new gear for the next one.'
+    : n < PLANETS.length ? `🚀 Great flying, Captain! Next stop: <b>${PLANETS[nextIdx].name}</b>. Check your Gear Locker →`
+    : '🏆 You explored every world! Replay any planet to earn more stars, or read your Captain\'s Log.';
+}
+
+// ---------- mission ----------
+function startMission(i) {
+  cur = { P: PLANETS[i], pi: i, phase: -1, cleanups: [], tick: null };
+  show('mission');
+  $('pname').textContent = cur.P.name;
+  sfx.whoosh();
+  goPhase(0);
+}
+function cleanupPhase() {
+  for (const a of [...anims]) if (!a.hub && a.cv !== $('titlePup')) anims.delete(a);
+  if (cur) { for (const f of cur.cleanups) try { f(); } catch (_) {} cur.cleanups = []; cur.tick = null; }
+  $('timeup').hidden = true;
+}
+function goPhase(i) {
+  cleanupPhase();
+  cur.phase = i; const ph = PHASES[i];
+  $('tracker').innerHTML = PHASES.map((p, k) => `<span class="${k < i ? 'done' : k === i ? 'on' : ''}">${p.n}<em> ${p.name}</em></span>`).join('');
+  cur.tLeft = ph.secs; cur.tMax = ph.secs; cur.timeUpShown = false;
+  $('timer').hidden = !ph.secs; updTimer();
+  $('stage').innerHTML = '';
+  if (ph.key === 'discover') buildDiscover();
+  else if (ph.key === 'check') buildCheck();
+  else cur.P[ph.key]();
+  const s = $('stage').querySelector('.side'); if (s) s.scrollTop = 0;
+}
+function nextPhase() { if (cur && cur.phase < PHASES.length - 1) goPhase(cur.phase + 1); }
+function updTimer() {
+  if (!cur) return; const t = Math.max(0, Math.ceil(cur.tLeft));
+  $('timer').textContent = '⏱ ' + Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0');
+  $('timer').classList.toggle('low', t <= 10);
+}
+function timeUp() {
+  const ph = PHASES[cur.phase], tu = $('timeup');
+  const boss = ph.key === 'boss';
+  tu.innerHTML = `<span>⏰ Time's up! ${boss ? 'No rush — keep trying, Captain!' : 'Want more time, or move on?'}</span>
+    <button class="btn go small" id="tuKeep">Keep going</button>
+    ${boss ? '' : '<button class="btn yel small" id="tuNext">Move on ▶</button>'}`;
+  tu.hidden = false;
+  $('tuKeep').onclick = () => { tu.hidden = true; cur.tLeft = 30; cur.timeUpShown = false; };
+  if (!boss) $('tuNext').onclick = () => { tu.hidden = true; nextPhase(); };
+}
+function playLayout(sideHtml) {
+  $('stage').innerHTML = `<div class="play"><div class="cvbox"><canvas></canvas></div><div class="side panel">${sideHtml}</div></div>`;
+  return { cv: $('stage').querySelector('canvas'), side: $('stage').querySelector('.side') };
+}
+const nextBtn = (label = 'Next ▶', dis = true) => `<div class="nav"><button class="btn go" data-next ${dis ? 'disabled' : ''}>${label}</button></div>`;
+function wireNext(side, fn = nextPhase) { const b = side.querySelector('[data-next]'); if (b) b.onclick = () => { if (!b.disabled) fn(); }; return b; }
+function enableNext(side) { const b = side.querySelector('[data-next]'); if (b && b.disabled) { b.disabled = false; b.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.12)' }, { transform: 'scale(1)' }], { duration: 400 }); } }
+function taskList(side, sel, tasks) {
+  const ul = side.querySelector(sel); ul.innerHTML = tasks.map(t => `<li><span>${t}</span></li>`).join('');
+  const done = new Set();
+  return { tick(i) { if (done.has(i)) return false; done.add(i); ul.children[i].classList.add('ok'); sfx.good(); burst(['YES!', 'WOW!', 'NICE!'][done.size % 3], '#06d6a0'); return true; }, count: () => done.size, has: i => done.has(i) };
+}
+
+// ---------- discover ----------
+function buildDiscover() {
+  const P = cur.P, replay = !!save.done[P.id];
+  $('stage').innerHTML = `<div class="disc"><div class="dhead panel"><p>🔍 <b>Discover:</b> tap each card to learn a secret about ${P.name}!</p>
+    <button class="btn alt small" id="dSkip" ${replay ? '' : 'hidden'}>Skip ▶</button><button class="btn go" data-next disabled>Next ▶</button></div><div class="cards"></div></div>`;
+  const box = $('stage').querySelector('.cards'), seen = new Set(), head = $('stage').querySelector('.dhead');
+  wireNext(head); if (replay) $('dSkip').onclick = nextPhase;
+  P.cards.forEach((cd, i) => {
+    const d = el(`<div class="card panel" role="button" tabindex="0"><canvas></canvas><div class="ct">${cd.title}</div>
+      <div class="tap first">👆 Tap to reveal</div><div class="cf">${cd.fact}</div><div class="tap again">🔁 Tap to replay animation</div></div>`);
+    box.appendChild(d);
+    const st = { t0: -1 };
+    anim(d.querySelector('canvas'), (c, W, H, t) => {
+      const k = st.t0 < 0 ? 0 : t - st.t0;
+      c.clearRect(0, 0, W, H); cd.draw(c, W, H, k, t, st.t0 >= 0);
+      if (st.t0 < 0) { c.fillStyle = 'rgba(20,10,50,.45)'; c.fillRect(0, 0, W, H); txt(c, '?', W / 2, H / 2, H * 0.45, '#ffd23f'); }
+    }).st = st;
+    d.addEventListener('click', () => {
+      st.t0 = performance.now() / 1000; d.classList.add('shown'); seen.add(i); sfx.pop();
+      if (seen.size === P.cards.length) { enableNext(head); burst('GOT IT!', '#4cc9f0'); setTimeout(() => head.scrollIntoView({ behavior: 'smooth', block: 'start' }), 900); }
+    });
+  });
+}
+
+// ---------- knowledge check ----------
+function buildCheck() {
+  const P = cur.P, qs = P.quiz; let qi = 0, right = 0;
+  $('stage').innerHTML = `<div class="quiz"><div class="qcard panel"></div></div>`;
+  const card = $('stage').querySelector('.qcard');
+  const ask = () => {
+    const q = qs[qi], order = shuffle(q.opts.map((o, k) => k));
+    card.innerHTML = `<div class="qn">Question ${qi + 1} of ${qs.length}</div><div class="qq">${q.q}</div>
+      <div class="opts ${q.opts.length > 3 ? 'two' : ''}">${order.map(k => `<button class="opt" data-k="${k}">${q.opts[k]}</button>`).join('')}</div>
+      <div class="msg" id="qmsg"></div><div class="nav"></div>`;
+    card.querySelectorAll('.opt').forEach(b => b.onclick = () => {
+      const k = +b.dataset.k, ok = k === q.a;
+      card.querySelectorAll('.opt').forEach(o => { o.disabled = true; if (+o.dataset.k === q.a) o.classList.add('right'); });
+      if (!ok) b.classList.add('wrong');
+      if (ok) { right++; sfx.good(); burst('YES!', '#06d6a0'); } else { sfx.bad(); burst('HMM!', '#ff9f1c'); }
+      setMsg($('qmsg'), ok ? 'good' : 'info', (ok ? '<b>Right!</b> ' : '<b>Good try!</b> ') + q.why);
+      const nav = card.querySelector('.nav');
+      nav.innerHTML = `<button class="btn go">${qi < qs.length - 1 ? 'Next question ▶' : 'See my stars ★'}</button>`;
+      nav.firstChild.onclick = () => { qi++; qi < qs.length ? ask() : finish(); };
+    });
+  };
+  const finish = () => {
+    const stars = Math.max(1, Math.round(right / qs.length * 3));
+    const prev = save.done[P.id] || {};
+    save.done[P.id] = Object.assign({}, prev, { stars: Math.max(prev.stars || 0, stars) }); persist();
+    sfx.win(); burst(stars === 3 ? 'SUPER!' : 'NICE!', '#ffd23f');
+    const nextP = PLANETS[cur.pi + 1];
+    card.innerHTML = `<h2 style="text-align:center">Mission complete!</h2>
+      <div class="bigstars">${starStr(stars)}</div>
+      <p style="text-align:center;font-size:19px;margin:0">${right} of ${qs.length} answers right. ${stars < 3 ? 'Replay any time to get all 3 stars!' : 'Perfect, Captain!'}</p>
+      <h3 style="text-align:center">🧰 Gear earned</h3><div class="award"></div>
+      <p class="msg info" style="margin:0">📖 New facts added to your <b>Captain's Log</b>. ${nextP ? `Next stop: <b>${nextP.name}</b>!` : 'You explored every world!'}</p>
+      <div class="row"><button class="btn alt" id="again">🔁 Replay</button><button class="btn go" id="toMap">⭐ Star Map</button></div>`;
+    const aw = card.querySelector('.award');
+    for (const g of P.awards) {
+      const d = el(`<div class="gear"><canvas></canvas><b>${GEAR[g].name}</b><small>${GEAR[g].use}</small></div>`); aw.appendChild(d);
+      anim(d.querySelector('canvas'), (c, W, H, t) => { c.clearRect(0, 0, W, H); drawGear(c, g, W / 2, H / 2, W * 0.42, t); });
+    }
+    $('again').onclick = () => startMission(cur.pi);
+    $('toMap').onclick = () => show('hub');
+    $('timer').hidden = true;
+  };
+  ask();
+}
+
+// boss beaten: unlock gear & next planet
+function winBoss(side, html) {
+  const P = cur.P;
+  if (!save.done[P.id]) save.done[P.id] = { stars: 0 };
+  for (const g of P.awards) if (!hasGear(g)) save.gear.push(g);
+  persist();
+  sfx.win(); burst('YOU DID IT!', '#06d6a0');
+  cur.tLeft = 0; cur.timeUpShown = true; $('timer').hidden = true;
+  if (side) {
+    side.innerHTML = `<h3>🏆 Boss beaten!</h3><p>${html}</p>
+      <div class="msg good">🧰 Unlocked: <b>${P.awards.map(g => GEAR[g].emoji + ' ' + GEAR[g].name).join(' + ')}</b></div>
+      <p>One last thing: a quick knowledge check for your stars!</p>${nextBtn('Knowledge check ▶', false)}`;
+    wireNext(side);
+  }
+}
+
+// ---------- log ----------
+function openLog() {
+  $('logList').innerHTML = PLANETS.map(P => save.done[P.id]
+    ? `<h4>${P.name} ${'★'.repeat(save.done[P.id].stars || 0)}</h4><ul>${P.log.map(f => `<li>${f}</li>`).join('')}</ul>`
+    : `<h4 style="opacity:.5">${P.name} — ???</h4><ul><li style="opacity:.6">Finish the ${P.name} mission to write this page.</li></ul>`).join('');
+  $('logOv').hidden = false;
+}
+$('logBtn').onclick = openLog;
+$('logClose').onclick = () => { $('logOv').hidden = true; };
+$('logOv').addEventListener('click', e => { if (e.target === $('logOv')) $('logOv').hidden = true; });
+$('startBtn').onclick = () => show('hub');
+$('toTitle').onclick = () => show('title');
+$('exitBtn').onclick = () => show('hub');
+
+// ---------- main loop ----------
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now; const t = now / 1000;
+  try { drawSky(t); } catch (_) {}
+  if (cur && view === 'mission') {
+    if (cur.tick) cur.tick(dt, t);
+    if (cur.tMax && !cur.timeUpShown && $('timeup').hidden) {
+      cur.tLeft -= dt; updTimer();
+      if (cur.tLeft <= 0) { cur.timeUpShown = true; timeUp(); }
+    }
+  }
+  for (const a of anims) {
+    if (!a.cv.isConnected || a.cv.offsetParent === null) continue;
+    const { c, W, H } = fit(a.cv); if (W < 2 || H < 2) continue;
+    c.save(); a.fn(c, W, H, t); c.restore();
+  }
+  requestAnimationFrame(frame);
+}
+</script>
+<script>
+'use strict';
+// ================= MARS =================
+function marsSky(dust, sunset) {
+  const dayTop = mix('#1d2a4f', '#c98a55', dust), dayBot = mix('#3a4a72', '#e9b98c', dust);
+  const setTop = mix('#0e1430', '#4a2f2c', dust), setBot = mix('#1d2748', '#7a5548', dust);
+  return [mix(dayTop, setTop, sunset), mix(dayBot, setBot, sunset)];
+}
+const ROCKS = Array.from({ length: 14 }, () => [Math.random(), rand(0.06, 0.2), rand(0.4, 1)]);
+function marsScene(c, W, H, t, o = {}) {
+  const dust = o.dust ?? 0.8, sunset = o.sunset ?? 0, gy = H * (o.ground ?? 0.72);
+  const sky = o.skyOverride ? [o.skyOverride, mix(o.skyOverride, '#ffffff', 0.25)] : marsSky(dust, sunset);
+  const g = c.createLinearGradient(0, 0, 0, gy); g.addColorStop(0, sky[0]); g.addColorStop(1, sky[1]);
+  c.fillStyle = g; c.fillRect(0, 0, W, gy + 2);
+  // sun: high at noon, low at sunset; a blue halo appears around it at sunset when dust is high
+  const sx = W * (0.25 + sunset * 0.5), sy = lerp(H * 0.14, gy - H * 0.06, sunset);
+  if (!o.skyOverride && sunset > 0.4 && dust > 0.25) {
+    const k = (sunset - 0.4) / 0.6 * Math.min(1, (dust - 0.25) / 0.5);
+    const hg = c.createRadialGradient(sx, sy, 2, sx, sy, H * 0.45);
+    hg.addColorStop(0, `rgba(150,200,255,${0.9 * k})`); hg.addColorStop(0.45, `rgba(90,140,220,${0.45 * k})`); hg.addColorStop(1, 'rgba(90,140,220,0)');
+    c.fillStyle = hg; c.fillRect(0, 0, W, gy);
+  }
+  c.fillStyle = '#fffbe6'; c.strokeStyle = INK; c.lineWidth = 2; ell(c, sx, sy, H * 0.035, H * 0.035); c.fill(); c.stroke();
+  // far hills
+  c.fillStyle = mix('#a5512e', sky[1], 0.35 + sunset * 0.2);
+  c.beginPath(); c.moveTo(0, gy); for (let x = 0; x <= W; x += W / 12) c.lineTo(x, gy - H * (0.05 + 0.04 * Math.sin(x * 0.013 + 1))); c.lineTo(W, gy); c.fill();
+  // ground
+  const gg = c.createLinearGradient(0, gy, 0, H); gg.addColorStop(0, mix('#c8643a', '#3a2020', sunset * 0.6)); gg.addColorStop(1, mix('#9c4526', '#2a1616', sunset * 0.6));
+  c.fillStyle = gg; c.fillRect(0, gy, W, H - gy);
+  c.strokeStyle = INK; c.lineWidth = 3; c.beginPath(); c.moveTo(0, gy); c.lineTo(W, gy); c.stroke();
+  c.lineWidth = 2;
+  const off = o.scroll || 0;
+  for (const [rx, s, d] of ROCKS) {
+    const x = ((rx * W * 1.4 - off * d) % (W * 1.4) + W * 1.4) % (W * 1.4) - W * 0.2, y = gy + (H - gy) * (0.25 + d * 0.6);
+    c.fillStyle = mix('#8a3a20', '#3a2020', sunset * 0.6); ell(c, x, y, s * H * 0.25 * d, s * H * 0.14 * d); c.fill(); c.stroke();
+  }
+  // floating dust specks
+  if (dust > 0.05 && !o.noSpecks) {
+    c.fillStyle = `rgba(230,150,90,${0.25 + dust * 0.4})`;
+    for (let i = 0; i < 40 * dust; i++) { const x = ((i * 97.3 + t * 25 * (1 + i % 3)) % W), y = (i * 53.7 + Math.sin(t + i) * 10) % gy; ell(c, x, y, 1.6, 1.6); c.fill(); }
+  }
+  return gy;
+}
+function drawLander(c, x, y, s) {
+  c.save(); c.translate(x, y); c.strokeStyle = INK; c.lineWidth = Math.max(2, s * 0.05); c.lineJoin = 'round';
+  for (const sd of [-1, 1]) { c.beginPath(); c.moveTo(sd * s * 0.3, -s * 0.3); c.lineTo(sd * s * 0.6, 0); c.stroke(); rr(c, sd * s * 0.6 - s * 0.12, -s * 0.04, s * 0.24, s * 0.06, 3); fs(c, '#b9c2d6'); }
+  rr(c, -s * 0.4, -s * 0.85, s * 0.8, s * 0.6, s * 0.12); fs(c, '#f4f1ff');
+  c.beginPath(); c.moveTo(-s * 0.4, -s * 0.85); c.lineTo(0, -s * 1.25); c.lineTo(s * 0.4, -s * 0.85); fs(c, '#ff4d6d');
+  ell(c, 0, -s * 0.6, s * 0.14, s * 0.14); fs(c, '#4cc9f0');
+  c.restore();
+}
+
+PLANETS.push({
+  id: 'mars', name: 'Mars', q: 'Why is the sky pinkish? Why is the air so thin?',
+  needs: [], awards: ['suit', 'filter'],
+  extra: '<a class="extra" href="../martian-jump/">🦘 Try The Martian Jump game</a>',
+  log: ['Mars dust is full of iron oxide — rust! That\'s why Mars looks red.',
+        'Fine dust floating in the air makes the daytime sky look butterscotch-pink.',
+        'Mars sunsets can look blue near the Sun, because the dust scatters blue light forward.',
+        'Mars air is very thin: less than 1% of Earth\'s air pressure, and mostly carbon dioxide.',
+        'Mars is small with weaker gravity and lost its global magnetic field long ago, so the solar wind stripped much of its air away over billions of years.'],
+  cards: [
+    { title: 'Rusty dust', fact: 'Mars rocks and soil have lots of <b>iron oxide</b> — that\'s <b>rust</b>! The dust is super fine, like flour, so winds lift it high into the air.',
+      draw(c, W, H, k, t) { marsScene(c, W, H, t, { dust: 0.2 + Math.min(0.7, k * 0.25), noSpecks: true });
+        c.fillStyle = '#c1623a'; for (let i = 0; i < 30; i++) { const p = (k * 0.4 + i / 30) % 1, x = W * (0.1 + 0.8 * ((i * 37) % 30) / 30) + Math.sin(t * 2 + i) * 6, y = H * 0.75 - p * H * 0.7; c.globalAlpha = 1 - p; ell(c, x, y, 3, 3); c.fill(); } c.globalAlpha = 1;
+        txt(c, 'Fe₂O₃ = rust!', W / 2, H * 0.86, H * 0.11, '#ffd23f'); } },
+    { title: 'Dust paints the sky', fact: 'The dust <b>scatters sunlight</b>, so the daytime sky looks <b>butterscotch-pink</b>. At sunset, the sky around the Sun can glow <b>blue</b>!',
+      draw(c, W, H, k, t) { const s = (Math.sin(k * 1.2 - 1.57) + 1) / 2; marsScene(c, W, H, t, { dust: 0.85, sunset: s }); txt(c, s < 0.5 ? 'DAY: pinkish!' : 'SUNSET: blue!', W / 2, H * 0.86, H * 0.11, s < 0.5 ? '#ffd23f' : '#4cc9f0'); } },
+    { title: 'Super thin air', fact: 'Mars air is <b>very thin</b> — less than <b>1%</b> of the air pressure on Earth. And it\'s mostly <b>carbon dioxide</b>, which we can\'t breathe.',
+      draw(c, W, H, k, t) { c.fillStyle = '#2b2a5a'; c.fillRect(0, 0, W, H);
+        const jar = (x, n, lbl, col) => { c.strokeStyle = INK; c.lineWidth = 3; rr(c, x - W * 0.17, H * 0.12, W * 0.34, H * 0.6, 12); fs(c, 'rgba(255,255,255,.15)');
+          c.fillStyle = col; for (let i = 0; i < n; i++) { const a = i * 2.4 + t * (1 + i % 3) * 0.6; ell(c, x + Math.sin(a) * W * 0.13, H * 0.42 + Math.cos(a * 1.3) * H * 0.25, 3.5, 3.5); c.fill(); }
+          txt(c, lbl, x, H * 0.84, H * 0.1, '#fff'); };
+        jar(W * 0.27, 100, 'EARTH', '#4cc9f0'); jar(W * 0.73, Math.max(1, Math.round(100 - Math.min(1, k * 0.6) * 99)), 'MARS', '#ff9f1c'); } },
+    { title: 'Where did the air go?', fact: 'Mars is <b>small</b>, so its gravity is weaker. Long ago it also lost its <b>magnetic field</b> — an invisible shield. The <b>solar wind</b> from the Sun slowly stripped much of its air into space.',
+      draw(c, W, H, k, t) { c.fillStyle = '#16133a'; c.fillRect(0, 0, W, H);
+        c.fillStyle = '#ffd23f'; c.strokeStyle = INK; c.lineWidth = 3; ell(c, -W * 0.05, H / 2, H * 0.4, H * 0.4); c.fill(); c.stroke();
+        const air = Math.max(0.15, 1 - k * 0.2);
+        c.fillStyle = `rgba(255,170,120,${0.35 * air})`; ell(c, W * 0.68, H * 0.48, H * (0.2 + 0.12 * air), H * (0.2 + 0.12 * air)); c.fill();
+        drawPlanet(c, 'mars', W * 0.68, H * 0.48, H * 0.2, t);
+        c.strokeStyle = '#ffe28a'; c.lineWidth = 2.5;
+        for (let i = 0; i < 9; i++) { const x = ((t * 140 + i * 47) % (W * 0.55)) + W * 0.3 - H * 0.1, y = H * (0.12 + i * 0.09); c.beginPath(); c.moveTo(x - 14, y); c.lineTo(x, y); c.stroke(); }
+        c.fillStyle = '#ffb38a'; for (let i = 0; i < 8; i++) { const p = ((t * 0.5 + i / 8) % 1); ell(c, W * 0.68 + H * 0.3 + p * W * 0.3, H * 0.48 + (i - 4) * H * 0.06 * (1 + p), 3, 3); c.globalAlpha = 1 - p; c.fill(); c.globalAlpha = 1; }
+        txt(c, 'SOLAR WIND', W * 0.4, H * 0.9, H * 0.09, '#ffd23f'); } },
+  ],
+  quiz: [
+    { q: 'Why does the daytime sky on Mars look butterscotch-pink?', opts: ['Fine rusty dust in the air scatters the sunlight', 'Mars has pink clouds made of candy', 'The Sun is pink at Mars', 'It reflects pink oceans'], a: 0,
+      why: 'Tiny bits of iron-oxide (rust) dust float in the thin air and scatter sunlight, tinting the sky butterscotch-pink.' },
+    { q: 'How thick is the air on Mars compared to Earth?', opts: ['Much thicker', 'About the same', 'Very thin — less than 1% of Earth\'s air pressure'], a: 2,
+      why: 'Mars air pressure is less than 1% of Earth\'s, and the air is mostly carbon dioxide. That\'s why you need a pressure suit!' },
+    { q: 'Which helped Mars lose much of its air?', opts: ['It is small with weak gravity and lost its magnetic shield, so the solar wind stripped air away', 'Astronauts used it all up', 'It rained away into the ground'], a: 0,
+      why: 'Weaker gravity plus no global magnetic field let the solar wind strip much of Mars\'s air into space over billions of years.' },
+  ],
+
+  challenge() {
+    const { cv, side } = playLayout(`<h3>1 · The Challenge</h3>
+      <p>Captain Pup just landed on Mars! Time to paint a postcard. <b>What colour is the daytime sky here?</b></p>
+      <div class="opts two" id="c1">${[['Blue like Earth', '#4b8bf5'], ['Butterscotch-pink', '#d9a06a'], ['Green', '#5bd17a'], ['Pitch black', '#111']].map(([n, col], k) =>
+        `<button class="opt" data-k="${k}"><span style="width:34px;height:34px;border-radius:50%;border:3px solid ${INK};background:${col};flex:none"></span>${n}</button>`).join('')}</div>
+      <div class="msg" id="m1"></div><div id="q2"></div>${nextBtn()}`);
+    wireNext(side);
+    const S = { sky: '#6a7a9a', reveal: -1, mood: '' };
+    anim(cv, (c, W, H, t) => {
+      const k = S.reveal < 0 ? 0 : clamp((t - S.reveal) / 1.5, 0, 1);
+      const gy = marsScene(c, W, H, t, k < 1 ? { skyOverride: mix(S.sky, '#cf9462', k), dust: 0.6 } : { dust: 0.85 });
+      drawLander(c, W * 0.22, gy + H * 0.05, H * 0.28);
+      drawPup(c, W * 0.6, gy - H * 0.14, H * 0.12, { t, wave: !S.mood, mood: S.mood });
+      if (S.gauge != null) { // air-pressure gauge
+        const r = Math.min(H * 0.11, W * 0.12), gx = W - r - 16, gyy = r + 24; c.strokeStyle = INK; c.lineWidth = 3; ell(c, gx, gyy, r, r); fs(c, '#fff');
+        txt(c, 'AIR', gx, gyy + r * 0.45, r * 0.3, '#ff4d6d');
+        const a = Math.PI * (0.8 + S.gauge * 1.4); c.beginPath(); c.moveTo(gx, gyy); c.lineTo(gx + Math.cos(a) * r * 0.8, gyy + Math.sin(a) * r * 0.8); c.lineWidth = 4; c.stroke();
+        ntxt(c, 'Earth', gx + r * 0.62, gyy - r * 0.62, r * 0.2, INK); ntxt(c, '0', gx - r * 0.6, gyy + r * 0.62, r * 0.22, INK);
+      }
+    });
+    const opts = side.querySelectorAll('#c1 .opt');
+    opts.forEach(b => b.onclick = () => {
+      const k = +b.dataset.k; opts.forEach(o => o.disabled = true);
+      S.sky = ['#4b8bf5', '#d9a06a', '#5bd17a', '#111111'][k]; S.reveal = performance.now() / 1000 + 0.6;
+      b.classList.add(k === 1 ? 'right' : 'wrong'); opts[1].classList.add('right');
+      if (k === 1) { sfx.good(); burst('WOW!', '#06d6a0'); setMsg($('m1'), 'good', 'Great guess! Rover cameras show a <b>butterscotch-pink</b> daytime sky. But <i>why?</i> Keep that question in mind…'); }
+      else { sfx.bad(); S.mood = 'oops'; burst('OOPS!', '#ff9f1c'); setMsg($('m1'), 'bad', 'Surprise! The Mars sky turns <b>butterscotch-pink</b>, not ' + b.textContent.toLowerCase() + '. Why? We\'ll find out!'); }
+      setTimeout(askQ2, 900);
+    });
+    function askQ2() {
+      $('q2').innerHTML = `<p style="margin:10px 0 8px">Now Pup wants to take off the helmet. 🤔 <b>How much air is pressing on Mars, compared to Earth?</b></p>
+        <div class="opts" id="c2"><button class="opt" data-k="0">About the same as Earth</button><button class="opt" data-k="1">About half of Earth</button><button class="opt" data-k="2">Less than 1% of Earth</button></div><div class="msg" id="m2"></div>`;
+      S.gauge = 1; S.mood = '';
+      const o2 = side.querySelectorAll('#c2 .opt');
+      o2.forEach(b => b.onclick = () => {
+        const k = +b.dataset.k; o2.forEach(o => o.disabled = true); o2[2].classList.add('right');
+        const tgt = 0.006, t0 = performance.now(); const go = () => { const p = Math.min(1, (performance.now() - t0) / 1200); S.gauge = lerp(1, tgt, p); if (p < 1 && cur) requestAnimationFrame(go); }; go();
+        if (k === 2) { sfx.good(); burst('YES!', '#06d6a0'); setMsg($('m2'), 'good', 'Right! The needle barely moves. <b>Keep that helmet ON!</b> Let\'s discover why Mars air is so thin.'); }
+        else { b.classList.add('wrong'); sfx.bad(); S.mood = 'oops'; burst('YIKES!', '#ff9f1c'); setMsg($('m2'), 'bad', 'Whoa — look at the gauge! Mars air is <b>less than 1%</b> of Earth\'s. Helmet stays ON! Let\'s discover why.'); }
+        enableNext(side); side.scrollTop = side.scrollHeight;
+      });
+      side.scrollTop = side.scrollHeight;
+    }
+  },
+
+  experiment() {
+    const { cv, side } = playLayout(`<h3>3 · Experiment</h3>
+      <div class="tabs"><button class="btn small on" data-tab="sky">🎨 Sky Lab</button><button class="btn small alt" data-tab="air">🪐 Air Lab</button></div>
+      <div id="tabSky">
+        <div class="slider"><label>Dust in the air <b id="vDust"></b></label><input type="range" id="sDust" min="0" max="100" value="10"></div>
+        <div class="slider"><label>Time of day <b id="vTime"></b></label><input type="range" id="sTime" min="0" max="100" value="0"></div>
+      </div>
+      <div id="tabAir" hidden>
+        <p style="font-size:16px">Build a planet, then fast-forward 4 billion years! <i>(a simple model)</i></p>
+        <div class="opts two"><button class="opt" data-size="0">🔸 Small (like Mars)</button><button class="opt" data-size="1">🔵 Big (like Earth)</button>
+        <button class="opt" data-mag="0">❌ No magnetic shield</button><button class="opt" data-mag="1">🧲 Magnetic shield</button></div>
+        <button class="btn yel wide" id="runAir">▶ Run 4 billion years</button>
+      </div>
+      <div class="msg info" id="xm">Move the sliders and watch the sky change!</div>
+      <ul class="tasks" id="tasks"></ul>${nextBtn()}`);
+    wireNext(side);
+    const tasks = taskList(side, '#tasks', ['Make a butterscotch-pink <b>daytime</b> sky', 'Make a <b>blue sunset</b>', 'Air Lab: run a <b>small</b> planet with <b>no shield</b>', 'Air Lab: run a <b>big</b> planet <b>with</b> a shield']);
+    const S = { tab: 'sky', dust: 0.1, time: 0, size: 0, mag: 0, run: -1, air: 1, sel: false };
+    const upd = () => {
+      S.dust = $('sDust').value / 100; S.time = $('sTime').value / 100;
+      $('vDust').textContent = S.dust < 0.15 ? 'almost none' : S.dust < 0.55 ? 'some' : 'lots!';
+      $('vTime').textContent = S.time < 0.3 ? 'midday' : S.time < 0.75 ? 'afternoon' : 'sunset';
+      if (S.dust >= 0.6 && S.time < 0.3 && tasks.tick(0)) setMsg($('xm'), 'good', 'Butterscotch-pink! The rusty dust scatters sunlight all over the sky.');
+      else if (S.dust >= 0.6 && S.time > 0.8 && tasks.tick(1)) setMsg($('xm'), 'good', 'A blue sunset! The fine dust sends blue light forward, so the sky right around the setting Sun glows blue.');
+      else if (S.dust < 0.15) setMsg($('xm'), 'info', 'With almost no dust, the thin Mars air scatters very little light — the sky would look much darker.');
+      if (tasks.count() >= 3) enableNext(side);
+    };
+    $('sDust').oninput = upd; $('sTime').oninput = upd; upd();
+    side.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => {
+      S.tab = b.dataset.tab; side.querySelectorAll('[data-tab]').forEach(x => { x.classList.toggle('on', x === b); x.classList.toggle('alt', x !== b); });
+      $('tabSky').hidden = S.tab !== 'sky'; $('tabAir').hidden = S.tab !== 'air';
+      setMsg($('xm'), 'info', S.tab === 'sky' ? 'Move the sliders and watch the sky change!' : 'Pick a size and a shield, then press ▶ Run.');
+    });
+    const selOpts = () => side.querySelectorAll('#tabAir .opt').forEach(o => o.classList.toggle('sel', (o.dataset.size != null && +o.dataset.size === S.size) || (o.dataset.mag != null && +o.dataset.mag === S.mag)));
+    side.querySelectorAll('#tabAir .opt').forEach(o => o.onclick = () => { if (o.dataset.size != null) S.size = +o.dataset.size; else S.mag = +o.dataset.mag; S.run = -1; S.air = 1; selOpts(); });
+    selOpts();
+    // air left after 4 billion years in this toy model
+    const airLeft = () => [[0.08, 0.45], [0.6, 1]][S.size][S.mag];
+    $('runAir').onclick = () => { S.run = performance.now() / 1000; S.target = airLeft(); sfx.whoosh(); };
+    cur.tick = (dt, t) => {
+      if (S.run > 0) {
+        const p = clamp((t - S.run) / 4, 0, 1); S.air = lerp(1, S.target, p); S.years = p * 4;
+        if (p >= 1) {
+          S.run = -1;
+          const msgs = { '00': ['Small + no shield = most of the air stripped away. That\'s what happened to <b>Mars</b>!', 2],
+            '11': ['Big + magnetic shield = the air stays thick. Like <b>Earth</b>!', 3],
+            '01': ['A shield helps, but weak gravity still lets air slip away.', -1], '10': ['Strong gravity holds on to lots of air, even without a shield.', -1] };
+          const [m, ti] = msgs['' + S.size + S.mag]; setMsg($('xm'), 'good', m); if (ti >= 0) tasks.tick(ti);
+          if (tasks.count() >= 3) enableNext(side);
+        }
+      }
+    };
+    anim(cv, (c, W, H, t) => {
+      if (S.tab === 'sky') {
+        const gy = marsScene(c, W, H, t, { dust: S.dust, sunset: S.time });
+        drawPup(c, W * 0.5, gy - H * 0.14, H * 0.12, { t });
+        return;
+      }
+      c.fillStyle = '#120f30'; c.fillRect(0, 0, W, H);
+      for (let i = 0; i < 40; i++) { c.fillStyle = 'rgba(255,255,255,.6)'; ell(c, (i * 131) % W, (i * 71) % H, 1.2, 1.2); c.fill(); }
+      c.fillStyle = '#ffd23f'; c.strokeStyle = INK; c.lineWidth = 3; ell(c, -H * 0.18, H / 2, H * 0.36, H * 0.36); c.fill(); c.stroke();
+      const px = W * 0.62, py = H * 0.48, pr = H * (S.size ? 0.17 : 0.1);
+      const bubbleR = pr * 2.4;
+      // solar wind streaks
+      c.strokeStyle = '#ffe28a'; c.lineWidth = 2.5;
+      for (let i = 0; i < 14; i++) {
+        const y = H * (0.06 + i * 0.065); let x = ((t * 180 + i * 61) % (W * 0.95)) + H * 0.2;
+        let dy = 0; const ddx = x - px, ddy = y - py;
+        if (S.mag && Math.hypot(ddx, ddy) < bubbleR && ddx > -bubbleR) { dy = Math.sign(ddy || 1) * (bubbleR - Math.abs(ddy)) * 0.9; }
+        c.beginPath(); c.moveTo(x - 16, y + dy); c.lineTo(x, y + dy); c.stroke();
+      }
+      if (S.mag) { c.strokeStyle = 'rgba(76,201,240,.8)'; c.lineWidth = 3; c.setLineDash([8, 6]); c.beginPath(); c.ellipse(px + bubbleR * 0.2, py, bubbleR * 1.1, bubbleR, 0, 0, TAU); c.stroke(); c.setLineDash([]); }
+      const ar = pr * (1.08 + 0.5 * S.air);
+      const ag = c.createRadialGradient(px, py, pr, px, py, ar); ag.addColorStop(0, `rgba(140,200,255,${0.75 * S.air + 0.1})`); ag.addColorStop(1, 'rgba(140,200,255,0)');
+      c.fillStyle = ag; ell(c, px, py, ar, ar); c.fill();
+      if (S.run > 0 && S.target < 0.9) { c.fillStyle = '#bfe3ff'; for (let i = 0; i < 10; i++) { const p = (t * 0.7 + i / 10) % 1; c.globalAlpha = 1 - p; ell(c, px + pr + p * W * 0.3, py + (i - 5) * pr * 0.25 * (1 + p), 3, 3); c.fill(); } c.globalAlpha = 1; }
+      drawPlanet(c, S.size ? 'earth' : 'mars', px, py, pr, t);
+      c.lineWidth = 3; rr(c, W * 0.05, H * 0.83, W * 0.9, H * 0.08, 10); fs(c, '#e9e2cf');
+      c.fillStyle = '#4cc9f0'; rr(c, W * 0.05 + 3, H * 0.83 + 3, (W * 0.9 - 6) * S.air, H * 0.08 - 6, 7); c.fill();
+      txt(c, 'AIR KEPT', W * 0.5, H * 0.87, H * 0.05, '#fff');
+      txt(c, (S.years ? S.years.toFixed(1) : '0.0') + ' billion years', W * 0.5, H * 0.07, H * 0.06, '#ffd23f');
+    });
+  },
+
+  boss() {
+    const { cv, side } = playLayout(`<h3>4 · Boss: Dust Storm!</h3>
+      <p>A giant dust storm is coming! Pup must walk from the lander to the base. <b>Pick the gear you need</b> (tap to choose):</p>
+      <div class="opts two" id="kit">${[['suit', '🧑‍🚀 Pressure suit + helmet'], ['o2', '🫧 Oxygen tank'], ['filter', '😷 Dust filter'], ['umb', '☂️ Umbrella'], ['coat', '🧥 Winter coat only'], ['fan', '🌀 Big fan']]
+        .map(([k, n]) => `<button class="opt" data-k="${k}">${n}</button>`).join('')}</div>
+      <button class="btn go wide" id="suitUp">✔ Suit up!</button>
+      <div class="msg" id="bm"></div>`);
+    const S = cur.S = { stage: 'pick', pick: new Set(), x: 0, walking: false, clog: 0, shakes: 0, gust: 0, wipe: 0, t: 0 };
+    side.querySelectorAll('#kit .opt').forEach(o => o.onclick = () => { const k = o.dataset.k; S.pick.has(k) ? S.pick.delete(k) : S.pick.add(k); o.classList.toggle('sel', S.pick.has(k)); });
+    $('suitUp').onclick = () => {
+      const p = S.pick, why = [];
+      if (!p.has('suit')) why.push('🧑‍🚀 Mars air is <b>less than 1%</b> of Earth\'s pressure — you need a <b>pressure suit</b>.');
+      if (!p.has('o2')) why.push('🫧 Mars air is mostly <b>carbon dioxide</b> — bring <b>oxygen</b> to breathe.');
+      if (!p.has('filter')) why.push('😷 The super-fine rusty dust gets into everything — pack a <b>dust filter</b>.');
+      if (p.has('umb')) why.push('☂️ No rain on Mars, and the thin air can\'t push hard — leave the umbrella.');
+      if (p.has('coat')) why.push('🧥 A coat alone can\'t hold air pressure in. (The suit keeps you warm anyway!)');
+      if (p.has('fan')) why.push('🌀 A fan can\'t blow away a whole storm! Too heavy.');
+      if (why.length) { sfx.bad(); burst('HMM!', '#ff9f1c'); setMsg($('bm'), 'bad', why.join('<br>')); return; }
+      sfx.good(); burst('READY!', '#06d6a0'); startWalk();
+    };
+    function startWalk() {
+      S.stage = 'walk';
+      side.innerHTML = `<h3>4 · Boss: Dust Storm!</h3>
+        <p><b>Hold WALK</b> to reach the base. If the dust filter clogs, <b>tap SHAKE</b> to clear it!</p>
+        <div class="mlabel"><span>Distance to base</span><span id="dist">100 m</span></div><div class="meter"><i id="distBar" style="background:var(--blue)"></i></div>
+        <div class="mlabel"><span>Dust filter</span><span id="clogT">clear</span></div><div class="meter"><i id="clogBar" style="background:#c1623a"></i></div>
+        <div class="holdrow"><button class="btn go" id="walkB">🚶 WALK</button><button class="btn yel" id="shakeB">✋ SHAKE</button></div>
+        <div class="msg info" id="bm">Fun fact: Mars air is so thin that even storm winds push on you much more gently than winds on Earth. The <b>dust</b> is the real problem!</div>`;
+      holdBtn($('walkB'), v => { S.walking = v; });
+      $('shakeB').onclick = () => { if (S.clog > 0.05) { S.clog = Math.max(0, S.clog - 0.36); sfx.pop(); S.wipe = 0.3; } };
+      cur.tick = (dt, t) => {
+        if (S.stage !== 'walk') return;
+        S.t += dt;
+        const walking = S.walking || keys[' '] || keys.ArrowRight;
+        if (keys.s || keys.S) { if (!S.sk) { S.sk = 1; $('shakeB').click(); } } else S.sk = 0;
+        const clogged = S.clog >= 1;
+        S.gust = 0.5 + 0.5 * Math.sin(S.t * 0.9) * Math.sin(S.t * 0.37);
+        if (walking && !clogged) { S.x = Math.min(100, S.x + dt * 9); S.clog = Math.min(1, S.clog + dt * (0.12 + 0.18 * S.gust)); }
+        else S.clog = Math.min(1, S.clog + dt * 0.03);
+        S.wipe = Math.max(0, S.wipe - dt);
+        $('dist').textContent = Math.ceil(100 - S.x) + ' m'; $('distBar').style.width = S.x + '%';
+        $('clogBar').style.width = S.clog * 100 + '%'; $('clogT').textContent = clogged ? 'CLOGGED! Tap SHAKE' : S.clog > 0.6 ? 'getting dusty…' : 'clear';
+        $('shakeB').classList.toggle('next', clogged);
+        $('shakeB').style.animation = clogged ? 'glow 0.6s infinite' : '';
+        if (S.x >= 100) { S.stage = 'won'; winBoss(side, 'Pup made it through the dust storm! The <b>pressure suit</b> held the air in, and the <b>dust filter</b> kept the rusty dust out.'); }
+      };
+    }
+    anim(cv, (c, W, H, t) => {
+      const dust = S.stage === 'pick' ? 0.75 : 0.95;
+      const gy = marsScene(c, W, H, t, { dust, scroll: S.x * W * 0.03, noSpecks: true });
+      if (S.stage === 'pick') {
+        drawLander(c, W * 0.25, gy + H * 0.05, H * 0.3);
+        drawPup(c, W * 0.6, gy - H * 0.14, H * 0.12, { t, helmet: S.pick.has('suit'), suit: S.pick.has('suit') ? '#f4f1ff' : '#4cc9f0' });
+        c.fillStyle = 'rgba(200,110,60,.35)'; c.fillRect(W * 0.8, 0, W * 0.2, H);
+        txt(c, 'STORM →', W * 0.88, H * 0.12, H * 0.06, '#ffd23f');
+        return;
+      }
+      // base comes closer as you walk
+      const bx = W * 0.5 + (100 - S.x) * W * 0.012;
+      c.save(); c.translate(bx, gy + H * 0.04); c.strokeStyle = INK; c.lineWidth = 3;
+      c.beginPath(); c.arc(0, 0, H * 0.18, Math.PI, 0); c.closePath(); fs(c, '#f4f1ff');
+      rr(c, -H * 0.05, -H * 0.1, H * 0.1, H * 0.1, 6); fs(c, '#4cc9f0');
+      c.fillStyle = Math.sin(t * 6) > 0 ? '#06d6a0' : '#0a6650'; ell(c, 0, -H * 0.2, H * 0.02, H * 0.02); c.fill(); c.stroke();
+      c.restore();
+      const walking = (S.walking || keys[' '] || keys.ArrowRight) && S.clog < 1 && S.stage === 'walk';
+      drawPup(c, W * 0.25, gy - H * 0.14, H * 0.12, { t, walk: walking, fog: S.clog, mood: S.clog >= 1 ? 'oops' : '', rot: walking ? 0.08 : 0 });
+      // blowing dust
+      for (let i = 0; i < 90; i++) {
+        const sp = 1 + (i % 5) * 0.5, x = W - ((t * 160 * sp * (0.6 + S.gust * 0.8) + i * 61) % (W + 40)), y = (i * 37.3) % H;
+        c.fillStyle = `rgba(${200 + i % 40},${110 + i % 30},60,${0.35 + 0.3 * S.gust})`; ell(c, x, y + Math.sin(t * 3 + i) * 6, 2 + (i % 3), 1.5); c.fill();
+      }
+      c.fillStyle = `rgba(190,110,60,${0.15 + 0.25 * S.gust})`; c.fillRect(0, 0, W, H);
+      if (S.wipe > 0) txt(c, 'SHAKE!', W * 0.25, gy - H * 0.42, H * 0.07, '#ffd23f');
+      if (S.stage === 'won') { drawPup(c, W * 0.42, gy - H * 0.14, H * 0.12, { t, arms: 'up' }); }
+    });
+  },
+});
+</script>
+<script>
+'use strict';
+// ================= JUPITER =================
+const JUP_BANDS = ['#f2dcb3', '#d79c6a', '#f6e7c9', '#c0794c', '#efe0c4', '#b97a55'];
+// cloud scene, depth 0..1 (0 = high, 1 = deep). depth darkens & reddens things
+function jupClouds(c, W, H, t, depth = 0, scroll = 0) {
+  const g = c.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, mix('#f6e2bd', '#7a3b22', depth)); g.addColorStop(1, mix('#c8865a', '#3b160d', depth));
+  c.fillStyle = g; c.fillRect(0, 0, W, H);
+  for (let i = 0; i < 7; i++) {
+    const y = ((i / 7) * H * 1.3 - scroll * H * 0.9) % (H * 1.3); const yy = y < -H * 0.15 ? y + H * 1.3 : y;
+    c.fillStyle = mix(JUP_BANDS[i % 6], '#4a1d10', depth * 0.8); c.globalAlpha = 0.75;
+    c.beginPath(); c.moveTo(0, yy);
+    for (let x = 0; x <= W + 20; x += 20) c.lineTo(x, yy + Math.sin(x * 0.012 + t * (0.4 + i * 0.1) + i) * H * 0.025);
+    for (let x = W + 20; x >= 0; x -= 20) c.lineTo(x, yy + H * 0.09 + Math.sin(x * 0.015 - t * 0.3 + i * 2) * H * 0.02);
+    c.closePath(); c.fill();
+  }
+  c.globalAlpha = 1;
+}
+function drawProbe(c, x, y, s, t, o = {}) {
+  c.save(); c.translate(x, y); c.rotate(o.tilt || 0); c.strokeStyle = INK; c.lineWidth = Math.max(2, s * 0.06); c.lineJoin = 'round';
+  if (o.flame) for (const sd of [-1, 1]) { const f = s * (0.4 + 0.25 * Math.sin(t * 30 + sd)) * o.flame; c.beginPath(); c.moveTo(sd * s * 0.4 - s * 0.12, s * 0.45); c.lineTo(sd * s * 0.4, s * 0.45 + f); c.lineTo(sd * s * 0.4 + s * 0.12, s * 0.45); fs(c, '#ffd23f'); }
+  for (const sd of [-1, 1]) { rr(c, sd * s * 0.4 - s * 0.16, -s * 0.1, s * 0.32, s * 0.6, s * 0.12); fs(c, o.boost ? '#ff4d6d' : '#b9c2d6'); }
+  ell(c, 0, 0, s * 0.5, s * 0.42); fs(c, '#f4f1ff');
+  ell(c, 0, -s * 0.05, s * 0.28, s * 0.24); fs(c, '#4cc9f0');
+  if (o.pup) { c.save(); c.beginPath(); c.ellipse(0, -s * 0.05, s * 0.26, s * 0.22, 0, 0, TAU); c.clip(); drawPup(c, 0, -s * 0.02, s * 0.17, { t, body: false, helmet: false, bob: false }); c.restore(); }
+  c.beginPath(); c.moveTo(0, -s * 0.42); c.lineTo(0, -s * 0.65); c.stroke(); ell(c, 0, -s * 0.68, s * 0.06, s * 0.06); fs(c, '#ff4d6d');
+  c.restore();
+}
+function drawScale(c, x, y, w, val, label, col = '#ff4d6d') {
+  c.save(); c.strokeStyle = INK; c.lineWidth = 3; c.lineJoin = 'round';
+  rr(c, x - w / 2, y, w, w * 0.28, w * 0.06); fs(c, '#f4f1ff');
+  rr(c, x - w * 0.3, y + w * 0.05, w * 0.6, w * 0.17, 6); fs(c, '#16133a');
+  txt(c, val, x, y + w * 0.14, w * 0.12, col, 'center', false);
+  if (label) ntxt(c, label, x, y + w * 0.36, Math.max(12, w * 0.08), '#fff');
+  c.restore();
+}
+const PRESETS = { moon: ['Moon', 0.17, 'moon'], mars: ['Mars', 0.38, 'mars'], earth: ['Earth', 1, 'earth'], saturn: ['Saturn', 1.07, 'saturn'], jupiter: ['Jupiter', 2.4, 'jupiter'] };
+
+PLANETS.push({
+  id: 'jupiter', name: 'Jupiter', q: 'Why would your weight be different there?',
+  needs: ['suit'], awards: ['boost'],
+  log: ['Your weight is how hard a planet\'s gravity pulls on you. Your mass (how much "stuff" you are) stays the same.',
+        'Gravity depends on a planet\'s mass AND its size: more mass pulls harder, and being farther from the centre pulls weaker.',
+        'At Jupiter\'s cloud tops, gravity is about 2.4 times Earth\'s — a 100 lb kid would weigh about 240 lb!',
+        'Jupiter is a gas giant: it has no solid surface to stand on. The deeper you go, the thicker, hotter and more squished the gas gets.'],
+  cards: [
+    { title: 'Weight = a pull', fact: 'Your <b>weight</b> is how hard gravity pulls you down. Your <b>mass</b> (how much stuff you\'re made of) stays the same everywhere!',
+      draw(c, W, H, k, t) { c.fillStyle = '#2b2a5a'; c.fillRect(0, 0, W, H); const j = Math.min(1, k * 0.7);
+        drawPup(c, W * 0.5, H * 0.3 + j * H * 0.03, H * 0.1, { t, squash: 1 - j * 0.12, helmet: false, hat: 'cap' });
+        drawScale(c, W * 0.5, H * 0.62, W * 0.4, Math.round(lerp(30, 72, j)) + ' lb', j < 0.5 ? 'on Earth' : 'on Jupiter!');
+        c.strokeStyle = '#ffd23f'; c.lineWidth = 4; for (const sd of [-1, 1]) { c.beginPath(); c.moveTo(W * 0.5 + sd * W * 0.32, H * 0.2); c.lineTo(W * 0.5 + sd * W * 0.32, H * 0.2 + H * 0.15 + j * H * 0.2); c.stroke(); } } },
+    { title: 'Mass vs. size', fact: '<b>More mass → stronger pull.</b> But <b>farther from the centre → weaker pull.</b> Jupiter has about <b>318 times</b> Earth\'s mass, but it\'s about <b>11 times wider</b>, so its cloud-top gravity is "only" about <b>2.4×</b>.',
+      draw(c, W, H, k, t) { c.fillStyle = '#16133a'; c.fillRect(0, 0, W, H); const g = Math.min(1, k * 0.5);
+        drawPlanet(c, 'earth', W * 0.18, H * 0.5, H * 0.07, t); drawPlanet(c, 'jupiter', W * 0.66, H * 0.5, H * (0.07 + g * 0.3), t);
+        txt(c, '×318 mass', W * 0.66, H * 0.1, H * 0.09, '#ffd23f'); txt(c, '×11 wide', W * 0.66, H * 0.92, H * 0.09, '#4cc9f0'); } },
+    { title: 'No ground!', fact: 'Jupiter is a <b>gas giant</b>. There\'s <b>no solid surface</b> to stand on — just clouds that get <b>thicker, hotter and more squeezed</b> the deeper you go.',
+      draw(c, W, H, k, t) { const d = Math.min(1, k * 0.3); jupClouds(c, W, H, t, d, k * 0.4);
+        drawProbe(c, W / 2, H * 0.45, H * 0.22, t, { pup: true }); txt(c, 'DEPTH ' + Math.round(d * 100) + '%', W / 2, H * 0.88, H * 0.1, d > 0.7 ? '#ff4d6d' : '#fff'); } },
+    { title: 'Weigh yourself!', fact: 'A <b>100 lb</b> kid would weigh about <b>240 lb</b> at Jupiter\'s cloud tops — and only about <b>38 lb</b> on Mars or <b>17 lb</b> on the Moon.',
+      draw(c, W, H, k, t) { c.fillStyle = '#2b2a5a'; c.fillRect(0, 0, W, H);
+        const list = [['moon', 17], ['mars', 38], ['earth', 100], ['jupiter', 240]];
+        list.forEach(([p, v], i) => { const x = W * (0.13 + i * 0.25), on = k * 1.5 > i;
+          drawPlanet(c, p, x, H * 0.3, H * 0.12, t); drawScale(c, x, H * 0.55, W * 0.22, on ? v + ' lb' : '…', ''); }); } },
+  ],
+  quiz: [
+    { q: 'You fly from Earth to Jupiter. What changes?', opts: ['Your weight — gravity pulls harder', 'Your mass — you get more stuff in you', 'Nothing at all'], a: 0,
+      why: 'Your mass stays the same. Your weight is the pull of gravity, and Jupiter\'s cloud-top gravity is about 2.4 times Earth\'s.' },
+    { q: 'A 100 lb kid at Jupiter\'s cloud tops would weigh about…', opts: ['40 lb', '100 lb', '240 lb', '1,000 lb'], a: 2,
+      why: 'About 2.4 × 100 = 240 lb. Big, but not 318× — because Jupiter is so wide, its cloud tops are far from its centre.' },
+    { q: 'Why can\'t you land and walk on Jupiter?', opts: ['It is a gas giant with no solid surface', 'It is made of hot lava', 'It is too small'], a: 0,
+      why: 'Jupiter is a gas giant. The gas just gets thicker, hotter and more squeezed deeper down — there\'s nowhere to stand.' },
+  ],
+
+  challenge() {
+    const { cv, side } = playLayout(`<h3>1 · The Challenge</h3>
+      <p>Captain Pup wants to <b>land</b> on Jupiter and plant a flag! <b>Hold DESCEND</b> and look for the ground.</p>
+      <div class="holdrow"><button class="btn go" id="dn">⬇ DESCEND</button></div>
+      <div class="mlabel"><span>Outside pressure</span><span id="pT">low</span></div><div class="meter"><i id="pB" style="background:var(--accent)"></i></div>
+      <div class="msg info" id="m1">Searching for solid ground…</div><div id="q2"></div>${nextBtn()}`);
+    wireNext(side);
+    const S = { d: 0, hold: false, done: false };
+    holdBtn($('dn'), v => S.hold = v);
+    cur.tick = (dt) => {
+      if (S.done) return;
+      if (S.hold || keys.ArrowDown || keys[' ']) S.d = Math.min(1, S.d + dt * 0.12);
+      $('pB').style.width = S.d * 100 + '%'; $('pT').textContent = S.d < 0.4 ? 'OK' : S.d < 0.8 ? 'squeezing!' : 'DANGER!';
+      if (S.d > 0.35 && S.d < 0.37) setMsg($('m1'), 'info', 'Still just clouds… and they\'re getting thicker!');
+      if (S.d >= 1) {
+        S.done = true; sfx.bad(); burst('ABORT!', '#ff4d6d');
+        setMsg($('m1'), 'bad', '⚠ <b>No ground anywhere!</b> The gas got too thick and squeezy. The probe zoomed back up to safety.');
+        $('dn').disabled = true;
+        $('q2').innerHTML = `<p style="margin:10px 0 6px">Pup weighs <b>30 lb</b> on Earth. Guess: what would the probe\'s scale say at Jupiter\'s cloud tops?</p>
+          <div class="opts two" id="c2"><button class="opt" data-k="0">About 10 lb</button><button class="opt" data-k="1">About 30 lb</button><button class="opt" data-k="2">About 72 lb</button><button class="opt" data-k="3">About 9,500 lb</button></div><div class="msg" id="m2"></div>`;
+        const o2 = side.querySelectorAll('#c2 .opt');
+        o2.forEach(b => b.onclick = () => { const k = +b.dataset.k; o2.forEach(o => o.disabled = true); o2[2].classList.add('right'); S.scale = 1;
+          if (k === 2) { sfx.good(); burst('YES!', '#06d6a0'); setMsg($('m2'), 'good', 'Right! About <b>2.4 times</b> heavier. But why? Let\'s discover!'); }
+          else { b.classList.add('wrong'); sfx.bad(); burst('HMM!', '#ff9f1c'); setMsg($('m2'), 'info', 'The scale says about <b>72 lb</b> — about 2.4 times more! Why not more, or less? Let\'s discover!'); }
+          enableNext(side); side.scrollTop = side.scrollHeight; });
+        side.scrollTop = side.scrollHeight;
+      }
+    };
+    anim(cv, (c, W, H, t) => {
+      jupClouds(c, W, H, t, S.d * 0.85, S.d * 3 + t * 0.02);
+      const back = S.done ? Math.min(1, (performance.now() / 1000 - (S.bt || (S.bt = performance.now() / 1000))) * 0.8) : 0;
+      drawProbe(c, W / 2 + Math.sin(t * 7) * S.d * 4, H * (0.42 - back * 0.2), H * 0.22, t, { pup: true, flame: S.done ? 1 : 0 });
+      txt(c, 'Depth: ' + Math.round(S.d * 1000) + ' km', W * 0.04, H * 0.07, H * 0.06, '#fff', 'left');
+      if (S.scale) { drawScale(c, W * 0.8, H * 0.72, W * 0.26, '72 lb', 'Pup on Jupiter'); }
+    });
+  },
+
+  experiment() {
+    const { cv, side } = playLayout(`<h3>3 · Experiment</h3>
+      <div class="tabs"><button class="btn small on" data-tab="w">⚖️ Weigh-in</button><button class="btn small alt" data-tab="b">🛠 Planet Builder</button></div>
+      <div id="tW">
+        <div class="slider"><label>Your weight on Earth <b id="vKid"></b></label><input type="range" id="sKid" min="40" max="150" value="100" step="5"></div>
+        <div class="opts two" id="pre">${Object.entries(PRESETS).map(([k, v]) => `<button class="opt" data-p="${k}">${v[0]}</button>`).join('')}</div>
+      </div>
+      <div id="tB" hidden>
+        <div class="slider"><label>Planet mass <b id="vM"></b></label><input type="range" id="sM" min="1" max="20" value="1"></div>
+        <div class="slider"><label>Planet size (radius) <b id="vR"></b></label><input type="range" id="sR" min="1" max="5" value="1" step="0.25"></div>
+      </div>
+      <div class="msg info" id="xm">Pick a world and step on the scale!</div>
+      <ul class="tasks" id="tasks"></ul>${nextBtn()}`);
+    wireNext(side);
+    const tasks = taskList(side, '#tasks', ['Weigh yourself on <b>Jupiter</b>', 'Weigh yourself on the <b>Moon</b> or <b>Mars</b>', 'Builder: add <b>mass</b> to make gravity stronger', 'Builder: make the planet <b>bigger</b> to weaken the pull']);
+    const S = { tab: 'w', p: 'earth', kid: 100, M: 1, R: 1, shown: 0, lastG: 1 };
+    const g = () => S.tab === 'w' ? PRESETS[S.p][1] : S.M / (S.R * S.R);
+    const upd = () => {
+      S.kid = +$('sKid').value; $('vKid').textContent = S.kid + ' lb';
+      S.M = +$('sM').value; S.R = +$('sR').value; $('vM').textContent = '×' + S.M + ' Earth'; $('vR').textContent = '×' + S.R + ' Earth';
+      side.querySelectorAll('#pre .opt').forEach(o => o.classList.toggle('sel', o.dataset.p === S.p));
+      if (S.tab === 'b') {
+        const gg = g();
+        if (S.M >= 4 && S.R <= 1.25 && tasks.tick(2)) setMsg($('xm'), 'good', 'More mass = <b>stronger pull</b>! Gravity is ×' + gg.toFixed(1) + ' now.');
+        else if (S.M >= 4 && S.R >= 2 && gg < S.M * 0.5 && tasks.tick(3)) setMsg($('xm'), 'good', 'Same mass, but bigger size = you stand <b>farther from the centre</b>, so the pull gets weaker! That\'s why Jupiter is "only" 2.4×.');
+        else setMsg($('xm'), 'info', `Gravity here: <b>×${gg.toFixed(2)}</b> Earth. You'd weigh about <b>${Math.round(S.kid * gg)} lb</b>.`);
+      }
+      if (tasks.count() >= 3) enableNext(side);
+    };
+    ['sKid', 'sM', 'sR'].forEach(id => $(id).oninput = upd);
+    side.querySelectorAll('#pre .opt').forEach(o => o.onclick = () => {
+      S.p = o.dataset.p; upd(); const [n, gg] = PRESETS[S.p];
+      const extra = { jupiter: ' Whoa! Gravity at Jupiter\'s cloud tops is about <b>2.4×</b> Earth\'s.', moon: ' So floaty! The Moon\'s gravity is about 1/6 of Earth\'s.', mars: ' Mars gravity is about 3/8 of Earth\'s.', saturn: ' Saturn is huge, but so wide that its cloud-top gravity is close to Earth\'s!', earth: '' }[S.p];
+      setMsg($('xm'), 'good', `On ${n} you'd weigh about <b>${Math.round(S.kid * gg)} lb</b>.${extra}`);
+      if (S.p === 'jupiter') tasks.tick(0); if (S.p === 'moon' || S.p === 'mars') tasks.tick(1);
+      if (tasks.count() >= 3) enableNext(side);
+    });
+    side.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => {
+      S.tab = b.dataset.tab; side.querySelectorAll('[data-tab]').forEach(x => { x.classList.toggle('on', x === b); x.classList.toggle('alt', x !== b); });
+      $('tW').hidden = S.tab !== 'w'; $('tB').hidden = S.tab !== 'b'; upd();
+      if (S.tab === 'w') setMsg($('xm'), 'info', 'Pick a world and step on the scale!');
+    });
+    upd();
+    anim(cv, (c, W, H, t) => {
+      const gg = g(); S.shown = lerp(S.shown, gg, 0.12);
+      c.fillStyle = '#16133a'; c.fillRect(0, 0, W, H);
+      for (let i = 0; i < 30; i++) { c.fillStyle = 'rgba(255,255,255,.5)'; ell(c, (i * 131) % W, (i * 71) % (H * 0.5), 1.2, 1.2); c.fill(); }
+      const gy = H * 0.66;
+      if (S.tab === 'w') {
+        const id = PRESETS[S.p][2];
+        drawPlanet(c, id, W * 0.5, gy + H * 1.6, H * 1.65, t);
+      } else {
+        const pr = Math.min(H * 0.32, H * 0.08 * S.R * 1.2);
+        c.save(); c.globalAlpha = 0.95; drawPlanet(c, '', W * 0.78, H * 0.3, pr, t, { color: mix('#9b5de5', '#4cc9f0', S.M / 20) }); c.restore();
+        txt(c, 'mass ×' + S.M, W * 0.78, H * 0.3 - pr - 14, 16, '#ffd23f');
+        c.fillStyle = mix('#9b5de5', '#4cc9f0', S.M / 20); c.fillRect(0, gy + H * 0.1, W, H); c.strokeStyle = INK; c.lineWidth = 3; c.beginPath(); c.moveTo(0, gy + H * 0.1); c.lineTo(W, gy + H * 0.1); c.stroke();
+      }
+      const sq = clamp(1 - (S.shown - 1) * 0.06, 0.8, 1.05);
+      drawPup(c, W * 0.38, gy - H * 0.26 + (1 - sq) * H * 0.2, H * 0.1, { t, squash: sq, helmet: true, mood: S.shown > 2 ? 'oops' : '' });
+      drawScale(c, W * 0.38, gy, W * 0.3, Math.round(S.kid * S.shown) + ' lb', '');
+      txt(c, 'gravity ×' + S.shown.toFixed(2), W * 0.38, H * 0.08, H * 0.065, '#ffd23f');
+      // pull arrow
+      const len = clamp(S.shown, 0.1, 4) * H * 0.06;
+      c.strokeStyle = '#ff4d6d'; c.lineWidth = 6; c.beginPath(); c.moveTo(W * 0.14, H * 0.3); c.lineTo(W * 0.14, H * 0.3 + len); c.stroke();
+      c.fillStyle = '#ff4d6d'; c.beginPath(); c.moveTo(W * 0.14 - 12, H * 0.3 + len); c.lineTo(W * 0.14 + 12, H * 0.3 + len); c.lineTo(W * 0.14, H * 0.3 + len + 16); c.fill();
+      ntxt(c, 'pull', W * 0.14, H * 0.25, 16, '#fff');
+    });
+  },
+
+  boss() {
+    const { cv, side } = playLayout(`<h3>4 · Boss: Cloud Diver</h3>
+      <p>Fly the probe to the <b>green sample zone</b> in Jupiter's clouds. Too deep and the gas squeezes too hard! First, <b>set the thrusters</b>.</p>
+      <p>The probe weighs <b>100 lb on Earth</b>. How much thruster push does it need just to float at Jupiter's cloud tops?</p>
+      <div class="opts" id="cal"><button class="opt" data-k="40">🔹 40 lb push</button><button class="opt" data-k="100">🔸 100 lb push</button><button class="opt" data-k="240">🔺 240 lb push</button></div>
+      <div class="msg" id="bm"></div>`);
+    const S = cur.S = { stage: 'cal', y: 0.25, vy: 0, cal: 0, inZone: 0, hold: false, zone: 0.5, t: 0, warn: 0 };
+    side.querySelectorAll('#cal .opt').forEach(b => b.onclick = () => {
+      const k = +b.dataset.k; S.cal = k; S.stage = 'test'; S.y = 0.3; S.vy = 0; S.tt = 0;
+      side.querySelectorAll('#cal .opt').forEach(o => o.classList.toggle('sel', o === b));
+      if (k === 240) { sfx.good(); burst('BALANCED!', '#06d6a0'); setMsg($('bm'), 'good', '2.4 × 100 lb = <b>240 lb</b>. The probe floats perfectly! 🎉'); setTimeout(startFly, 1400); }
+      else { sfx.bad(); setMsg($('bm'), 'bad', `Uh-oh, ${k} lb of push isn't enough! At Jupiter the probe weighs about <b>${Math.round(100 * 2.4)} lb</b>, so it sinks. Try again!`); }
+    });
+    function startFly() {
+      S.stage = 'fly'; S.y = 0.25; S.vy = 0; S.inZone = 0;
+      side.innerHTML = `<h3>4 · Boss: Cloud Diver</h3>
+        <p><b>Hold BOOST</b> to rise, let go to sink. Keep the probe in the <b>green zone</b> to collect cloud samples! Watch out for wind gusts.</p>
+        <div class="holdrow"><button class="btn go" id="up">🔥 BOOST</button></div>
+        <div class="mlabel"><span>Samples collected</span><span id="sT">0%</span></div><div class="meter"><i id="sB"></i></div>
+        <div class="msg info" id="bm">Thrusters set to 240 lb — that's what it takes to float in 2.4× gravity!</div>`;
+      holdBtn($('up'), v => S.hold = v);
+    }
+    cur.tick = (dt) => {
+      S.t += dt;
+      if (S.stage === 'test') {   // wrong calibration: probe sinks
+        S.tt += dt; S.vy += dt * 0.25 * (1 - S.cal / 240); S.y = Math.min(0.92, S.y + S.vy * dt * 3);
+      }
+      if (S.stage !== 'fly') return;
+      const hold = S.hold || keys.ArrowUp || keys[' '];
+      S.zone = 0.52 + Math.sin(S.t * 0.35) * 0.12;
+      const gust = Math.sin(S.t * 1.7) * Math.sin(S.t * 0.53) * 0.18;
+      S.vy += dt * ((hold ? -0.55 : 0.42) + gust);
+      S.vy *= Math.pow(0.35, dt);
+      S.y = clamp(S.y + S.vy * dt, 0.05, 0.97);
+      if (S.y <= 0.05) S.vy = Math.max(0, S.vy);
+      const inZ = Math.abs(S.y - S.zone) < 0.085;
+      if (inZ) S.inZone = Math.min(1, S.inZone + dt / 14);
+      if (S.y > 0.86) { S.warn += dt; if (S.warn > 0.6) { S.warn = 0; S.y = 0.3; S.vy = 0; sfx.bad(); burst('TOO DEEP!', '#ff4d6d'); setMsg($('bm'), 'bad', 'Too deep — the gas was squeezing too hard! The probe\'s autopilot bounced back up. Keep going!'); } }
+      $('sB').style.width = S.inZone * 100 + '%'; $('sT').textContent = Math.round(S.inZone * 100) + '%';
+      if (S.inZone >= 1) { S.stage = 'won'; winBoss(side, 'Pup used <b>240 lb</b> of push to fight Jupiter\'s strong gravity and collected cloud samples — without sinking into the crushing depths!'); }
+    };
+    anim(cv, (c, W, H, t) => {
+      jupClouds(c, W, H, t, 0.15 + S.y * 0.6, t * 0.03);
+      if (S.stage === 'fly' || S.stage === 'won') {
+        const zy = S.zone * H, zh = 0.17 * H;
+        c.fillStyle = 'rgba(6,214,160,.28)'; c.fillRect(0, zy - zh / 2, W, zh); c.strokeStyle = '#06d6a0'; c.lineWidth = 3; c.setLineDash([12, 8]);
+        c.beginPath(); c.moveTo(0, zy - zh / 2); c.lineTo(W, zy - zh / 2); c.moveTo(0, zy + zh / 2); c.lineTo(W, zy + zh / 2); c.stroke(); c.setLineDash([]);
+        txt(c, 'SAMPLE ZONE', W * 0.04, zy, H * 0.045, '#06d6a0', 'left');
+      }
+      c.fillStyle = 'rgba(229,56,59,.35)'; c.fillRect(0, H * 0.88, W, H * 0.12); txt(c, 'CRUSH ZONE ⚠', W * 0.96, H * 0.94, H * 0.045, '#ff4d6d', 'right');
+      const hold = S.stage === 'fly' && (S.hold || keys.ArrowUp || keys[' ']);
+      drawProbe(c, W * 0.55, S.y * H, H * 0.17, t, { pup: true, boost: true, flame: hold ? 1 : S.stage === 'test' ? S.cal / 240 : S.stage === 'cal' ? 0 : 0.2, tilt: S.vy * 0.4 });
+      if (S.stage === 'test' || S.stage === 'cal') {
+        txt(c, S.stage === 'cal' ? 'Set thrusters!' : (S.cal === 240 ? 'FLOATING!' : 'SINKING!'), W * 0.55, H * 0.1, H * 0.07, S.stage === 'test' && S.cal !== 240 ? '#ff4d6d' : '#ffd23f');
+        drawScale(c, W * 0.2, H * 0.6, W * 0.26, '240 lb', 'probe weight here');
+      }
+    });
+  },
+});
+</script>
+<script>
+'use strict';
+// ================= SATURN =================
+// top-down orbit view. Saturn at centre (cx,cy), lanes are circles.
+const RING_BITS = Array.from({ length: 260 }, () => ({ r: rand(0.45, 1), a: rand(0, TAU), s: rand(1, 2.6), ice: Math.random() < 0.7 }));
+function saturnTop(c, W, H, t, o = {}) {
+  c.fillStyle = '#100d2a'; c.fillRect(0, 0, W, H);
+  for (let i = 0; i < 50; i++) { c.fillStyle = 'rgba(255,255,255,.5)'; ell(c, (i * 131.7) % W, (i * 71.3) % H, 1.1, 1.1); c.fill(); }
+  const cx = o.cx ?? W / 2, cy = o.cy ?? H / 2, R = o.R ?? Math.min(W, H) * 0.46;
+  // ring band
+  c.fillStyle = 'rgba(233,207,152,.12)'; c.beginPath(); c.arc(cx, cy, R, 0, TAU); c.arc(cx, cy, R * 0.42, 0, TAU, true); c.fill('evenodd');
+  if (o.particles !== false) {
+    for (const b of RING_BITS) {
+      const r = R * b.r, w = Math.pow(0.45 / b.r, 1.5) * 0.9;   // inner bits orbit faster (Kepler-ish)
+      const a = b.a + t * w * (o.speed ?? 0.35);
+      c.fillStyle = b.ice ? '#eaf6ff' : '#b49a7a'; ell(c, cx + Math.cos(a) * r, cy + Math.sin(a) * r, b.s, b.s); c.fill();
+    }
+  }
+  // gap with shepherd moon
+  if (o.gap) { c.strokeStyle = '#100d2a'; c.lineWidth = R * 0.05; c.beginPath(); c.arc(cx, cy, R * 0.8, 0, TAU); c.stroke(); }
+  drawPlanet(c, 'jupiter_like', cx, cy, R * 0.32, t, { color: '#e8cf9c' });
+  c.save(); c.beginPath(); c.arc(cx, cy, R * 0.32 - 2, 0, TAU); c.clip();
+  ['#f3e1b5', '#e5c98f', '#f6e8c6', '#d9b77a'].forEach((col, i) => { c.strokeStyle = col; c.lineWidth = R * 0.05; c.beginPath(); c.arc(cx, cy, R * (0.08 + i * 0.07), 0, TAU); c.stroke(); });
+  c.restore(); c.strokeStyle = INK; c.lineWidth = 3; c.beginPath(); c.arc(cx, cy, R * 0.32, 0, TAU); c.stroke();
+  return { cx, cy, R };
+}
+function drawShip(c, x, y, s, ang, t, flame = 0) {
+  c.save(); c.translate(x, y); c.rotate(ang); c.strokeStyle = INK; c.lineWidth = Math.max(2, s * 0.08); c.lineJoin = 'round';
+  if (flame > 0) { c.beginPath(); c.moveTo(-s * 0.55, -s * 0.18); c.lineTo(-s * (0.6 + flame * (0.5 + 0.2 * Math.sin(t * 40))), 0); c.lineTo(-s * 0.55, s * 0.18); fs(c, '#ffd23f'); }
+  c.beginPath(); c.moveTo(s * 0.7, 0); c.quadraticCurveTo(s * 0.2, -s * 0.42, -s * 0.55, -s * 0.3); c.lineTo(-s * 0.55, s * 0.3); c.quadraticCurveTo(s * 0.2, s * 0.42, s * 0.7, 0); fs(c, '#f4f1ff');
+  for (const sd of [-1, 1]) { c.beginPath(); c.moveTo(-s * 0.2, sd * s * 0.3); c.lineTo(-s * 0.6, sd * s * 0.6); c.lineTo(-s * 0.5, sd * s * 0.25); fs(c, '#ff4d6d'); }
+  ell(c, s * 0.18, 0, s * 0.17, s * 0.15); fs(c, '#4cc9f0');
+  c.restore();
+}
+// orbit sim (dimensionless): GM = 1, units of radius. Circular speed at r: sqrt(1/r)
+function orbStep(o, dt, GM = 1) {
+  const sub = 8; dt /= sub;
+  for (let i = 0; i < sub; i++) {
+    const r2 = o.x * o.x + o.y * o.y, r = Math.sqrt(r2), a = -GM / r2;
+    o.vx += a * o.x / r * dt; o.vy += a * o.y / r * dt; o.x += o.vx * dt; o.y += o.vy * dt;
+  }
+}
+
+PLANETS.push({
+  id: 'saturn', name: 'Saturn', q: 'How do its rings stay in orbit?',
+  needs: ['boost'], awards: ['nav'],
+  log: ['Saturn\'s rings are made of countless pieces of ice and rock — from tiny grains to chunks as big as a house.',
+        'Every ring piece orbits Saturn like a tiny moon.',
+        'Orbiting means falling around: gravity pulls each piece inward, and its sideways speed keeps it from falling in.',
+        'Pieces closer to Saturn must move faster to stay in orbit; outer pieces move slower.',
+        'Small "shepherd moons" help keep some ring edges sharp.'],
+  cards: [
+    { title: 'Rings = ice & rock', fact: 'The rings aren\'t solid! They\'re <b>countless pieces of ice and rock</b> — from tiny grains to chunks as big as a house. Each one <b>orbits Saturn like a tiny moon</b>.',
+      draw(c, W, H, k, t) { const z = 1 + Math.min(3, k * 1.2); c.fillStyle = '#100d2a'; c.fillRect(0, 0, W, H);
+        if (z < 2) { drawPlanet(c, 'saturn', W / 2, H / 2, H * 0.2 * z, t); }
+        else { for (let i = 0; i < 40; i++) { const x = ((i * 97 + t * 20 * (1 + i % 3)) % (W + 60)) - 30, y = H * 0.2 + (i * 53) % (H * 0.6), s = 3 + (i * 7) % 14;
+          c.strokeStyle = INK; c.lineWidth = 2; ell(c, x, y, s, s * 0.8, i); fs(c, i % 4 ? '#eaf6ff' : '#b49a7a'); } txt(c, 'ICE + ROCK!', W / 2, H * 0.9, H * 0.1, '#4cc9f0'); } } },
+    { title: 'Falling around', fact: 'Gravity pulls each piece <b>inward</b>. But each piece also zooms <b>sideways</b>. So it keeps <b>falling around</b> Saturn instead of falling in. That\'s an orbit!',
+      draw(c, W, H, k, t) { c.fillStyle = '#100d2a'; c.fillRect(0, 0, W, H); const cx = W / 2, cy = H / 2, R = H * 0.34;
+        drawPlanet(c, 'saturn', cx, cy, H * 0.12, t); const a = t * 1.3; const x = cx + Math.cos(a) * R, y = cy + Math.sin(a) * R * 0.95;
+        c.strokeStyle = 'rgba(255,255,255,.3)'; c.setLineDash([6, 6]); c.lineWidth = 2; ell(c, cx, cy, R, R * 0.95); c.stroke(); c.setLineDash([]);
+        const arrow = (dx, dy, col) => { c.strokeStyle = col; c.lineWidth = 5; c.beginPath(); c.moveTo(x, y); c.lineTo(x + dx, y + dy); c.stroke(); };
+        arrow((cx - x) * 0.4, (cy - y) * 0.4, '#ff4d6d'); arrow(-Math.sin(a) * R * 0.5, Math.cos(a) * R * 0.5, '#06d6a0');
+        c.strokeStyle = INK; c.lineWidth = 2; ell(c, x, y, 8, 7); fs(c, '#eaf6ff');
+        txt(c, 'gravity', W * 0.12, H * 0.1, H * 0.07, '#ff4d6d', 'left'); txt(c, 'speed', W * 0.88, H * 0.1, H * 0.07, '#06d6a0', 'right'); } },
+    { title: 'Inner = faster', fact: 'Pieces <b>closer to Saturn</b> feel a stronger pull, so they must zoom <b>faster</b> to stay in orbit. <b>Outer</b> pieces move <b>slower</b>.',
+      draw(c, W, H, k, t) { const { cx, cy, R } = saturnTop(c, W, H, t, { particles: false });
+        [0.5, 0.72, 0.95].forEach((f, i) => { const a = t * Math.pow(0.5 / f, 1.5) * 1.2; c.strokeStyle = 'rgba(255,255,255,.25)'; c.lineWidth = 2; ell(c, cx, cy, R * f, R * f); c.stroke();
+          c.strokeStyle = INK; ell(c, cx + Math.cos(a) * R * f, cy + Math.sin(a) * R * f, 9, 9); fs(c, ['#ff4d6d', '#ffd23f', '#4cc9f0'][i]); });
+        txt(c, 'FAST', W * 0.06, H * 0.1, H * 0.07, '#ff4d6d', 'left'); txt(c, 'SLOW', W * 0.94, H * 0.1, H * 0.07, '#4cc9f0', 'right'); } },
+    { title: 'Shepherd moons', fact: 'Some <b>small moons</b> orbit right at the ring edges or inside gaps. Their gravity nudges ring pieces and helps keep some ring <b>edges sharp</b> — like sheepdogs herding sheep!',
+      draw(c, W, H, k, t) { const { cx, cy, R } = saturnTop(c, W, H, t, { gap: true, speed: 0.5 });
+        const a = t * Math.pow(0.45 / 0.8, 1.5) * 0.9 * 0.5; c.strokeStyle = INK; c.lineWidth = 2.5; ell(c, cx + Math.cos(a) * R * 0.8, cy + Math.sin(a) * R * 0.8, 7, 6); fs(c, '#c9c2b2');
+        txt(c, 'shepherd moon', W * 0.5, H * 0.94, H * 0.06, '#ffd23f'); } },
+  ],
+  quiz: [
+    { q: 'What are Saturn\'s rings made of?', opts: ['Countless pieces of ice and rock', 'One giant solid disk of metal', 'Rainbow-coloured gas'], a: 0,
+      why: 'The rings are made of countless pieces of ice and rock, and each piece orbits Saturn like a tiny moon.' },
+    { q: 'Why doesn\'t a ring piece fall into Saturn?', opts: ['Its sideways speed keeps it "falling around" Saturn', 'There\'s no gravity near Saturn', 'It is glued to the other pieces'], a: 0,
+      why: 'Gravity is pulling it in the whole time — but the piece is also moving sideways fast enough that it keeps missing. That\'s an orbit!' },
+    { q: 'Which ring pieces move fastest?', opts: ['The outermost pieces', 'The pieces closest to Saturn', 'They all move at the same speed'], a: 1,
+      why: 'Closer to Saturn, gravity pulls harder, so pieces need more speed to stay in orbit. Outer pieces move slower.' },
+  ],
+
+  challenge() {
+    const { cv, side } = playLayout(`<h3>1 · The Challenge</h3>
+      <p>Pup wants to <b>park the ship</b> near Saturn's rings to grab ice. Just turn off the engine and float, right?</p>
+      <button class="btn go wide" id="park">🅿️ Stop & park here</button>
+      <div class="msg" id="m1"></div><div id="q2"></div>${nextBtn()}`);
+    wireNext(side);
+    const S = { mode: 'orbit', o: { x: 1.25, y: 0, vx: 0, vy: Math.sqrt(1 / 1.25) }, trail: [] };
+    $('park').onclick = () => {
+      $('park').disabled = true; S.mode = 'fall'; S.o.vx = 0; S.o.vy = 0; S.trail = []; sfx.whoosh();
+      setMsg($('m1'), 'bad', 'Uh-oh! With no sideways speed, Saturn\'s gravity pulls the ship straight in!');
+    };
+    cur.tick = (dt) => {
+      if (S.mode === 'orbit') orbStep(S.o, dt * 0.8);
+      else if (S.mode === 'fall') {
+        orbStep(S.o, dt * 0.6);
+        if (Math.hypot(S.o.x, S.o.y) < 0.42) {
+          S.mode = 'saved'; sfx.bad(); burst('YIKES!', '#ff4d6d');
+          setMsg($('m1'), 'bad', '🚨 Autopilot saved us at the last second! You can\'t just "park" in space — gravity always pulls.');
+          $('q2').innerHTML = `<p style="margin:10px 0 6px">So how do the ring pieces stay up there without falling in?</p>
+            <div class="opts" id="c2"><button class="opt" data-k="0">They stand on something solid</button><button class="opt" data-k="1">They keep moving sideways, falling <i>around</i> Saturn</button><button class="opt" data-k="2">There\'s no gravity there</button></div><div class="msg" id="m2"></div>`;
+          const o2 = side.querySelectorAll('#c2 .opt');
+          o2.forEach(b => b.onclick = () => { const k = +b.dataset.k; o2.forEach(o => o.disabled = true); o2[1].classList.add('right');
+            if (k === 1) { sfx.good(); burst('YES!', '#06d6a0'); setMsg($('m2'), 'good', 'Great thinking! Let\'s discover exactly how that works.'); }
+            else { b.classList.add('wrong'); sfx.bad(); setMsg($('m2'), 'info', 'Good guess, but no! Ring pieces keep zooming <b>sideways</b>, so they fall <i>around</i> Saturn. Let\'s discover more!'); }
+            S.mode = 'orbit'; S.o = { x: 1.25, y: 0, vx: 0, vy: Math.sqrt(1 / 1.25) };
+            enableNext(side); side.scrollTop = side.scrollHeight; });
+          side.scrollTop = side.scrollHeight;
+        }
+      }
+    };
+    anim(cv, (c, W, H, t) => {
+      const { cx, cy, R } = saturnTop(c, W, H, t, { R: Math.min(W, H) * 0.36 });
+      const sc = R / 1.0 * 0.95;
+      const sx = cx + S.o.x * sc, sy = cy + S.o.y * sc;
+      S.trail.push([sx, sy]); if (S.trail.length > 60) S.trail.shift();
+      c.strokeStyle = 'rgba(255,210,63,.6)'; c.lineWidth = 3; c.beginPath(); S.trail.forEach(([x, y], i) => i ? c.lineTo(x, y) : c.moveTo(x, y)); c.stroke();
+      drawShip(c, sx, sy, Math.min(W, H) * 0.05, Math.atan2(S.o.vy, S.o.vx) || Math.atan2(-S.o.y, -S.o.x), t, S.mode === 'orbit' ? 0 : 0);
+      if (S.mode === 'saved') txt(c, 'PULLED IN!', W / 2, H * 0.1, H * 0.07, '#ff4d6d');
+    });
+  },
+
+  experiment() {
+    const { cv, side } = playLayout(`<h3>3 · Experiment</h3>
+      <p style="font-size:16px">Launch a ring pebble! Pick its <b>distance</b> from Saturn and its <b>sideways speed</b>, then press Launch.</p>
+      <div class="slider"><label>Distance <b id="vD"></b></label><input type="range" id="sD" min="0" max="2" value="1" step="1"></div>
+      <div class="slider"><label>Sideways speed <b id="vV"></b></label><input type="range" id="sV" min="0" max="100" value="30"></div>
+      <div class="row" style="margin:0"><button class="btn yel" id="launch">🚀 Launch</button><button class="btn alt small" id="clr">Clear</button></div>
+      <div class="msg info" id="xm">Tip: the dashed circle shows a perfect orbit.</div>
+      <ul class="tasks" id="tasks"></ul>${nextBtn()}`);
+    wireNext(side);
+    const tasks = taskList(side, '#tasks', ['Too slow: make a pebble <b>fall in</b>', 'Too fast: make a pebble <b>fly away</b> or swing way out', 'Just right: make a <b>circular orbit</b>', 'Get a perfect orbit at the <b>inner</b> distance — is it faster?']);
+    const DIST = [0.6, 0.85, 1.1], DNAME = ['close', 'middle', 'far'];
+    const S = { pebbles: [] };
+    const vmax = d => Math.sqrt(1 / d) * 1.7;
+    const curV = () => (+$('sV').value / 100) * vmax(DIST[+$('sD').value]);
+    const upd = () => { const d = DIST[+$('sD').value]; $('vD').textContent = DNAME[+$('sD').value]; $('vV').textContent = Math.round(curV() * 100) + ' (orbit needs ' + Math.round(Math.sqrt(1 / d) * 100) + ')'; };
+    $('sD').oninput = upd; $('sV').oninput = upd; upd();
+    $('clr').onclick = () => { S.pebbles = []; };
+    $('launch').onclick = () => {
+      const d = DIST[+$('sD').value], v = curV();
+      const col = ['#ff4d6d', '#ffd23f', '#4cc9f0', '#06d6a0', '#9b5de5'][S.pebbles.length % 5];
+      S.pebbles.push({ o: { x: d, y: 0, vx: 0, vy: -v }, d, v, col, trail: [], age: 0, done: false, minR: d, maxR: d });
+      if (S.pebbles.length > 5) S.pebbles.shift();
+      sfx.whoosh();
+    };
+    cur.tick = (dt) => {
+      for (const p of S.pebbles) {
+        if (p.done) continue;
+        orbStep(p.o, dt * 1.1); p.age += dt;
+        const r = Math.hypot(p.o.x, p.o.y); p.minR = Math.min(p.minR, r); p.maxR = Math.max(p.maxR, r);
+        const vc = Math.sqrt(1 / p.d), ratio = p.v / vc;
+        if (r < 0.32) { p.done = 'in'; sfx.bad(); tasks.tick(0); setMsg($('xm'), 'bad', 'Too slow! Gravity won and the pebble fell into Saturn.'); }
+        else if (r > 2.2) { p.done = 'out'; tasks.tick(1); setMsg($('xm'), 'info', 'Too fast! The pebble swung way out — it can\'t stay in its ring lane.'); }
+        else if (p.age > 4.5 && !p.judged) {
+          p.judged = true;
+          if (p.maxR - p.minR < 0.12 * p.d) { tasks.tick(2); setMsg($('xm'), 'good', `Perfect orbit! At the <b>${DNAME[DIST.indexOf(p.d)]}</b> distance it needs a speed of about ${Math.round(vc * 100)}.`);
+            if (p.d === DIST[0]) { tasks.tick(3); setMsg($('xm'), 'good', `Yes! The inner orbit needs speed ${Math.round(vc * 100)} — faster than the outer one (${Math.round(Math.sqrt(1 / DIST[2]) * 100)}). Closer = faster!`); } }
+          else if (ratio > 1) { tasks.tick(1); setMsg($('xm'), 'info', 'A bit too fast — it swings outward in a stretched loop.'); }
+          else setMsg($('xm'), 'info', 'A bit too slow — it dips inward in a stretched loop.');
+        }
+      }
+      if (tasks.count() >= 3) enableNext(side);
+    };
+    anim(cv, (c, W, H, t) => {
+      const { cx, cy, R } = saturnTop(c, W, H, t, { R: Math.min(W, H) * 0.36, particles: false });
+      const sc = R * 0.95 / 1.0;
+      const d = DIST[+$('sD').value];
+      c.strokeStyle = 'rgba(255,255,255,.4)'; c.setLineDash([6, 6]); c.lineWidth = 2; ell(c, cx, cy, d * sc, d * sc); c.stroke(); c.setLineDash([]);
+      c.strokeStyle = '#06d6a0'; c.lineWidth = 4; const vx = cx + d * sc, vlen = curV() * sc * 0.6;
+      c.beginPath(); c.moveTo(vx, cy); c.lineTo(vx, cy - vlen); c.stroke();
+      for (const p of S.pebbles) {
+        const x = cx + p.o.x * sc, y = cy + p.o.y * sc;
+        if (!p.done) { p.trail.push([x, y]); if (p.trail.length > 240) p.trail.shift(); }
+        c.strokeStyle = p.col; c.globalAlpha = 0.7; c.lineWidth = 2.5; c.beginPath(); p.trail.forEach(([a, b], i) => i ? c.lineTo(a, b) : c.moveTo(a, b)); c.stroke(); c.globalAlpha = 1;
+        if (!p.done) { c.strokeStyle = INK; c.lineWidth = 2; ell(c, x, y, 7, 7); fs(c, p.col); }
+      }
+    });
+  },
+
+  boss() {
+    const { cv, side } = playLayout(`<h3>4 · Boss: Ring Rider</h3>
+      <p>Fly the ship into the <b>glowing ring lane</b> and collect <b>8 ice samples</b>. Use <b>SLOW</b> and <b>FAST</b> thrusters to stay in the lane.</p>
+      <p style="font-size:16px">Remember: <b>too slow → fall inward</b>, <b>too fast → drift outward</b>.</p>
+      <div class="mlabel"><span>Speed vs. orbit speed</span><span id="spT"></span></div><div class="meter"><i id="spB" style="background:var(--yellow)"></i></div>
+      <div class="holdrow"><button class="btn blue" id="slow">◀ SLOW</button><button class="btn go" id="fast">FAST ▶</button></div>
+      <div class="mlabel"><span>Ice samples</span><span id="iT">0 / 8</span></div><div class="meter"><i id="iB" style="background:var(--blue)"></i></div>
+      <div class="msg info" id="bm">The ship starts <b>outside</b> the lane. Tap <b>SLOW</b> a little to drop inward!</div>`);
+    const LANE = 1.0, LW = 0.09;
+    // simple orbit model: sp = your speed / the orbit speed where you are.
+    // sp < 1 -> you sink inward (and speed up as you fall); sp > 1 -> you drift outward (and slow down).
+    const S = cur.S = { r: 1.32, a: 0, sp: 1, slow: false, fast: false, ice: [], got: 0, trail: [], done: false, o: { x: 1.32, y: 0 } };
+    const spawnIce = () => { while (S.ice.length < 3) S.ice.push({ a: S.a + rand(0.9, 2.6) + S.ice.length * 0.6, dr: rand(-0.04, 0.04) }); };
+    spawnIce();
+    holdBtn($('slow'), v => S.slow = v); holdBtn($('fast'), v => S.fast = v);
+    const reset = () => { S.r = 1.32; S.sp = 1; S.trail = []; };
+    cur.tick = (dt) => {
+      if (S.done) return;
+      const slow = S.slow || keys.ArrowLeft, fast = S.fast || keys.ArrowRight;
+      if (slow) S.sp -= dt * 0.35;
+      if (fast) S.sp += dt * 0.35;
+      S.sp = clamp(S.sp, 0.55, 1.45);
+      S.r += (S.sp - 1) * dt * 0.75;
+      if (!slow && !fast) S.sp += (1 - S.sp) * (1 - Math.exp(-0.9 * dt));   // falling in speeds you up, climbing out slows you down
+      const w = S.sp * Math.sqrt(1 / S.r) / S.r;
+      S.a += w * dt * 0.9;
+      S.o.x = Math.cos(S.a) * S.r; S.o.y = Math.sin(S.a) * S.r;
+      if (S.r < 0.55 || S.r > 1.62) {
+        sfx.bad(); burst(S.r < 0.55 ? 'TOO SLOW!' : 'TOO FAST!', '#ff4d6d');
+        setMsg($('bm'), 'bad', S.r < 0.55 ? 'Too slow — gravity pulled us inward toward Saturn! Autopilot reset. Try shorter taps.' : 'Too fast — we drifted way outward! Autopilot reset. Try shorter taps.');
+        reset();
+      }
+      $('spB').style.width = clamp(S.sp - 0.5, 0, 1) * 100 + '%';
+      $('spT').textContent = S.sp < 0.95 ? 'too slow → falling in ⬇' : S.sp > 1.05 ? 'too fast → drifting out ⬆' : 'just right ✔';
+      const inLane = Math.abs(S.r - LANE) < LW;
+      for (const ic of S.ice) ic.a += 0.8 * Math.sqrt(1 / LANE) / LANE * dt * 0.9;   // ice moves a bit slower, so you catch up
+      for (let i = S.ice.length - 1; i >= 0; i--) {
+        const ic = S.ice[i], ix = Math.cos(ic.a) * (LANE + ic.dr), iy = Math.sin(ic.a) * (LANE + ic.dr);
+        if (Math.hypot(ix - S.o.x, iy - S.o.y) < 0.14) {
+          S.ice.splice(i, 1); S.got++; sfx.pop(); if (S.got % 3 === 0) burst('ICE!', '#4cc9f0');
+          if (S.got === 1) setMsg($('bm'), 'good', 'Got one! Stay in the lane at orbit speed and keep scooping up ice!');
+        } else if (ic.a < S.a - 1) { ic.a = S.a + rand(1, 2.5); }   // missed it (passed by): it loops around
+      }
+      if (!inLane && S.got === 0 && Math.abs(S.r - LANE) < 0.2) setMsg($('bm'), 'info', 'Almost there! Let go to settle into your new orbit.');
+      spawnIce();
+      $('iB').style.width = S.got / 8 * 100 + '%'; $('iT').textContent = S.got + ' / 8';
+      if (S.got >= 8) { S.done = true; winBoss(side, 'Pup matched the ring\'s <b>orbital speed</b> and collected 8 ice samples — just like a ring piece, falling <i>around</i> Saturn!'); }
+    };
+    anim(cv, (c, W, H, t) => {
+      const { cx, cy, R } = saturnTop(c, W, H, t, { R: Math.min(W, H) * 0.32, speed: 0.6 });
+      const sc = R * 0.95;
+      c.strokeStyle = 'rgba(76,201,240,.35)'; c.lineWidth = LW * 2 * sc; ell(c, cx, cy, LANE * sc, LANE * sc); c.stroke();
+      c.strokeStyle = 'rgba(76,201,240,.9)'; c.lineWidth = 2; c.setLineDash([10, 8]); ell(c, cx, cy, LANE * sc, LANE * sc); c.stroke(); c.setLineDash([]);
+      for (const ic of S.ice) { const x = cx + Math.cos(ic.a) * (LANE + ic.dr) * sc, y = cy + Math.sin(ic.a) * (LANE + ic.dr) * sc; c.save(); c.translate(x, y); c.rotate(t * 2 + ic.a);
+        c.strokeStyle = INK; c.lineWidth = 2; c.beginPath(); for (let i = 0; i < 12; i++) { const a = i / 12 * TAU, r = i % 2 ? 6 : 12; c.lineTo(Math.cos(a) * r, Math.sin(a) * r); } c.closePath(); fs(c, '#dff6ff'); c.restore(); }
+      const x = cx + S.o.x * sc, y = cy + S.o.y * sc;
+      S.trail.push([x, y]); if (S.trail.length > 70) S.trail.shift();
+      c.strokeStyle = 'rgba(255,210,63,.55)'; c.lineWidth = 3; c.beginPath(); S.trail.forEach(([a, b], i) => i ? c.lineTo(a, b) : c.moveTo(a, b)); c.stroke();
+      const fl = (S.fast || keys.ArrowRight) ? 1 : 0;
+      drawShip(c, x, y, Math.min(W, H) * 0.045, S.a + Math.PI / 2 + ((S.slow || keys.ArrowLeft) ? Math.PI : 0), t, fl || ((S.slow || keys.ArrowLeft) ? 1 : 0));
+      if (S.done) drawPup(c, W * 0.85, H * 0.2, Math.min(W, H) * 0.06, { t, arms: 'up' });
+    });
+  },
+});
+</script>
+<script>
+'use strict';
+// ================= EUROPA =================
+function europaSurface(c, W, H, t, gy) {
+  const g = c.createLinearGradient(0, 0, 0, gy); g.addColorStop(0, '#05041a'); g.addColorStop(1, '#1a1640');
+  c.fillStyle = g; c.fillRect(0, 0, W, gy);
+  for (let i = 0; i < 50; i++) { c.fillStyle = 'rgba(255,255,255,.6)'; ell(c, (i * 131.7) % W, (i * 71.3) % gy, 1.1, 1.1); c.fill(); }
+  drawPlanet(c, 'jupiter', W * 0.78, gy * 0.38, Math.min(W, H) * 0.2, t);
+  const sg = c.createLinearGradient(0, gy, 0, H); sg.addColorStop(0, '#f1e6cf'); sg.addColorStop(1, '#d9c9a8');
+  c.fillStyle = sg; c.fillRect(0, gy, W, H - gy);
+  c.strokeStyle = '#b0683f'; c.lineWidth = 2;
+  for (let i = 0; i < 7; i++) { const y = gy + (H - gy) * (0.15 + i * 0.12); c.beginPath(); c.moveTo(0, y); c.bezierCurveTo(W * 0.3, y + 10 * Math.sin(i), W * 0.6, y - 12, W, y + 6 * Math.cos(i)); c.stroke(); }
+  c.strokeStyle = INK; c.lineWidth = 3; c.beginPath(); c.moveTo(0, gy); c.lineTo(W, gy); c.stroke();
+}
+function oceanBg(c, W, H, t, top = 0) {
+  const g = c.createLinearGradient(0, top, 0, H); g.addColorStop(0, '#1d5f8a'); g.addColorStop(1, '#071a33');
+  c.fillStyle = g; c.fillRect(0, top, W, H - top);
+  c.fillStyle = 'rgba(255,255,255,.25)';
+  for (let i = 0; i < 26; i++) { const x = (i * 97.3) % W, y = H - ((t * 30 * (1 + i % 3) + i * 57) % (H - top)); ell(c, x + Math.sin(t + i) * 5, y, 2 + i % 3, 2 + i % 3); c.fill(); }
+}
+function drawSub(c, x, y, s, t, face = 1) {
+  c.save(); c.translate(x, y); c.scale(face, 1); c.strokeStyle = INK; c.lineWidth = Math.max(2, s * 0.07); c.lineJoin = 'round';
+  c.beginPath(); c.moveTo(-s * 0.75, 0); c.lineTo(-s * 1.0, -s * 0.25 + Math.sin(t * 12) * s * 0.08); c.lineTo(-s * 1.0, s * 0.25 - Math.sin(t * 12) * s * 0.08); c.closePath(); fs(c, '#ff9f1c');
+  ell(c, 0, 0, s * 0.8, s * 0.45); fs(c, '#ffd23f');
+  rr(c, -s * 0.15, -s * 0.7, s * 0.3, s * 0.3, 4); fs(c, '#ffd23f');
+  ell(c, s * 0.3, -s * 0.02, s * 0.27, s * 0.25); fs(c, '#4cc9f0');
+  c.save(); c.beginPath(); c.ellipse(s * 0.3, -s * 0.02, s * 0.25, s * 0.23, 0, 0, TAU); c.clip(); drawPup(c, s * 0.3, 0, s * 0.17, { t, body: false, helmet: false, bob: false }); c.restore();
+  c.fillStyle = 'rgba(255,250,200,.25)'; c.beginPath(); c.moveTo(s * 0.8, 0); c.lineTo(s * 2.6, -s * 0.7); c.lineTo(s * 2.6, s * 0.7); c.closePath(); c.fill();
+  c.restore();
+}
+function drawVent(c, x, y, s, t) {
+  c.save(); c.strokeStyle = INK; c.lineWidth = 3; c.lineJoin = 'round';
+  c.beginPath(); c.moveTo(x - s * 0.5, y); c.lineTo(x - s * 0.18, y - s); c.lineTo(x + s * 0.18, y - s); c.lineTo(x + s * 0.5, y); c.closePath(); fs(c, '#5a4a5e');
+  for (let i = 0; i < 7; i++) { const p = (t * 0.6 + i / 7) % 1; c.fillStyle = `rgba(255,${160 - p * 80},90,${0.7 * (1 - p)})`; ell(c, x + Math.sin(t * 2 + i) * s * 0.25 * p, y - s - p * s * 1.6, s * (0.12 + p * 0.3), s * (0.12 + p * 0.3)); c.fill(); }
+  c.restore();
+}
+
+PLANETS.push({
+  id: 'europa', name: 'Europa', q: 'Could an ocean beneath the ice support life?',
+  needs: ['nav', 'boost'], awards: ['kit'],
+  log: ['Europa is one of Jupiter\'s moons. It has a shell of ice over a giant, salty, liquid-water ocean that covers the whole moon.',
+        'Europa is far from the Sun, but Jupiter\'s strong pull stretches and squeezes it as it orbits. That "tidal heating" helps keep the ocean liquid.',
+        'Life as we know it needs three things: liquid water, the right chemical ingredients, and an energy source.',
+        'Europa may have all three! But no one knows yet if anything lives there.',
+        'NASA\'s Europa Clipper spacecraft launched in 2024 and is on its way to study Europa up close.'],
+  cards: [
+    { title: 'Ice shell, hidden ocean', fact: 'Europa is a moon of Jupiter. Under its icy shell, scientists think there\'s a <b>salty liquid-water ocean</b> covering the <b>whole moon</b> — maybe holding more water than all of Earth\'s oceans!',
+      draw(c, W, H, k, t) { c.fillStyle = '#100d2a'; c.fillRect(0, 0, W, H); const cx = W / 2, cy = H * 0.55, r = H * 0.42, cut = Math.min(1, k * 0.6);
+        drawPlanet(c, 'europa', cx, cy, r, t);
+        c.save(); c.beginPath(); c.moveTo(cx, cy); c.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + cut * Math.PI / 2); c.closePath(); c.clip();
+        c.fillStyle = '#7a6a5a'; c.fillRect(cx - r, cy - r, 2 * r, 2 * r); c.fillStyle = '#2a7fc0'; ell(c, cx, cy, r * 0.9, r * 0.9); c.fill();
+        c.fillStyle = '#6e5d50'; ell(c, cx, cy, r * 0.68, r * 0.68); c.fill(); c.fillStyle = '#e9e4da'; c.beginPath(); c.arc(cx, cy, r, 0, TAU); c.arc(cx, cy, r * 0.9, 0, TAU, true); c.fill('evenodd'); c.restore();
+        c.strokeStyle = INK; c.lineWidth = 3; ell(c, cx, cy, r, r); c.stroke();
+        if (cut > 0.9) { txt(c, 'ICE', cx + r * 0.75, cy - r * 0.95, H * 0.07, '#fff'); txt(c, 'OCEAN', cx + r * 0.55, cy - r * 0.55, H * 0.07, '#4cc9f0'); } } },
+    { title: 'Squeezy heating', fact: 'Europa is far from the Sun and super cold on top. But <b>Jupiter\'s strong pull</b> stretches and squeezes Europa as it orbits. That squishing makes <b>heat</b> — called <b>tidal heating</b> — which helps keep the ocean liquid.',
+      draw(c, W, H, k, t) { c.fillStyle = '#100d2a'; c.fillRect(0, 0, W, H); drawPlanet(c, 'jupiter', W * 0.2, H / 2, H * 0.32, t);
+        const sq = Math.sin(t * 3), r = H * 0.2; c.save(); c.translate(W * 0.68, H / 2); c.scale(1 + sq * 0.12, 1 - sq * 0.08); drawPlanet(c, 'europa', 0, 0, r, t); c.restore();
+        c.fillStyle = `rgba(255,120,60,${0.25 + 0.25 * Math.abs(sq)})`; ell(c, W * 0.68, H / 2, r * 0.45, r * 0.45); c.fill();
+        txt(c, 'SQUEEZE = HEAT', W / 2, H * 0.9, H * 0.08, '#ff9f1c'); } },
+    { title: 'The recipe for life', fact: 'Life as we know it needs 3 things: <b>💧 liquid water</b>, <b>🧪 the right chemical ingredients</b> (like carbon), and <b>⚡ an energy source</b>.',
+      draw(c, W, H, k, t) { c.fillStyle = '#2b2a5a'; c.fillRect(0, 0, W, H);
+        [['💧', 'WATER', '#4cc9f0'], ['🧪', 'CHEMICALS', '#06d6a0'], ['⚡', 'ENERGY', '#ffd23f']].forEach(([e, n, col], i) => { const on = k * 1.4 > i, x = W * (0.2 + i * 0.3);
+          c.strokeStyle = INK; c.lineWidth = 3; ell(c, x, H * 0.42, H * 0.18, H * 0.18); fs(c, on ? col : '#555');
+          c.font = `${H * 0.17}px system-ui`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.globalAlpha = on ? 1 : 0.3; c.fillText(e, x, H * 0.43); c.globalAlpha = 1;
+          txt(c, n, x, H * 0.78, H * 0.07, on ? col : '#888'); }); } },
+    { title: 'Is anybody there?', fact: 'Europa <b>may have all three</b> ingredients! But <b>no one knows yet</b> if anything lives there. NASA\'s <b>Europa Clipper</b> launched in 2024 to study Europa up close.',
+      draw(c, W, H, k, t) { c.fillStyle = '#100d2a'; c.fillRect(0, 0, W, H); drawPlanet(c, 'europa', W * 0.35, H * 0.55, H * 0.3, t);
+        const a = t * 0.8; drawShip(c, W * 0.35 + Math.cos(a) * W * 0.32, H * 0.55 + Math.sin(a) * H * 0.38, H * 0.08, a + Math.PI / 2, t);
+        txt(c, '???', W * 0.8, H * 0.2, H * 0.16, '#ffd23f'); } },
+  ],
+  quiz: [
+    { q: 'What do scientists think is under Europa\'s icy shell?', opts: ['A salty liquid-water ocean', 'A big pool of lava', 'Nothing — it\'s solid ice all the way through'], a: 0,
+      why: 'Scientists think a global salty ocean of liquid water lies beneath Europa\'s ice shell.' },
+    { q: 'Europa is very far from the Sun. What helps keep its ocean liquid?', opts: ['Sunlight shining through the ice', 'Tidal heating — Jupiter\'s pull stretches and squeezes Europa', 'Hot air from Jupiter'], a: 1,
+      why: 'Jupiter\'s strong gravity flexes Europa as it orbits. That squeezing makes heat, called tidal heating.' },
+    { q: 'Does life exist on Europa?', opts: ['Yes, scientists found fish', 'No, it\'s impossible', 'No one knows yet — scientists are still exploring!'], a: 2,
+      why: 'Europa may have water, chemicals and energy — the three things life as we know it needs. But nobody has found life there. Missions like Europa Clipper will help us learn more!' },
+  ],
+
+  challenge() {
+    const { cv, side } = playLayout(`<h3>1 · The Challenge</h3>
+      <p>Pup is hovering over Europa. Sensors say there\'s <b>water hidden below</b>! Grab the hand drill and <b>hold DRILL</b> to reach it.</p>
+      <div class="holdrow"><button class="btn go" id="dr">⛏ DRILL</button></div>
+      <div class="mlabel"><span>Drill depth</span><span id="dT">0 m</span></div><div class="meter"><i id="dB"></i></div>
+      <div class="msg info" id="m1"></div><div id="q2"></div>${nextBtn()}`);
+    wireNext(side);
+    const S = { d: 0, hold: false, done: false };
+    holdBtn($('dr'), v => S.hold = v);
+    cur.tick = (dt) => {
+      if (S.done) return;
+      if (S.hold || keys[' '] || keys.ArrowDown) { S.d += dt; if (Math.random() < 0.4) sfx.drill(); }
+      $('dT').textContent = (S.d * 0.4).toFixed(1) + ' m'; $('dB').style.width = Math.min(100, S.d / 6 * 0.6) + '%';
+      if (S.d > 2.5 && S.d < 2.6) setMsg($('m1'), 'info', 'Brrr! The surface is super cold, about −160 °C. Keep going…');
+      if (S.d >= 6) {
+        S.done = true; sfx.bad(); burst('TOO THICK!', '#ff9f1c');
+        setMsg($('m1'), 'bad', 'Only 2.4 m down… and scientists think the ice is <b>many kilometres thick</b>! We\'ll need much better gear.');
+        $('q2').innerHTML = `<p style="margin:10px 0 6px">Europa is super far from the Sun. How could there be <b>liquid water</b> under all that ice?</p>
+          <div class="opts" id="c2"><button class="opt" data-k="0">Sunlight melts it</button><button class="opt" data-k="1">Jupiter\'s pull squeezes Europa and makes heat</button><button class="opt" data-k="2">Volcanoes from Earth</button></div><div class="msg" id="m2"></div>`;
+        const o2 = side.querySelectorAll('#c2 .opt');
+        o2.forEach(b => b.onclick = () => { const k = +b.dataset.k; o2.forEach(o => o.disabled = true); o2[1].classList.add('right');
+          if (k === 1) { sfx.good(); burst('YES!', '#06d6a0'); setMsg($('m2'), 'good', 'Wow, great idea! Let\'s discover how that works.'); }
+          else { b.classList.add('wrong'); sfx.bad(); setMsg($('m2'), 'info', 'Not quite! The secret is <b>Jupiter\'s pull</b>. Let\'s discover more!'); }
+          enableNext(side); side.scrollTop = side.scrollHeight; });
+        side.scrollTop = side.scrollHeight;
+      }
+    };
+    anim(cv, (c, W, H, t) => {
+      const gy = H * 0.5; europaSurface(c, W, H, t, gy);
+      const hole = Math.min(H * 0.08, S.d * H * 0.013);
+      c.fillStyle = '#9ec9e0'; c.strokeStyle = INK; c.lineWidth = 2; rr(c, W * 0.42 - 8, gy, 16, hole + 2, 4); c.fill(); c.stroke();
+      const shake = (S.hold && !S.done) ? Math.sin(t * 60) * 2 : 0;
+      drawPup(c, W * 0.34 + shake, gy - H * 0.14, H * 0.1, { t, reach: true, mood: S.done ? 'oops' : '' });
+      c.strokeStyle = INK; c.lineWidth = 4; c.beginPath(); c.moveTo(W * 0.4 + shake, gy - H * 0.1); c.lineTo(W * 0.42 + shake, gy + hole * 0.5); c.stroke();
+      // depth cut-away
+      c.fillStyle = 'rgba(16,13,42,.7)'; rr(c, W * 0.03, gy + 10, W * 0.2, H * 0.45, 10); c.fill();
+      c.fillStyle = '#e9e4da'; c.fillRect(W * 0.05, gy + 20, W * 0.16, H * 0.3); c.fillStyle = '#2a7fc0'; c.fillRect(W * 0.05, gy + 20 + H * 0.3, W * 0.16, H * 0.1);
+      c.fillStyle = '#ff4d6d'; c.fillRect(W * 0.05, gy + 20, W * 0.16, 3);
+      ntxt(c, 'you', W * 0.13, gy + 30, 13, '#ff4d6d'); ntxt(c, 'ICE (km!)', W * 0.13, gy + 20 + H * 0.15, 13, INK); ntxt(c, 'OCEAN', W * 0.13, gy + 20 + H * 0.35, 13, '#fff');
+    });
+  },
+
+  experiment() {
+    const { cv, side } = playLayout(`<h3>3 · Experiment</h3>
+      <div class="tabs"><button class="btn small on" data-tab="tide">🌀 Tide Lab</button><button class="btn small alt" data-tab="life">🧪 Life Recipe</button></div>
+      <div id="tT"><p style="font-size:16px">Europa\'s orbit is a little bit oval, so Jupiter\'s pull keeps changing. Slide to change the squeeze!</p>
+        <div class="slider"><label>Jupiter squeeze <b id="vS"></b></label><input type="range" id="sS" min="0" max="100" value="50"></div></div>
+      <div id="tL" hidden><p style="font-size:16px">Tap ingredients to add them to the beaker. Which ones make a recipe for life as we know it?</p>
+        <div class="opts two" id="ing">${[['water', '💧 Liquid water'], ['chem', '🧪 Chemical ingredients'], ['energy', '⚡ Energy source'], ['candy', '🍬 Candy'], ['gold', '🪙 Gold coins'], ['music', '🎵 Music']]
+          .map(([k, n]) => `<button class="opt" data-k="${k}">${n}</button>`).join('')}</div>
+        <div class="row" style="margin:0"><button class="btn yel" id="mixB">🥄 Mix!</button><button class="btn alt small" id="emptyB">Empty</button></div></div>
+      <div class="msg info" id="xm">Watch the ocean layer and the thermometer.</div>
+      <ul class="tasks" id="tasks"></ul>${nextBtn()}`);
+    wireNext(side);
+    const tasks = taskList(side, '#tasks', ['Tide Lab: turn the squeeze <b>off</b> — what happens?', 'Tide Lab: squeeze enough to keep a <b>big liquid ocean</b>', 'Life Recipe: mix the <b>3 ingredients</b> for life']);
+    const S = { tab: 'tide', sq: 0.5, ocean: 0.5, beaker: new Set(), mixT: -1, ok: false };
+    const upd = () => {
+      S.sq = $('sS').value / 100; $('vS').textContent = S.sq < 0.08 ? 'none' : S.sq < 0.45 ? 'gentle' : 'strong';
+    };
+    $('sS').oninput = upd; upd();
+    side.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => {
+      S.tab = b.dataset.tab; side.querySelectorAll('[data-tab]').forEach(x => { x.classList.toggle('on', x === b); x.classList.toggle('alt', x !== b); });
+      $('tT').hidden = S.tab !== 'tide'; $('tL').hidden = S.tab !== 'life';
+      setMsg($('xm'), 'info', S.tab === 'tide' ? 'Watch the ocean layer and the thermometer.' : 'Pick ingredients, then press Mix!');
+    });
+    side.querySelectorAll('#ing .opt').forEach(o => o.onclick = () => { const k = o.dataset.k; S.beaker.has(k) ? S.beaker.delete(k) : S.beaker.add(k); o.classList.toggle('sel', S.beaker.has(k)); S.mixT = -1; });
+    $('emptyB').onclick = () => { S.beaker.clear(); S.mixT = -1; side.querySelectorAll('#ing .opt').forEach(o => o.classList.remove('sel')); };
+    $('mixB').onclick = () => {
+      const b = S.beaker, need = ['water', 'chem', 'energy'], miss = need.filter(k => !b.has(k)), extra = [...b].filter(k => !need.includes(k));
+      S.mixT = performance.now() / 1000; S.ok = !miss.length;
+      if (!b.size) { setMsg($('xm'), 'info', 'The beaker is empty! Tap some ingredients first.'); return; }
+      if (!miss.length) {
+        tasks.tick(2); setMsg($('xm'), 'good', 'Water + chemicals + energy = a recipe that <b>could</b> support life as we know it!' + (extra.length ? ' (The extras weren\'t needed, though!)' : ''));
+      } else {
+        const names = { water: '💧 liquid water', chem: '🧪 chemical ingredients', energy: '⚡ an energy source' };
+        sfx.bad(); setMsg($('xm'), 'bad', 'Hmm, still missing: ' + miss.map(k => '<b>' + names[k] + '</b>').join(', ') + '.' + (extra.length ? ' (Candy, gold and music aren\'t needed for life!)' : ''));
+      }
+      if (tasks.count() >= 2) enableNext(side);
+    };
+    cur.tick = (dt) => {
+      if (S.tab !== 'tide') return;
+      const target = clamp(S.sq * 1.15, 0, 0.85);
+      S.ocean = lerp(S.ocean, target, dt * 1.2);
+      if (S.sq < 0.08 && S.ocean < 0.06 && tasks.tick(0)) setMsg($('xm'), 'bad', 'No squeeze → no tidal heat → the ocean <b>froze solid</b>! Brrr.');
+      if (S.sq > 0.55 && S.ocean > 0.6 && tasks.tick(1)) setMsg($('xm'), 'good', 'Squeezing makes heat, and the heat keeps a <b>big liquid ocean</b> under the ice!');
+      if (tasks.count() >= 2) enableNext(side);
+    };
+    anim(cv, (c, W, H, t) => {
+      if (S.tab === 'tide') {
+        c.fillStyle = '#100d2a'; c.fillRect(0, 0, W, H);
+        drawPlanet(c, 'jupiter', W * 0.13, H / 2, H * 0.3, t);
+        const sq = Math.sin(t * 3) * S.sq, cx = W * 0.6, cy = H * 0.5, r = Math.min(W * 0.28, H * 0.38);
+        c.save(); c.translate(cx, cy); c.scale(1 + sq * 0.1, 1 - sq * 0.07);
+        c.strokeStyle = INK; c.lineWidth = 3;
+        ell(c, 0, 0, r, r); fs(c, '#e9e4da', false);
+        const oceanOuter = r * 0.92, oceanInner = r * (0.92 - 0.3 * S.ocean);
+        c.fillStyle = '#2a7fc0'; c.beginPath(); c.arc(0, 0, oceanOuter, 0, TAU); c.arc(0, 0, oceanInner, 0, TAU, true); c.fill('evenodd');
+        c.fillStyle = mix('#6e5d50', '#c65a3a', S.sq * 0.6); ell(c, 0, 0, Math.min(oceanInner, r * 0.62), Math.min(oceanInner, r * 0.62)); c.fill();
+        c.fillStyle = `rgba(255,120,60,${S.sq * (0.3 + 0.3 * Math.abs(Math.sin(t * 3)))})`; ell(c, 0, 0, r * 0.4, r * 0.4); c.fill();
+        ell(c, 0, 0, r, r); c.stroke();
+        c.restore();
+        // thermometer
+        const tx = W * 0.92, th = H * 0.6, ty = H * 0.18; c.strokeStyle = INK; c.lineWidth = 3;
+        rr(c, tx - 10, ty, 20, th, 10); fs(c, '#fff'); ell(c, tx, ty + th + 8, 16, 16); fs(c, '#ff4d6d');
+        c.fillStyle = '#ff4d6d'; c.fillRect(tx - 5, ty + th * (1 - S.ocean * 0.95), 10, th * S.ocean * 0.95 + 5);
+        txt(c, S.ocean < 0.06 ? 'FROZEN!' : 'OCEAN ' + Math.round(S.ocean / 0.85 * 100) + '%', cx, H * 0.08, H * 0.065, S.ocean < 0.06 ? '#4cc9f0' : '#ffd23f');
+      } else {
+        oceanBg(c, W, H, t);
+        const bx = W * 0.5, by = H * 0.55, bw = Math.min(W * 0.4, H * 0.5), bh = bw * 1.1;
+        c.strokeStyle = INK; c.lineWidth = 4; c.fillStyle = 'rgba(255,255,255,.2)';
+        c.beginPath(); c.moveTo(bx - bw / 2, by - bh / 2); c.lineTo(bx - bw / 2, by + bh / 2 - 12); c.quadraticCurveTo(bx - bw / 2, by + bh / 2, bx - bw / 2 + 12, by + bh / 2);
+        c.lineTo(bx + bw / 2 - 12, by + bh / 2); c.quadraticCurveTo(bx + bw / 2, by + bh / 2, bx + bw / 2, by + bh / 2 - 12); c.lineTo(bx + bw / 2, by - bh / 2); c.fill(); c.stroke();
+        const items = [...S.beaker], em = { water: '💧', chem: '🧪', energy: '⚡', candy: '🍬', gold: '🪙', music: '🎵' };
+        c.font = `${bw * 0.18}px system-ui`; c.textAlign = 'center'; c.textBaseline = 'middle';
+        const mixing = S.mixT > 0 ? t - S.mixT : -1;
+        items.forEach((k, i) => { const a = i / Math.max(1, items.length) * TAU + (mixing > 0 ? mixing * 6 : 0);
+          c.fillText(em[k], bx + Math.cos(a) * bw * 0.22, by + bh * 0.15 + Math.sin(a) * bh * 0.15); });
+        if (mixing > 0.6 && S.ok) { txt(c, '✨ COULD BE ✨', bx, by - bh * 0.62, H * 0.07, '#06d6a0'); txt(c, 'LIFE-FRIENDLY!', bx, by - bh * 0.48, H * 0.06, '#06d6a0'); }
+        drawSub(c, W * 0.15, H * 0.2, H * 0.08, t);
+      }
+    });
+  },
+
+  boss() {
+    const { cv, side } = playLayout(`<h3>4 · Boss: Ocean Explorer</h3><div id="bs"></div>`);
+    const bs = side.querySelector('#bs');
+    const S = cur.S = { stage: 'nav', y: 0, vy: 0, hold: false, drill: 0, heat: 0, sx: 0.3, sy: 0.3, tx: 0.3, ty: 0.3, face: 1, found: new Set(), msgT: 0 };
+    const gearRow = ids => `<div class="row" style="margin:0;justify-content:flex-start">${ids.map(g => `<span class="chip" style="background:#fff;font-size:15px">${GEAR[g].emoji} ${GEAR[g].name} ✔</span>`).join('')}</div>`;
+    function stageNav() {
+      bs.innerHTML = `<p><b>Step 1: Get into orbit.</b> Europa zooms around Jupiter fast! Use your <b>Orbit Navigator</b> to match Europa's speed.</p>${gearRow(['nav'])}
+        <button class="btn blue wide" id="navB">🧭 Match orbit speed</button><div class="msg" id="bm"></div>`;
+      $('navB').onclick = () => { $('navB').disabled = true; S.stage = 'navAnim'; S.navT = performance.now() / 1000; sfx.whoosh();
+        setMsg($('bm'), 'good', 'Orbit matched! Just like on Saturn: the right sideways speed lets you "fall around" Europa.'); setTimeout(stageLand, 1700); };
+    }
+    function stageLand() {
+      S.stage = 'land'; S.y = 0.05; S.vy = 0.02;
+      bs.innerHTML = `<p><b>Step 2: Land softly!</b> Hold <b>BRAKE</b> to fire your Gravity Boosters. Touch down slower than the green line.</p>${gearRow(['boost'])}
+        <div class="holdrow"><button class="btn go" id="brk">🚀 BRAKE</button></div>
+        <div class="mlabel"><span>Falling speed</span><span id="vT"></span></div><div class="meter"><i id="vB"></i></div>
+        <div class="msg info" id="bm">Europa's gravity is weak (about 1/7 of Earth's), so it falls gently — but there's no air to slow you down!</div>`;
+      holdBtn($('brk'), v => S.hold = v);
+    }
+    function stageDrill() {
+      S.stage = 'drill'; S.drill = 0; S.heat = 0;
+      bs.innerHTML = `<p><b>Step 3: Melt through the ice!</b> Hold <b>MELT</b> to run the heat-drill. Let go if it gets too hot, so it can cool down.</p>${gearRow(['suit'])}
+        <div class="holdrow"><button class="btn go" id="dr">🔥 MELT</button></div>
+        <div class="mlabel"><span>Depth through ice</span><span id="dT">0%</span></div><div class="meter"><i id="dB" style="background:var(--blue)"></i></div>
+        <div class="mlabel"><span>Drill heat</span><span id="hT">cool</span></div><div class="meter"><i id="hB" style="background:var(--accent)"></i></div>
+        <div class="msg info" id="bm">Pup's <b>Pressure Suit</b> keeps him safe — Europa has almost no air. (This is a game super-drill. Real ice this thick would take a very long time!)</div>`;
+      holdBtn($('dr'), v => S.hold = v);
+    }
+    function stageSub() {
+      S.stage = 'sub'; S.sx = 0.5; S.sy = 0.12; S.tx = 0.5; S.ty = 0.3;
+      bs.innerHTML = `<p><b>Step 4: Pilot the sub-probe!</b> <b>Tap or drag</b> in the ocean to steer (or use arrow keys). Test samples for the 3 ingredients of life.</p>
+        <ul class="tasks" id="lt"></ul><div class="msg info" id="bm">You made it into the ocean! 💧</div>`;
+      S.lt = taskList(bs, '#lt', ['💧 Liquid water', '🧪 Salty chemicals (near the rocky seafloor)', '⚡ Energy (a warm vent on the seafloor)']);
+      setTimeout(() => { if (S.stage === 'sub') { S.lt.tick(0); S.found.add(0); setMsg($('bm'), 'good', '💧 Water test: <b>liquid salt water — check!</b> Now find chemicals and energy.'); } }, 900);
+    }
+    const SPOTS = [null, { x: 0.18, y: 0.82, i: 1 }, { x: 0.8, y: 0.82, i: 2 }];
+    pointer(cv, { down: (x, y) => { S.tx = x / cv.clientWidth; S.ty = y / cv.clientHeight; }, move: (x, y, d) => { if (d) { S.tx = x / cv.clientWidth; S.ty = y / cv.clientHeight; } } });
+    cur.tick = (dt, t) => {
+      if (S.stage === 'land') {
+        const brake = S.hold || keys[' '] || keys.ArrowUp;
+        S.vy += dt * (brake ? -0.22 : 0.11); S.vy = Math.max(-0.05, S.vy); S.y += S.vy * dt;
+        S.y = Math.max(0, S.y);
+        const v = Math.round(S.vy * 100);
+        $('vB').style.width = clamp(S.vy / 0.4, 0, 1) * 100 + '%'; $('vB').style.background = S.vy > 0.12 ? 'var(--accent)' : 'var(--green)';
+        $('vT').textContent = (S.vy > 0.12 ? 'too fast! ' : 'gentle ') + Math.max(0, v);
+        if (S.y >= 0.62) {
+          if (S.vy > 0.12) { sfx.bad(); burst('BUMP!', '#ff9f1c'); setMsg($('bm'), 'bad', 'Too fast! The autopilot pulled up. Use your Gravity Boosters to slow down earlier.'); S.y = 0.1; S.vy = 0.03; }
+          else { S.stage = 'landed'; S.y = 0.62; sfx.good(); burst('LANDED!', '#06d6a0'); setTimeout(stageDrill, 1300); }
+        }
+      } else if (S.stage === 'drill') {
+        const on = (S.hold || keys[' '] || keys.ArrowDown) && S.heat < 1;
+        if (on) { S.drill = Math.min(1, S.drill + dt / 9); S.heat = Math.min(1, S.heat + dt * 0.32); if (Math.random() < 0.3) sfx.drill(); }
+        else S.heat = Math.max(0, S.heat - dt * (S.heat >= 1 ? 0.35 : 0.5));
+        if (S.heat >= 1 && !S.over) { S.over = 1; sfx.bad(); setMsg($('bm'), 'bad', 'Overheated! Let it cool a moment, then keep melting.'); }
+        if (S.heat < 0.4) S.over = 0;
+        $('dB').style.width = S.drill * 100 + '%'; $('dT').textContent = Math.round(S.drill * 100) + '%';
+        $('hB').style.width = S.heat * 100 + '%'; $('hT').textContent = S.heat > 0.8 ? 'HOT!' : S.heat > 0.45 ? 'warm' : 'cool';
+        if (S.drill >= 1) { S.stage = 'splash'; sfx.whoosh(); burst('SPLASH!', '#4cc9f0'); setTimeout(stageSub, 1000); }
+      } else if (S.stage === 'sub') {
+        let kx = (keys.ArrowRight ? 1 : 0) - (keys.ArrowLeft ? 1 : 0), ky = (keys.ArrowDown ? 1 : 0) - (keys.ArrowUp ? 1 : 0);
+        if (kx || ky) { S.tx = clamp(S.sx + kx * 0.2, 0.05, 0.95); S.ty = clamp(S.sy + ky * 0.2, 0.15, 0.9); }
+        const dx = S.tx - S.sx, dy = S.ty - S.sy, d = Math.hypot(dx, dy), sp = 0.35 * dt;
+        if (d > 0.01) { S.sx += dx / d * Math.min(sp, d); S.sy += dy / d * Math.min(sp, d); if (Math.abs(dx) > 0.01) S.face = Math.sign(dx); }
+        S.sy = clamp(S.sy, 0.15, 0.88);
+        for (const sp2 of SPOTS) if (sp2 && !S.found.has(sp2.i) && Math.hypot(S.sx - sp2.x, (S.sy - sp2.y) * 0.8) < 0.12) {
+          S.found.add(sp2.i); S.lt.tick(sp2.i);
+          setMsg($('bm'), 'good', sp2.i === 1 ? '🧪 Chemical test: <b>salts and minerals from the rocky seafloor — check!</b>' : '⚡ Energy test: <b>warm water from a seafloor vent — check!</b> (Scientists think Europa <i>might</i> have vents like this.)');
+        }
+        if (S.found.size >= 3 && S.stage === 'sub') {
+          S.stage = 'won';
+          setTimeout(() => winBoss(side, 'Water ✔ Chemicals ✔ Energy ✔ — Europa\'s ocean <b>might</b> have everything life needs!<br><br><b style="font-size:22px">Could life exist there? Scientists are still exploring! 🔭</b>'), 900);
+        }
+      }
+    };
+    anim(cv, (c, W, H, t) => {
+      if (S.stage === 'nav' || S.stage === 'navAnim') {
+        c.fillStyle = '#100d2a'; c.fillRect(0, 0, W, H);
+        for (let i = 0; i < 40; i++) { c.fillStyle = 'rgba(255,255,255,.5)'; ell(c, (i * 131.7) % W, (i * 71.3) % H, 1.1, 1.1); c.fill(); }
+        drawPlanet(c, 'jupiter', W * 0.12, H * 0.5, H * 0.35, t);
+        const ex = W * 0.6, ey = H * 0.5, er = Math.min(W, H) * 0.2; drawPlanet(c, 'europa', ex, ey, er, t);
+        const k = S.stage === 'navAnim' ? clamp((t - S.navT) / 1.2, 0, 1) : 0;
+        const a = t * (k ? 1.4 : 3), rad = lerp(er * 2.2, er * 1.4, k);
+        c.strokeStyle = k ? 'rgba(6,214,160,.8)' : 'rgba(255,255,255,.25)'; c.setLineDash([8, 6]); c.lineWidth = 2; ell(c, ex, ey, rad, rad * 0.8); c.stroke(); c.setLineDash([]);
+        if (!k) drawShip(c, W * 0.9 - (t * 40 % 30), H * 0.2, H * 0.06, Math.PI * 0.8, t, 0.5);
+        else drawShip(c, ex + Math.cos(a) * rad, ey + Math.sin(a) * rad * 0.8, H * 0.06, a + Math.PI / 2, t);
+        drawGear(c, 'nav', W * 0.88, H * 0.82, H * 0.1, t);
+        return;
+      }
+      if (S.stage === 'land' || S.stage === 'landed') {
+        const gy = H * 0.78; europaSurface(c, W, H, t, gy);
+        const by = lerp(H * 0.1, gy - H * 0.06, S.y / 0.62);
+        const brake = S.stage === 'land' && (S.hold || keys[' '] || keys.ArrowUp);
+        c.save(); c.translate(W * 0.45, by); c.strokeStyle = INK; c.lineWidth = 3;
+        if (brake) for (const sd of [-1, 1]) { const f = H * 0.06 * (1 + 0.3 * Math.sin(t * 40)); c.beginPath(); c.moveTo(sd * H * 0.06 - 8, H * 0.04); c.lineTo(sd * H * 0.06, H * 0.04 + f); c.lineTo(sd * H * 0.06 + 8, H * 0.04); fs(c, '#ffd23f'); }
+        c.restore();
+        drawLander(c, W * 0.45, by + H * 0.06, H * 0.16);
+        drawGear(c, 'boost', W * 0.88, H * 0.18, H * 0.08, brake ? t : 0);
+        c.strokeStyle = '#06d6a0'; c.setLineDash([8, 6]); c.lineWidth = 2; c.beginPath(); c.moveTo(0, gy - 2); c.lineTo(W, gy - 2); c.stroke(); c.setLineDash([]);
+        if (S.stage === 'landed') txt(c, 'TOUCHDOWN!', W / 2, H * 0.12, H * 0.08, '#06d6a0');
+        return;
+      }
+      if (S.stage === 'drill' || S.stage === 'splash') {
+        const gy = H * 0.3; europaSurface(c, W, H, t, gy);
+        c.fillStyle = '#d6e6ee'; c.fillRect(0, gy + 4, W, H * 0.55);
+        c.strokeStyle = 'rgba(120,160,190,.5)'; c.lineWidth = 2; for (let i = 1; i < 6; i++) { c.beginPath(); c.moveTo(0, gy + i * H * 0.09); c.lineTo(W, gy + i * H * 0.09 + 6); c.stroke(); }
+        oceanBg(c, W, H, t, gy + H * 0.55);
+        c.strokeStyle = INK; c.lineWidth = 3; c.beginPath(); c.moveTo(0, gy + H * 0.55); c.lineTo(W, gy + H * 0.55); c.stroke();
+        const dep = gy + S.drill * H * 0.55;
+        c.fillStyle = '#9ec9e0'; rr(c, W * 0.5 - 14, gy, 28, dep - gy + 2, 6); c.fill(); c.stroke();
+        c.save(); c.translate(W * 0.5, dep); c.strokeStyle = INK; c.lineWidth = 3;
+        c.beginPath(); c.moveTo(-14, -26); c.lineTo(14, -26); c.lineTo(14, 0); c.lineTo(0, 14); c.lineTo(-14, 0); c.closePath(); fs(c, mix('#b9c2d6', '#ff4d6d', S.heat));
+        if (S.heat > 0.2) { c.fillStyle = `rgba(255,140,60,${S.heat * 0.6})`; ell(c, 0, 6, 26, 18); c.fill(); }
+        c.restore();
+        drawPup(c, W * 0.3, gy - H * 0.13, H * 0.075, { t, mood: S.heat >= 1 ? 'oops' : '' });
+        txt(c, S.stage === 'splash' ? 'SPLASH!' : 'ICE SHELL', W * 0.85, gy + H * 0.25, H * 0.06, S.stage === 'splash' ? '#4cc9f0' : '#fff');
+        txt(c, 'OCEAN', W * 0.85, gy + H * 0.62, H * 0.06, '#4cc9f0');
+        return;
+      }
+      // ocean
+      oceanBg(c, W, H, t, 0);
+      c.fillStyle = '#d6e6ee'; c.fillRect(0, 0, W, H * 0.08); c.strokeStyle = INK; c.lineWidth = 3; c.beginPath(); c.moveTo(0, H * 0.08); c.lineTo(W, H * 0.08); c.stroke();
+      c.fillStyle = '#4a3b3f'; c.beginPath(); c.moveTo(0, H); for (let x = 0; x <= W; x += W / 10) c.lineTo(x, H * (0.9 + 0.04 * Math.sin(x * 0.02))); c.lineTo(W, H); c.fill(); c.stroke();
+      // chemical rocks & vent
+      const r1 = SPOTS[1], r2 = SPOTS[2];
+      for (let i = 0; i < 4; i++) { c.strokeStyle = INK; c.lineWidth = 2.5; ell(c, r1.x * W + (i - 1.5) * 22, r1.y * H + 26 + (i % 2) * 6, 18, 12); fs(c, ['#9b5de5', '#06d6a0', '#ffd23f', '#ff9f1c'][i]); }
+      drawVent(c, r2.x * W, H * 0.93, H * 0.12, t);
+      for (const sp of SPOTS) if (sp && !S.found.has(sp.i)) { const pr = 18 + Math.sin(t * 4) * 5; c.strokeStyle = '#ffd23f'; c.lineWidth = 3; c.setLineDash([6, 5]); ell(c, sp.x * W, sp.y * H, pr * 2, pr * 1.5); c.stroke(); c.setLineDash([]); txt(c, '?', sp.x * W, sp.y * H - pr * 2.2, 26, '#ffd23f'); }
+      c.strokeStyle = 'rgba(255,255,255,.35)'; c.lineWidth = 2; c.setLineDash([4, 6]); c.beginPath(); c.moveTo(S.sx * W, S.sy * H); c.lineTo(S.tx * W, S.ty * H); c.stroke(); c.setLineDash([]);
+      drawSub(c, S.sx * W, S.sy * H, Math.min(W, H) * 0.07, t, S.face);
+      if (S.stage === 'won') { txt(c, 'COULD LIFE EXIST?', W / 2, H * 0.22, H * 0.07, '#ffd23f'); txt(c, 'Scientists are still exploring!', W / 2, H * 0.32, H * 0.05, '#fff'); }
+    });
+    stageNav();
+  },
+});
+
+// ================= boot =================
+updMute();
+const hasDone = Object.keys(save.done).length > 0;
+show('title');
+requestAnimationFrame(frame);
+window.__game = {
+  get save() { return save; }, get cur() { return cur; }, PLANETS,
+  start: i => startMission(i), phase: i => goPhase(i), next: () => nextPhase(), hub: () => show('hub'),
+  winBoss: () => { winBoss($('stage').querySelector('.side'), 'Test win.'); },
+  unlockAll() { for (const P of PLANETS) save.done[P.id] = save.done[P.id] || { stars: 1 }; save.gear = GEAR_ORDER.slice(); persist(); },
+  reset() { save = { done: {}, gear: [], muted: save.muted }; persist(); },
+};
+</script>
+</body>
+</html>
