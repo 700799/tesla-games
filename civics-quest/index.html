@@ -1,0 +1,1478 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Capitol Quest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root { --ink:#1d1b26; --paper:#fffaf0; --accent:#ff4d6d; --yellow:#ffd23f; --green:#06d6a0; --blue:#4cc9f0;
+    --purple:#9b5de5; --orange:#ff9f1c; --leg:#4cc9f0; --exe:#ff9f1c; --jud:#c39bff;
+    --toon:"Luckiest Guy","Comic Sans MS","Chalkboard SE",system-ui,sans-serif; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; height:100%; overflow:hidden; background:#2b2a4a; color:var(--ink);
+    font-family:Nunito,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; font-weight:800; font-size:18px;
+    user-select:none; -webkit-user-select:none; -webkit-tap-highlight-color:transparent; }
+  button { font:inherit; color:inherit; cursor:pointer; }
+  .toon { font-family:var(--toon); font-weight:400; letter-spacing:1px; }
+  .panel { background:var(--paper); border:3px solid var(--ink); border-radius:18px; box-shadow:4px 4px 0 var(--ink); }
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:60px; background:var(--accent); color:#fff;
+    font-family:var(--toon); font-weight:400; font-size:24px; padding:10px 26px 4px; border-radius:999px; border:3px solid var(--ink);
+    box-shadow:0 6px 0 var(--ink); letter-spacing:1px; text-decoration:none; transition:transform .08s; white-space:nowrap; }
+  .btn:active { transform:translateY(4px); box-shadow:0 2px 0 var(--ink); }
+  .btn.alt { background:#fff; color:var(--ink); } .btn.go { background:var(--green); color:var(--ink); }
+  .btn.yel { background:var(--yellow); color:var(--ink); } .btn.blu { background:var(--blue); color:var(--ink); }
+  .btn:disabled { opacity:.4; filter:grayscale(.7); pointer-events:none; }
+  .btn.sm { font-size:19px; padding:8px 16px 3px; }
+  .btn.pulse { animation:pulseBtn 1s infinite; }
+  @keyframes pulseBtn { 50% { transform:scale(1.07); } }
+  .round { width:60px; height:60px; flex:none; border-radius:50%; border:3px solid var(--ink); background:#fff; box-shadow:0 5px 0 var(--ink);
+    font-size:26px; display:grid; place-items:center; padding:0; }
+  .round:active { transform:translateY(3px); box-shadow:0 2px 0 var(--ink); }
+  .screen { position:fixed; inset:0; display:flex; flex-direction:column; }
+  h1.big { margin:0; font-family:var(--toon); font-weight:400; font-size:clamp(46px,8vw,104px); line-height:.95; color:var(--yellow);
+    -webkit-text-stroke:3px var(--ink); paint-order:stroke; text-shadow:5px 5px 0 var(--ink); transform:rotate(-2deg); letter-spacing:2px; }
+  h1.big span { color:var(--accent); }
+  h2.big { margin:0; font-family:var(--toon); font-weight:400; font-size:clamp(30px,4.5vw,48px); color:var(--accent); line-height:1;
+    -webkit-text-stroke:2px var(--ink); paint-order:stroke; text-shadow:3px 3px 0 var(--ink); letter-spacing:1px; }
+  @keyframes bob { 50% { transform:translateY(-8px) rotate(2deg); } }
+  @keyframes wiggle { 25% { transform:rotate(-1.5deg); } 75% { transform:rotate(1.5deg); } }
+  @keyframes shake { 20%,60% { transform:translateX(-8px); } 40%,80% { transform:translateX(8px); } }
+  @keyframes popIn { 0% { transform:scale(.6); opacity:0; } 70% { transform:scale(1.05); opacity:1; } 100% { transform:scale(1); } }
+  .shake { animation:shake .45s; }
+
+  /* ---------- title ---------- */
+  #title { background:linear-gradient(#7fd3ff 0%, #bfeaff 55%, #fff1c9 100%); overflow:auto; }
+  #title .tbar { display:flex; justify-content:space-between; padding:14px 16px; }
+  #title .tmain { flex:1; display:flex; align-items:center; justify-content:center; gap:3vw; padding:0 16px 12px; flex-wrap:wrap; }
+  #title .tleft { text-align:center; max-width:640px; }
+  #title .sub { display:inline-block; margin:18px 0 8px; padding:8px 18px 4px; font-family:var(--toon); font-size:clamp(20px,2.6vw,32px);
+    background:#fff; transform:rotate(1.5deg); }
+  #title p.lead { font-size:clamp(17px,1.8vw,22px); margin:14px auto 18px; max-width:520px; }
+  #title .tpup { width:clamp(190px,26vw,360px); animation:bob 2.4s ease-in-out infinite; }
+  #title .skyline { height:clamp(110px,22vh,230px); flex:none; background:linear-gradient(transparent 84%,#1d1b26 84%,#1d1b26 85.4%,#06d6a0 85.4%); }
+  #title .skyline svg { width:100%; height:100%; display:block; }
+  .tbtns { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+
+  /* ---------- map ---------- */
+  #map { background:#8fdc8a radial-gradient(circle at 20% 30%, #a6e8a0 0 8%, transparent 9%) 0 0/160px 160px; }
+  .mbar { display:flex; align-items:center; gap:12px; padding:12px 16px; background:var(--paper); border-bottom:3px solid var(--ink); flex-wrap:wrap; }
+  .mbar .grow { flex:1; min-width:120px; }
+  .mbar h2 { margin:0; font-family:var(--toon); font-weight:400; font-size:clamp(24px,3vw,36px); }
+  .starcount { font-family:var(--toon); font-size:24px; padding:8px 14px 3px; background:var(--yellow); border:3px solid var(--ink); border-radius:999px; white-space:nowrap; }
+  .mapscroll { flex:1; overflow:auto; padding:16px; -webkit-overflow-scrolling:touch; }
+  .badges { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin:0 auto 14px; max-width:1300px; padding:8px 12px; }
+  .badges .bdg { width:52px; height:52px; border-radius:50%; border:3px solid var(--ink); background:#fff; display:grid; place-items:center; font-size:26px; }
+  .badges .bdg.off { background:#d7d2c4; filter:grayscale(1); opacity:.5; }
+  .badges .lbl { align-self:center; font-family:var(--toon); font-size:18px; margin-right:4px; }
+  .tiles { display:grid; grid-template-columns:repeat(4,1fr); gap:18px; max-width:1300px; margin:0 auto; }
+  .tile { position:relative; text-align:center; padding:10px 10px 12px; cursor:pointer; background:var(--paper); border:3px solid var(--ink);
+    border-radius:18px; box-shadow:0 6px 0 var(--ink); display:flex; flex-direction:column; align-items:center; gap:4px; }
+  .tile:active { transform:translateY(4px); box-shadow:0 2px 0 var(--ink); }
+  .tile .art { width:100%; aspect-ratio:16/11; border-radius:12px; border:3px solid var(--ink); background:var(--c); display:grid; place-items:center; overflow:hidden; }
+  .tile .art svg { width:92%; height:92%; }
+  .tile .num { position:absolute; top:-12px; left:-10px; width:44px; height:44px; border-radius:50%; background:var(--accent); color:#fff;
+    border:3px solid var(--ink); display:grid; place-items:center; font-family:var(--toon); font-size:24px; padding-top:4px; }
+  .tile b { font-family:var(--toon); font-weight:400; font-size:22px; line-height:1.05; margin-top:4px; }
+  .tile small { font-size:15px; opacity:.75; }
+  .tile .st { font-size:22px; color:#f4a100; letter-spacing:3px; -webkit-text-stroke:1px var(--ink); }
+  .tile .st .off { color:#e2dccb; }
+  .tile.locked { background:#e4ddcc; color:#857c6e; }
+  .tile.locked .art { filter:grayscale(1) opacity(.55); }
+  .tile.locked .num { background:#a49b8b; }
+  .tile .lock { position:absolute; inset:0; display:grid; place-items:center; font-size:52px; pointer-events:none; }
+  .tile.next { animation:wiggle 1.4s infinite; }
+  .tile.side .num { background:var(--green); }
+
+  /* ---------- mission ---------- */
+  #mission { background:#ffe9b8 radial-gradient(#f6d58f 1.5px, transparent 2px) 0 0/22px 22px; }
+  .mhead { display:flex; align-items:center; gap:10px; padding:10px 14px; background:var(--paper); border-bottom:3px solid var(--ink); flex-wrap:wrap; }
+  .mtitle { flex:1; min-width:150px; line-height:1.05; }
+  .mtitle b { display:block; font-family:var(--toon); font-weight:400; font-size:22px; color:var(--accent); }
+  .mtitle span { font-size:15px; opacity:.75; }
+  .steps { display:flex; gap:6px; list-style:none; margin:0; padding:0; flex-wrap:nowrap; }
+  .steps li { padding:6px 12px 4px; border:3px solid var(--ink); border-radius:999px; background:#fff; font-size:15px; white-space:nowrap; }
+  .steps li.on { background:var(--yellow); transform:scale(1.08); }
+  .steps li.done { background:var(--green); }
+  .chip { padding:8px 14px 6px; border:3px solid var(--ink); border-radius:999px; background:#fff; font-size:17px; white-space:nowrap; }
+  .chip.out { background:#d9fff0; }
+  .chip[hidden] { display:none; }
+  #stage { flex:1; overflow:auto; padding:16px 16px 24px; -webkit-overflow-scrolling:touch; }
+  .phead { text-align:center; margin:2px 0 14px; }
+  .ptag { display:inline-block; font-size:15px; letter-spacing:2px; text-transform:uppercase; background:var(--ink); color:#fff; padding:4px 12px 3px; border-radius:999px; }
+  .phead h2 { margin:8px 0 0; }
+  .pbody { max-width:1250px; margin:0 auto; }
+  .prompt { text-align:center; font-size:20px; margin:0 0 12px; }
+  .mfoot { display:flex; align-items:center; gap:12px; padding:10px 14px calc(10px + env(safe-area-inset-bottom)); background:var(--paper); border-top:3px solid var(--ink); }
+  .pupmini { width:70px; height:70px; flex:none; }
+  .pupmini svg { width:100%; height:100%; }
+  .bubble { flex:1; position:relative; background:#fff; border:3px solid var(--ink); border-radius:16px; padding:8px 14px; font-size:18px; line-height:1.25; min-height:52px; display:flex; align-items:center; }
+  .bubble::before { content:""; position:absolute; left:-14px; top:50%; margin-top:-10px; border:10px solid transparent; border-right:12px solid var(--ink); border-left:0; }
+  .bubble.good { background:#d9fff0; } .bubble.bad { background:#ffe8ec; }
+  .bubble.say { animation:popIn .25s; }
+  .fbtns { display:flex; gap:10px; flex:none; }
+  .fbtns [hidden] { display:none; }
+
+  /* comic burst */
+  #fx { position:fixed; inset:0; pointer-events:none; z-index:200; }
+  .burst { position:fixed; width:170px; height:150px; margin:-75px 0 0 -85px; animation:burst .95s ease-out forwards; }
+  .burst svg { position:absolute; inset:0; width:100%; height:100%; }
+  .burst b { position:absolute; inset:0; display:grid; place-items:center; font-family:var(--toon); font-weight:400; font-size:30px; color:#fff;
+    -webkit-text-stroke:2px var(--ink); paint-order:stroke; text-shadow:2px 2px 0 var(--ink); transform:rotate(-8deg); }
+  @keyframes burst { 0% { transform:scale(.2) rotate(-20deg); opacity:0; } 25% { transform:scale(1.12) rotate(4deg); opacity:1; }
+    70% { transform:scale(1); opacity:1; } 100% { transform:scale(1.1) translateY(-24px); opacity:0; } }
+  .fly { position:fixed; font-size:40px; z-index:210; transition:transform .7s cubic-bezier(.3,1.4,.5,1); pointer-events:none; margin:-24px 0 0 -24px; }
+  .confetti { position:fixed; top:-20px; width:14px; height:20px; border:2px solid var(--ink); z-index:220; animation:fall linear forwards; }
+  @keyframes fall { to { transform:translateY(110vh) rotate(720deg); } }
+
+  /* sorter */
+  .tray { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; min-height:76px; padding:12px; border:3px dashed #b9ad8f; border-radius:18px; background:rgba(255,255,255,.55); }
+  .tray:empty::after { content:"All sorted! ✔"; font-family:var(--toon); font-size:22px; color:#0a8f6c; align-self:center; }
+  .chip-item { min-height:56px; padding:10px 16px; background:#fff; border:3px solid var(--ink); border-radius:14px; box-shadow:0 4px 0 var(--ink);
+    font-size:18px; display:flex; align-items:center; cursor:grab; touch-action:none; transition:transform .1s, background .1s; line-height:1.15; }
+  .chip-item.sel { background:var(--yellow); transform:translateY(-4px) rotate(-2deg); }
+  .chip-item.ghost { position:fixed; z-index:150; pointer-events:none; transform:rotate(-3deg) scale(1.06); box-shadow:6px 8px 0 rgba(0,0,0,.25); margin:0; }
+  .chip-item.dragging { opacity:.3; }
+  .chip-item.placed { cursor:default; font-size:15px; min-height:0; padding:6px 10px; box-shadow:0 2px 0 var(--ink); background:#eafff6; animation:popIn .3s; }
+  .bins[style="--n:1"] { max-width:520px; margin-left:auto; margin-right:auto; }
+  .bins { display:grid; grid-template-columns:repeat(var(--n),minmax(0,1fr)); gap:12px; margin-top:16px; }
+  .bin { border:3px solid var(--ink); border-radius:18px; background:rgba(255,255,255,.75); min-height:160px; box-shadow:4px 4px 0 var(--ink);
+    display:flex; flex-direction:column; cursor:pointer; transition:transform .12s, background .12s; }
+  .binhead { background:var(--c); padding:8px 8px 4px; border-bottom:3px solid var(--ink); border-radius:14px 14px 0 0; font-family:var(--toon);
+    font-weight:400; font-size:21px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:2px; line-height:1.05; }
+  .binhead .bi { font-size:30px; line-height:1; }
+  .binhead .bart { width:120px; height:86px; } .binhead .bart svg { width:100%; height:100%; }
+  .binbody { flex:1; display:flex; flex-wrap:wrap; gap:6px; padding:8px; align-content:flex-start; justify-content:center; }
+  .bins.armed .bin { animation:wiggle .7s infinite; }
+  .bin.over { transform:scale(1.04); background:#fff3c4; }
+
+  /* questions */
+  .qcard { max-width:820px; margin:0 auto; padding:18px 20px 20px; animation:popIn .3s; }
+  .mprog { font-size:15px; opacity:.7; letter-spacing:1px; text-transform:uppercase; }
+  .qhead { display:inline-block; margin:6px 0 2px; padding:4px 12px 2px; background:var(--yellow); border:3px solid var(--ink); border-radius:10px; font-family:var(--toon); font-size:20px; }
+  .q { font-size:clamp(20px,2.3vw,26px); margin:10px 0 14px; line-height:1.25; }
+  .qicon { font-size:56px; line-height:1; margin-top:6px; }
+  .opts { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; }
+  .opt { min-height:64px; border:3px solid var(--ink); border-radius:16px; background:#fff; box-shadow:0 5px 0 var(--ink); font-size:19px; padding:10px 14px; line-height:1.2; }
+  .opt:active { transform:translateY(3px); box-shadow:0 2px 0 var(--ink); }
+  .opt.right { background:var(--green); } .opt.wrong { background:#ffb3c1; text-decoration:line-through; }
+  .opt:disabled { cursor:default; }
+  .explain { margin-top:14px; padding:10px 14px; border:3px solid var(--ink); border-radius:14px; font-size:19px; line-height:1.3; animation:popIn .25s; }
+  .explain.good { background:#d9fff0; } .explain.bad { background:#fff3c4; }
+  .cright { text-align:right; margin-top:12px; }
+
+  /* discover */
+  .dgrid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:16px; }
+  .dcard { position:relative; min-height:210px; padding:16px; text-align:center; cursor:pointer; background:var(--c); }
+  .dcard .front { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; height:100%; min-height:170px; }
+  .dcard .dicon { font-size:66px; line-height:1; animation:bob 2s ease-in-out infinite; }
+  .dcard .front b { font-size:26px; }
+  .dcard small { font-size:15px; opacity:.75; }
+  .dcard.open { background:#fff; text-align:left; cursor:default; animation:popIn .3s; }
+  .dcard .dtop { display:flex; align-items:center; gap:10px; }
+  .dcard .dtop .dicon { font-size:40px; animation:none; }
+  .dcard .dtop b { font-size:24px; }
+  .dcard p { font-size:18px; line-height:1.35; margin:10px 0 4px; }
+  .mini { margin-top:10px; padding:10px; border:3px dashed #b9ad8f; border-radius:14px; background:#fffaf0; }
+  input[type=range] { width:100%; height:44px; accent-color:var(--accent); }
+  .seats { display:flex; flex-wrap:wrap; gap:3px; margin-top:6px; }
+  .seats i { width:12px; height:12px; border-radius:50%; background:var(--leg); border:2px solid var(--ink); }
+  .seats i.sen { background:var(--accent); }
+  .ladder { display:flex; flex-direction:column; gap:6px; }
+  .rung { display:flex; align-items:center; gap:8px; padding:6px 10px; border:3px solid var(--ink); border-radius:12px; background:#fff; font-size:16px; }
+  .rung.on { background:var(--yellow); }
+  .rung .fold { margin-left:auto; font-size:26px; }
+
+  /* sequence */
+  .seqline { display:flex; flex-direction:column; gap:8px; max-width:640px; margin:0 auto 14px; }
+  .seqdone { padding:10px 14px; border:3px solid var(--ink); border-radius:14px; background:var(--green); font-size:19px; animation:popIn .3s; }
+  .seqslot { padding:10px 14px; border:3px dashed #b9ad8f; border-radius:14px; font-size:17px; opacity:.7; }
+  .seqpool { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; }
+  .seqcard { min-height:60px; padding:8px 16px; border:3px solid var(--ink); border-radius:14px; background:#fff; box-shadow:0 5px 0 var(--ink); font-size:19px; }
+
+  /* board game */
+  .board { display:grid; grid-template-columns:repeat(var(--cols),minmax(0,1fr)); gap:8px; max-width:1150px; margin:0 auto; }
+  .sq { position:relative; min-height:92px; border:3px solid var(--ink); border-radius:14px; background:#fff; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; font-size:14px; text-align:center; padding:6px 4px; line-height:1.05; box-shadow:0 3px 0 var(--ink); }
+  .sq .si { font-size:30px; line-height:1.1; }
+  .sq.gate { background:var(--yellow); } .sq.cleared { background:var(--green); } .sq.end { background:var(--accent); color:#fff; }
+  .sq.here { outline:4px solid var(--accent); outline-offset:2px; }
+  .sq .tok { position:absolute; top:-18px; right:-8px; width:54px; height:54px; animation:bob 1.2s ease-in-out infinite; z-index:2; }
+  .sq .arrow { position:absolute; font-size:14px; opacity:.5; }
+  .bgctl { display:flex; gap:16px; align-items:flex-start; justify-content:center; flex-wrap:wrap; margin-top:16px; }
+  .die { width:84px; height:84px; flex:none; border:3px solid var(--ink); border-radius:16px; background:#fff; box-shadow:4px 4px 0 var(--ink);
+    display:grid; grid-template:repeat(3,1fr)/repeat(3,1fr); padding:10px; }
+  .die i { width:14px; height:14px; border-radius:50%; background:var(--ink); place-self:center; visibility:hidden; }
+  .die i.on { visibility:visible; }
+  .die.roll { animation:shake .3s infinite; }
+  .evt { flex:1; min-width:260px; max-width:760px; padding:14px 16px; }
+  .evt .opts { margin-top:8px; }
+  .wheel { width:180px; height:180px; position:relative; margin:0 auto; }
+  .wheel svg { width:100%; height:100%; transition:transform 2.2s cubic-bezier(.15,.8,.2,1); }
+  .wheel .ptr { position:absolute; left:50%; top:-14px; margin-left:-14px; font-size:30px; }
+  .meters { display:grid; gap:10px; margin:10px 0; }
+  .mrow { display:flex; align-items:center; gap:10px; font-size:17px; }
+  .mrow b { width:80px; }
+  .mbarx { flex:1; height:30px; border:3px solid var(--ink); border-radius:14px; background:#fff; position:relative; overflow:hidden; }
+  .mbarx i { position:absolute; inset:0 auto 0 0; width:0; background:var(--green); transition:width 1.6s ease-out; }
+  .mbarx u { position:absolute; top:-2px; bottom:-2px; left:66.7%; border-left:4px dashed var(--accent); }
+
+  /* scale + triangle */
+  .scalewrap { max-width:560px; margin:0 auto 10px; }
+  .scalewrap svg { width:100%; display:block; }
+  #beam, .pan { transition:transform .9s cubic-bezier(.3,1.5,.5,1); transform-box:view-box; }
+  #beam { transform-origin:200px 70px; }
+  .tri { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,1fr); gap:16px; align-items:start; }
+  .tri svg { width:100%; max-height:58vh; display:block; }
+  .tri .node { cursor:pointer; }
+  .tri .info { padding:14px 16px; min-height:200px; }
+  .tri .info ul { margin:8px 0 0; padding-left:22px; font-size:18px; line-height:1.35; }
+  .explored { font-family:var(--toon); font-size:20px; text-align:center; margin-bottom:8px; }
+
+  /* dispatch */
+  .callcard { max-width:900px; margin:0 auto 10px; padding:10px 16px; display:flex; gap:12px; align-items:center; }
+  .callcard .ph { font-size:42px; animation:wiggle .5s infinite; }
+  .callcard p { margin:0; font-size:clamp(18px,2.1vw,24px); line-height:1.2; }
+  .scene { max-width:900px; margin:0 auto; border:3px solid var(--ink); border-radius:18px; overflow:hidden; box-shadow:4px 4px 0 var(--ink); background:#9fe3ff; }
+  .scene svg { width:100%; display:block; max-height:42vh; }
+  .pinring { animation:ring 1.2s infinite; transform-box:fill-box; transform-origin:center; }
+  @keyframes ring { from { transform:scale(.6); opacity:1; } to { transform:scale(1.8); opacity:0; } }
+  .forces { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:8px; max-width:1000px; margin:12px auto 0; }
+  .force { min-height:84px; border:3px solid var(--ink); border-radius:16px; background:var(--c); box-shadow:0 5px 0 var(--ink); display:flex; flex-direction:column;
+    align-items:center; justify-content:center; padding:4px; touch-action:none; line-height:1.05; }
+  .force .fi { font-size:30px; } .force b { font-size:14px; }
+  .force:active { transform:translateY(3px); box-shadow:0 2px 0 var(--ink); }
+
+  /* modal */
+  .overlay { position:fixed; inset:0; z-index:120; display:grid; place-items:center; background:rgba(30,20,60,.5); padding:14px; }
+  .mcard { padding:22px 26px 24px; text-align:center; max-width:min(760px,96vw); max-height:94vh; overflow:auto; border-radius:26px; box-shadow:6px 6px 0 var(--ink); animation:popIn .35s; }
+  .bigstars { font-size:60px; color:#f4a100; letter-spacing:6px; -webkit-text-stroke:2px var(--ink); line-height:1.1; }
+  .bigstars .off { color:#e7e0cf; }
+  .badgebig { display:inline-flex; align-items:center; gap:12px; margin:10px 0; padding:8px 18px 6px 8px; border:3px solid var(--ink); border-radius:999px; background:var(--yellow); font-family:var(--toon); font-size:22px; }
+  .badgebig i { font-style:normal; width:56px; height:56px; border-radius:50%; background:#fff; border:3px solid var(--ink); display:grid; place-items:center; font-size:30px; }
+  .retry { max-width:600px; margin:16px auto 0; padding:16px; text-align:center; }
+  .overload { max-width:640px; margin:16px auto 0; padding:16px; text-align:center; animation:popIn .3s; }
+  .meter { height:26px; border:3px solid var(--ink); border-radius:14px; overflow:hidden; background:#fff; margin:8px 0; }
+  .meter i { display:block; height:100%; width:0; background:repeating-linear-gradient(45deg,#e5383b 0 14px,#ff4d6d 14px 28px); animation:fillm 1.1s forwards; }
+  @keyframes fillm { to { width:100%; } }
+  .rulebook { max-width:820px; margin:0 auto 12px; padding:10px 16px; background:#fff7dc; }
+  .rulebook ol { margin:6px 0 0; padding-left:24px; font-size:17px; line-height:1.35; }
+  .two { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:8px; }
+  .two > div { border:3px solid var(--ink); border-radius:12px; padding:8px; font-size:16px; line-height:1.3; }
+
+  @media (max-width:1100px) { .tiles { grid-template-columns:repeat(3,1fr); } }
+  @media (max-width:820px) {
+    html,body { font-size:16px; }
+    .tiles { grid-template-columns:repeat(2,1fr); gap:14px; }
+    .tile b { font-size:18px; }
+    .steps { order:5; width:100%; justify-content:center; }
+    .steps li { padding:5px 9px 3px; font-size:13px; }
+    .steps li:not(.on) .lb { display:none; }
+    .mtitle b { font-size:19px; } .mtitle span { display:none; }
+    .bubble { font-size:15px; padding:6px 10px; }
+    .pupmini { width:52px; height:52px; }
+    .mfoot { gap:8px; padding:8px 10px calc(8px + env(safe-area-inset-bottom)); flex-wrap:wrap; }
+    .mfoot .bubble { min-width:0; }
+    .btn { font-size:20px; padding:8px 18px 3px; }
+    .chip-item { font-size:15px; padding:8px 10px; min-height:52px; }
+    .binhead { font-size:16px; } .binhead .bart { width:60px; height:44px; }
+    .bin { min-height:130px; }
+    .chip-item.placed { font-size:12px; padding:4px 6px; }
+    .forces { grid-template-columns:repeat(4,minmax(0,1fr)); }
+    .tri { grid-template-columns:1fr; }
+    .sq { min-height:78px; font-size:12px; } .sq .si { font-size:24px; } .sq .tok { width:42px; height:42px; }
+    .two { grid-template-columns:1fr; }
+    .dcard p { font-size:16px; }
+  }
+  @media (max-width:820px) {
+    .tray[data-more]::after { content:"+" attr(data-more) " more"; align-self:center; font-size:15px; opacity:.6; }
+    .tray .chip-item:nth-child(n+4) { display:none; }
+    .mhead { gap:6px; padding:8px 10px; }
+    .mhead .round { width:52px; height:52px; font-size:22px; }
+    .mhead .mapbtn .lb2 { display:none; }
+    .mhead .btn.sm { padding:8px 14px 3px; }
+    .mtitle { min-width:0; }
+    .chip { font-size:14px; padding:6px 10px 4px; }
+  }
+  @media (max-width:520px) { .fbtns .btn { min-width:0; } .mfoot .fbtns { width:100%; justify-content:flex-end; } }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="fx"></div>
+<script>
+'use strict';
+const INK = '#1d1b26';
+const KEY = 'capitolquest.v1';
+let save = { done: [], stars: {}, muted: false };
+try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && typeof s === 'object') save = Object.assign(save, s); } catch (_) {}
+if (!Array.isArray(save.done)) save.done = [];
+if (!save.stars || typeof save.stars !== 'object') save.stars = {};
+function persist() { try { localStorage.setItem(KEY, JSON.stringify(save)); } catch (_) {} }
+
+// ---------- tiny helpers ----------
+function h(tag, props, ...kids) {
+  const el = document.createElement(tag);
+  if (props) for (const k in props) {
+    const v = props[k];
+    if (v == null || v === false) continue;
+    if (k === 'class') el.className = v;
+    else if (k === 'html') el.innerHTML = v;
+    else if (k === 'style') el.style.cssText = v;
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else el.setAttribute(k, v === true ? '' : v);
+  }
+  for (const c of kids.flat()) { if (c == null || c === false) continue; el.append(c.nodeType ? c : document.createTextNode(c)); }
+  return el;
+}
+const $ = s => document.querySelector(s);
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const pick = a => a[Math.random() * a.length | 0];
+const GOOD = ['YES!', 'NICE!', 'WOW!', 'GREAT!', 'BOOM!'];
+const wait = ms => new Promise(r => setTimeout(r, ms));
+
+// ---------- sound (Web Audio, made on first tap) ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (_) { AC = null; } }
+  if (AC && AC.state === 'suspended') AC.resume().catch(() => {});
+  return AC;
+}
+document.addEventListener('pointerdown', () => ac(), { once: true });
+function tone(f, dur, type = 'triangle', vol = .07, delay = 0, slide = 0) {
+  if (save.muted) return; const c = ac(); if (!c) return;
+  try {
+    const t = c.currentTime + delay, o = c.createOscillator(), g = c.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t);
+    if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(40, f * slide), t + dur);
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .01); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.connect(g).connect(c.destination); o.start(t); o.stop(t + dur + .03);
+  } catch (_) {}
+}
+const sfx = {
+  tap: () => tone(720, .05, 'square', .035),
+  pop: () => tone(480, .09, 'square', .045, 0, 1.9),
+  good: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, .13, 'triangle', .08, i * .065)),
+  bad: () => tone(230, .22, 'sawtooth', .035, 0, .6),
+  whoosh: () => tone(260, .28, 'sine', .05, 0, 3.2),
+  win: () => [523, 659, 784, 1047, 784, 1047, 1319].forEach((f, i) => tone(f, .16, 'triangle', .085, i * .09)),
+  dice: () => { for (let i = 0; i < 7; i++) tone(260 + Math.random() * 500, .04, 'square', .03, i * .06); },
+};
+function muteBtn() {
+  const b = h('button', { class: 'round mute', 'aria-label': 'Sound on or off' }, save.muted ? '🔇' : '🔊');
+  b.onclick = () => { save.muted = !save.muted; persist(); document.querySelectorAll('.mute').forEach(x => x.textContent = save.muted ? '🔇' : '🔊'); if (!save.muted) sfx.tap(); };
+  return b;
+}
+
+// ---------- comic FX ----------
+function burst(text, x, y, color = '#ffd23f') {
+  if (x == null) { x = innerWidth / 2; y = innerHeight * .4; }
+  x = Math.max(90, Math.min(innerWidth - 90, x)); y = Math.max(80, Math.min(innerHeight - 80, y));
+  const pts = []; for (let i = 0; i < 22; i++) { const r = i % 2 ? 62 : 98, a = i / 22 * Math.PI * 2; pts.push((100 + Math.cos(a) * r).toFixed(1) + ',' + (100 + Math.sin(a) * r * .8).toFixed(1)); }
+  const el = h('div', { class: 'burst', style: `left:${x}px;top:${y}px`, html: `<svg viewBox="0 0 200 200"><polygon points="${pts.join(' ')}" fill="${color}" stroke="${INK}" stroke-width="6" stroke-linejoin="round"/></svg><b>${text}</b>` });
+  $('#fx').append(el); setTimeout(() => el.remove(), 1000);
+}
+function burstAt(el, text, color) { const r = el.getBoundingClientRect(); burst(text, r.left + r.width / 2, r.top + 10, color); }
+function confetti(n = 60) {
+  const cols = ['#ff4d6d', '#ffd23f', '#06d6a0', '#4cc9f0', '#9b5de5', '#ff9f1c'];
+  for (let i = 0; i < n; i++) {
+    const c = h('i', { class: 'confetti', style: `left:${Math.random() * 100}vw;background:${pick(cols)};animation-duration:${1.8 + Math.random() * 1.6}s;animation-delay:${Math.random() * .6}s` });
+    $('#fx').append(c); setTimeout(() => c.remove(), 4200);
+  }
+}
+function flyTo(text, fromEl, toEl) {
+  const a = fromEl.getBoundingClientRect(), b = toEl.getBoundingClientRect();
+  const f = h('div', { class: 'fly', style: `left:${a.left + a.width / 2}px;top:${a.top + a.height / 2}px` }, text);
+  $('#fx').append(f);
+  requestAnimationFrame(() => requestAnimationFrame(() => { f.style.transform = `translate(${b.left + b.width / 2 - a.left - a.width / 2}px,${b.top + b.height / 2 - a.top - a.height / 2}px) scale(1.3)`; }));
+  setTimeout(() => f.remove(), 1100);
+}
+
+// ---------- art: Captain Pup (Japanese Chin) in a reporter hat ----------
+function fluff(cx, cy, r, bump, n) {
+  let d = '';
+  for (let i = 0; i <= n; i++) {
+    const a = i / n * Math.PI * 2 - Math.PI / 2, x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r;
+    if (!i) d += `M${x.toFixed(1)} ${y.toFixed(1)}`;
+    else { const m = (i - .5) / n * Math.PI * 2 - Math.PI / 2; d += ` Q${(cx + Math.cos(m) * (r + bump)).toFixed(1)} ${(cy + Math.sin(m) * (r + bump)).toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)}`; }
+  }
+  return d + 'Z';
+}
+function pupSVG(o = {}) {
+  const full = !!o.full;
+  let s = `<svg viewBox="${full ? '0 0 200 290' : '4 18 192 180'}" aria-label="Captain Pup"><g stroke="${INK}" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">`;
+  if (full) {
+    s += `<path d="M52 236 Q18 228 22 194 Q36 206 50 214" fill="#fff"/>`;
+    s += `<path d="${fluff(100, 232, 50, 7, 12)}" fill="#fff"/>`;
+    s += `<ellipse cx="74" cy="276" rx="20" ry="11" fill="#fff"/><ellipse cx="126" cy="276" rx="20" ry="11" fill="#fff"/>`;
+    s += `<path d="M60 186 Q100 214 140 186 L132 204 Q100 224 68 204Z" fill="#ff4d6d"/>`;
+    s += `<rect x="78" y="226" width="44" height="22" rx="5" fill="#ffd23f" stroke-width="3"/>`;
+    s += `<text x="100" y="242" font-size="12" text-anchor="middle" font-family="Luckiest Guy,Comic Sans MS,sans-serif" fill="${INK}" stroke="none">PRESS</text>`;
+    s += `<g transform="rotate(14 156 232)"><rect x="138" y="206" width="38" height="48" rx="4" fill="#fff"/><path d="M144 220h26M144 230h26M144 240h18" stroke-width="3"/><rect x="138" y="200" width="38" height="9" fill="#4cc9f0" stroke-width="3"/></g>`;
+    s += `<ellipse cx="146" cy="244" rx="14" ry="11" fill="#fff"/>`;
+    s += `<g transform="rotate(-30 44 230)"><rect x="38" y="200" width="10" height="44" rx="3" fill="#ffd23f" stroke-width="3"/><path d="M38 244 L43 256 L48 244Z" fill="#f6c99a" stroke-width="3"/></g>`;
+    s += `<ellipse cx="56" cy="238" rx="14" ry="11" fill="#fff"/>`;
+  }
+  s += `<ellipse cx="42" cy="118" rx="21" ry="38" fill="#1f1d22" transform="rotate(20 42 118)"/><ellipse cx="158" cy="118" rx="21" ry="38" fill="#1f1d22" transform="rotate(-20 158 118)"/>`;
+  s += `<path d="${fluff(100, 112, 62, 8, 16)}" fill="#fff"/>`;
+  s += `<g stroke="none" fill="#1f1d22"><ellipse cx="71" cy="106" rx="21" ry="27" transform="rotate(28 71 106)"/><ellipse cx="129" cy="106" rx="21" ry="27" transform="rotate(-28 129 106)"/></g>`;
+  for (const ex of [74, 126]) s += `<circle cx="${ex}" cy="108" r="13" fill="#6b3d22" stroke-width="3"/><circle cx="${ex + 1}" cy="109" r="8" fill="#120a08" stroke="none"/><circle cx="${ex + 5}" cy="103" r="4.2" fill="#fff" stroke="none"/><circle cx="${ex - 4}" cy="113" r="1.8" fill="#fff" stroke="none"/>`;
+  s += `<ellipse cx="100" cy="133" rx="10" ry="7" fill="#1f1d22" stroke-width="3"/><ellipse cx="97" cy="131" rx="3" ry="1.8" fill="#fff" stroke="none"/>`;
+  s += `<path d="M83 144 Q100 170 117 144 Q100 151 83 144Z" fill="#7a1f35" stroke-width="4"/>`;
+  s += `<path d="M93 152 Q91 176 100 177 Q109 176 107 152Z" fill="#ff8fb1" stroke-width="3"/><path d="M100 156 V170" stroke="#e0607f" stroke-width="2"/>`;
+  s += `<path d="M62 136 l-24 -5 M62 143 l-24 3 M138 136 l24 -5 M138 143 l24 3" stroke-width="2.5"/>`;
+  if (o.hat !== false) {
+    s += `<ellipse cx="100" cy="64" rx="70" ry="13" fill="#d99c5a"/>`;
+    s += `<path d="M60 64 Q58 30 100 26 Q142 30 140 64 Q100 72 60 64Z" fill="#c98b4a"/>`;
+    s += `<path d="M86 32 Q100 42 114 32" fill="none" stroke-width="3"/>`;
+    s += `<path d="M60 54 Q100 62 140 54 L140 63 Q100 71 60 63Z" fill="${INK}"/>`;
+    s += `<g transform="rotate(-14 126 46)"><rect x="110" y="36" width="34" height="21" rx="3" fill="#fff" stroke-width="3"/><text x="127" y="51" font-size="10" text-anchor="middle" font-family="Luckiest Guy,Comic Sans MS,sans-serif" fill="#ff4d6d" stroke="none">PRESS</text></g>`;
+  }
+  return s + '</g></svg>';
+}
+
+// ---------- art: original cartoon buildings ----------
+const SW = `stroke="${INK}" stroke-width="3" stroke-linejoin="round"`;
+function cols(x0, x1, step, y0, y1, w = 5) { let s = ''; for (let x = x0; x <= x1; x += step) s += `<rect x="${x}" y="${y0}" width="${w}" height="${y1 - y0}" fill="#fff" ${SW} stroke-width="2"/>`; return s; }
+const ART = {
+  capitol: () => `<svg viewBox="0 -6 160 136"><g ${SW}>
+    <rect x="6" y="84" width="148" height="34" fill="#fff"/>${cols(12, 46, 9, 90, 116, 4)}${cols(110, 146, 9, 90, 116, 4)}
+    <rect x="50" y="68" width="60" height="50" fill="#fff"/>${cols(56, 100, 10, 76, 116, 5)}
+    <path d="M46 70 L80 54 L114 70Z" fill="#fff"/>
+    <rect x="58" y="38" width="44" height="18" fill="#fff"/>${cols(62, 94, 8, 40, 54, 3)}
+    <path d="M54 40 Q54 8 80 6 Q106 8 106 40Z" fill="#fff"/><path d="M66 38 Q66 16 80 8 M94 38 Q94 16 80 8" fill="none" stroke-width="2"/>
+    <rect x="75" y="-2" width="10" height="9" fill="#fff"/><circle cx="80" cy="-4" r="3" fill="#ffd23f"/>
+    <rect x="2" y="116" width="156" height="9" fill="#e9e2cf"/></g></svg>`,
+  whitehouse: () => `<svg viewBox="0 0 160 130"><g ${SW}>
+    <rect x="0" y="112" width="160" height="18" fill="#06d6a0"/>
+    <rect x="10" y="52" width="140" height="62" fill="#fff"/><rect x="10" y="46" width="140" height="8" fill="#e9e2cf"/>
+    ${[22, 36, 114, 128].map(x => `<rect x="${x}" y="62" width="9" height="13" fill="#4cc9f0" stroke-width="2"/><rect x="${x}" y="86" width="9" height="13" fill="#4cc9f0" stroke-width="2"/>`).join('')}
+    <path d="M50 54 L80 32 L110 54Z" fill="#fff"/>${cols(56, 100, 14, 54, 112, 5)}
+    <rect x="74" y="88" width="12" height="24" rx="5" fill="#ff9f1c" stroke-width="2"/>
+    <path d="M80 32 V6" fill="none"/><rect x="80" y="6" width="22" height="13" fill="#fff" stroke-width="2"/>
+    <path d="M80 10.5h22M80 15h22" stroke="#ff4d6d" stroke-width="2"/><rect x="80" y="6" width="8" height="6" fill="#4361ee" stroke-width="1.5"/></g></svg>`,
+  court: () => `<svg viewBox="0 0 160 130"><g ${SW}>
+    <path d="M10 58 L80 22 L150 58Z" fill="#fff"/><path d="M68 48 h24 M80 36 v12 M70 44 l-4 6 h8z M90 44 l-4 6 h8z" fill="#ffd23f" stroke-width="2"/>
+    <rect x="14" y="58" width="132" height="10" fill="#e9e2cf"/>
+    ${[20, 36, 52, 68, 84, 100, 116, 132].map(x => `<rect x="${x}" y="68" width="8" height="38" fill="#fff" stroke-width="2"/>`).join('')}
+    <rect x="12" y="104" width="136" height="8" fill="#fff"/><rect x="6" y="112" width="148" height="8" fill="#e9e2cf"/><rect x="0" y="120" width="160" height="8" fill="#fff"/></g></svg>`,
+  archives: () => `<svg viewBox="0 0 160 130"><g ${SW}>
+    <path d="M14 46 L80 18 L146 46Z" fill="#4cc9f0"/><rect x="18" y="46" width="124" height="66" fill="#fff"/>
+    ${[26, 44, 104, 122].map(x => `<rect x="${x}" y="52" width="10" height="56" fill="#fff" stroke-width="2"/>`).join('')}
+    <rect x="8" y="110" width="144" height="10" fill="#e9e2cf"/>
+    <g transform="rotate(-4 80 82)"><rect x="56" y="56" width="48" height="56" fill="#fff3c4"/><rect x="50" y="50" width="60" height="9" rx="4.5" fill="#f6c99a"/><rect x="50" y="108" width="60" height="9" rx="4.5" fill="#f6c99a"/>
+    <path d="M62 68h36M62 76h30M62 84h36M62 92h26M62 100h32" stroke-width="2"/></g></g></svg>`,
+  park: () => `<svg viewBox="0 0 160 130"><g ${SW}>
+    <ellipse cx="80" cy="112" rx="70" ry="14" fill="#4cc9f0"/><rect x="74" y="40" width="12" height="70" fill="#fff"/>
+    <path d="M60 112 h40 l-6 -10 h-28z" fill="#e9e2cf"/><g transform="rotate(-4 80 40)"><rect x="22" y="36" width="116" height="8" rx="4" fill="#ffd23f"/>
+    <path d="M30 44 L18 72 H44Z M80 44 L68 72 H92Z M130 44 L118 72 H142Z" fill="none" stroke-width="2"/>
+    <path d="M14 72 h34 q-17 16 -34 0z" fill="#4cc9f0"/><path d="M63 72 h34 q-17 16 -34 0z" fill="#ff9f1c"/><path d="M113 72 h34 q-17 16 -34 0z" fill="#c39bff"/></g>
+    <circle cx="80" cy="34" r="8" fill="#ff4d6d"/></g></svg>`,
+  defense: () => `<svg viewBox="0 0 160 130"><g ${SW}>
+    <path d="M80 18 L148 52 L124 112 L36 112 L12 52Z" fill="#e9e2cf"/><path d="M80 34 L132 58 L114 102 L46 102 L28 58Z" fill="#fff"/>
+    <path d="M80 52 L110 66 L100 92 L60 92 L50 66Z" fill="#06d6a0"/><circle cx="80" cy="74" r="8" fill="#ffd23f"/></g></svg>`,
+  stage: () => `<svg viewBox="0 0 160 130"><g ${SW}>
+    <path d="M30 0 L10 60 H50Z M130 0 L110 60 H150Z" fill="#fff3c4" stroke-width="2" opacity=".9"/>
+    <rect x="6" y="20" width="148" height="80" fill="#9b5de5"/><path d="M6 20 h30 q-6 40 6 80 H6Z M154 20 h-30 q6 40 -6 80 H154Z" fill="#ff4d6d"/>
+    <rect x="0" y="98" width="160" height="22" fill="#ffd23f"/>
+    <path d="M80 34 l7 15 16 2 -12 11 4 16 -15 -8 -15 8 4 -16 -12 -11 16 -2z" fill="#ffd23f"/>
+    <rect x="66" y="82" width="28" height="16" fill="#fff" stroke-width="2"/></g></svg>`,
+  citizen: () => `<svg viewBox="0 0 160 130"><g ${SW}>
+    <rect x="44" y="56" width="72" height="62" rx="6" fill="#4cc9f0"/><rect x="60" y="54" width="40" height="7" rx="3" fill="${INK}"/>
+    <g transform="rotate(-8 80 40)"><rect x="62" y="16" width="36" height="42" fill="#fff"/><path d="M70 36 l7 8 14 -16" fill="none" stroke="#06d6a0" stroke-width="5"/></g>
+    <rect x="52" y="78" width="56" height="20" rx="4" fill="#fff"/><text x="80" y="94" text-anchor="middle" font-size="15" font-family="Luckiest Guy,Comic Sans MS,sans-serif" fill="#ff4d6d" stroke="none">VOTE</text>
+    <rect x="0" y="116" width="160" height="14" fill="#06d6a0"/></g></svg>`,
+};
+
+// ---------- drag + tap ----------
+function makeDraggable(el, onDrop, onTap) {
+  el.addEventListener('pointerdown', e => {
+    if (el.classList.contains('placed') || (e.button && e.button !== 0)) return;
+    e.preventDefault();
+    const sx = e.clientX, sy = e.clientY, id = e.pointerId; let ghost = null, over = null;
+    const move = ev => {
+      if (ev.pointerId !== id) return;
+      if (!ghost && Math.hypot(ev.clientX - sx, ev.clientY - sy) > 9) {
+        const r = el.getBoundingClientRect();
+        ghost = el.cloneNode(true); ghost.classList.add('ghost'); ghost.classList.remove('sel');
+        ghost.style.width = r.width + 'px'; ghost._ox = sx - r.left; ghost._oy = sy - r.top;
+        document.body.append(ghost); el.classList.add('dragging');
+      }
+      if (ghost) {
+        ghost.style.left = (ev.clientX - ghost._ox) + 'px'; ghost.style.top = (ev.clientY - ghost._oy) + 'px';
+        const t = document.elementFromPoint(ev.clientX, ev.clientY), b = t && t.closest('[data-bin]');
+        if (b !== over) { if (over) over.classList.remove('over'); over = b; if (over) over.classList.add('over'); }
+      }
+    };
+    const up = ev => {
+      if (ev.pointerId !== id) return;
+      removeEventListener('pointermove', move); removeEventListener('pointerup', up); removeEventListener('pointercancel', up);
+      if (over) over.classList.remove('over');
+      if (ghost) { ghost.remove(); el.classList.remove('dragging'); if (ev.type === 'pointerup') onDrop(document.elementFromPoint(ev.clientX, ev.clientY)); }
+      else if (ev.type === 'pointerup') onTap();
+    };
+    addEventListener('pointermove', move); addEventListener('pointerup', up); addEventListener('pointercancel', up);
+  });
+  el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onTap(); } });
+}
+
+// ---------- reusable mini-games ----------
+// Sort chips into bins (drag OR tap chip then tap bin)
+function sorter(el, { bins, items, prompt, say, onDone }) {
+  let left = items.length, miss = 0, sel = null;
+  if (prompt) el.append(h('p', { class: 'prompt' }, prompt));
+  const tray = h('div', { class: 'tray' });
+  const binWrap = h('div', { class: 'bins', style: `--n:${bins.length}` });
+  const select = c => { if (sel) sel.classList.remove('sel'); sel = sel === c ? null : c; if (sel) sel.classList.add('sel'); binWrap.classList.toggle('armed', !!sel); sfx.tap(); if (sel) say('Now tap the spot where it belongs! 👇'); };
+  const place = (c, id, be) => {
+    const it = c._it; c.classList.remove('sel'); sel = null; binWrap.classList.remove('armed');
+    const ok = Array.isArray(it.bin) ? it.bin.includes(id) : it.bin === id;
+    if (ok) {
+      be.querySelector('.binbody').append(c); c.classList.add('placed'); c.removeAttribute('tabindex');
+      burstAt(be, pick(GOOD), '#06d6a0'); sfx.good(); say('✅ ' + (it.why || 'Right!'), 'good');
+      more(); if (--left === 0) setTimeout(() => onDone({ miss, total: items.length }), 650);
+    } else {
+      miss++; c.classList.remove('shake'); void c.offsetWidth; c.classList.add('shake');
+      burstAt(be, 'OOPS!', '#ff8fa3'); sfx.bad(); say('💡 ' + (it.hint || 'Not quite — try a different spot!'), 'bad');
+    }
+  };
+  for (const b of bins) {
+    const be = h('div', { class: 'bin', 'data-bin': b.id, style: `--c:${b.color || '#4cc9f0'}` },
+      h('div', { class: 'binhead' }, b.art ? h('span', { class: 'bart', html: b.art }) : b.icon ? h('span', { class: 'bi' }, b.icon) : null, h('span', null, b.label)),
+      h('div', { class: 'binbody' }));
+    be.addEventListener('click', () => { if (sel) place(sel, b.id, be); });
+    binWrap.append(be);
+  }
+  for (const it of shuffle(items)) {
+    const c = h('div', { class: 'chip-item', tabindex: 0 }, it.t); c._it = it; tray.append(c);
+    makeDraggable(c, t => { const be = t && t.closest('[data-bin]'); if (be) place(c, be.dataset.bin, be); }, () => select(c));
+  }
+  const more = () => { const n = tray.children.length - 3; if (n > 0) tray.dataset.more = n; else delete tray.dataset.more; };
+  more(); el.append(tray, binWrap);
+}
+
+// One card at a time, retry until right (first-try answers count)
+function matchup(el, { cards, say, onDone, auto = 0 }) {
+  let i = 0, right = 0;
+  const box = h('div'); el.append(box);
+  const show = () => {
+    const c = cards[i]; box.innerHTML = ''; let first = true, solved = false;
+    const card = h('div', { class: 'panel qcard' }, h('div', { class: 'mprog' }, `${i + 1} of ${cards.length}`),
+      c.head ? h('div', { class: 'qhead' }, c.head) : null, c.icon ? h('div', { class: 'qicon' }, c.icon) : null, h('p', { class: 'q' }, c.q));
+    const opts = h('div', { class: 'opts' });
+    const advance = () => { i++; if (i < cards.length) show(); else onDone({ right, total: cards.length }); };
+    for (const o of (c.keep ? c.o : shuffle(c.o))) {
+      const b = h('button', { class: 'opt' }, o); b._ok = o === c.a;
+      b.onclick = () => {
+        if (solved || b.disabled) return;
+        if (o === c.a) {
+          solved = true; if (first) right++;
+          b.classList.add('right'); opts.querySelectorAll('.opt').forEach(x => x.disabled = true);
+          burstAt(b, pick(GOOD), '#06d6a0'); sfx.good(); say('✅ ' + (c.why || 'Right!'), 'good');
+          if (auto) setTimeout(advance, auto);
+          else card.append(h('div', { class: 'explain good' }, c.why || 'Right!'), h('div', { class: 'cright' }, h('button', { class: 'btn go', onclick: e => { e.currentTarget.disabled = true; advance(); } }, i + 1 < cards.length ? 'Next ▶' : 'Done ✔')));
+        } else {
+          first = false; b.classList.add('wrong'); b.disabled = true; burstAt(b, 'OOPS!', '#ff8fa3'); sfx.bad();
+          say('💡 ' + (c.hint || 'Not quite — try again!'), 'bad');
+        }
+      };
+      opts.append(b);
+    }
+    card.append(opts); box.append(card);
+  };
+  show();
+}
+
+// Knowledge check: one try, explanation after every answer
+function quiz(el, qs, onDone, say, label = 'Question') {
+  let i = 0, right = 0;
+  const box = h('div'); el.append(box);
+  const show = () => {
+    const q = qs[i]; box.innerHTML = '';
+    const card = h('div', { class: 'panel qcard' }, h('div', { class: 'mprog' }, `${label} ${i + 1} of ${qs.length}` + (qs.length > 3 ? ` · score ${right}` : '')), h('p', { class: 'q' }, q.q));
+    const opts = h('div', { class: 'opts' }); let answered = false;
+    for (const o of shuffle(q.o)) {
+      const b = h('button', { class: 'opt' }, o); b._ok = o === q.a;
+      b.onclick = () => {
+        if (answered) return; answered = true;
+        const ok = o === q.a; if (ok) right++;
+        opts.querySelectorAll('.opt').forEach(x => { x.disabled = true; if (x.textContent === q.a) x.classList.add('right'); });
+        if (!ok) b.classList.add('wrong');
+        burstAt(b, ok ? pick(GOOD) : 'OOPS!', ok ? '#06d6a0' : '#ff8fa3'); ok ? sfx.good() : sfx.bad();
+        say(ok ? 'Great answer! ⭐' : 'Good try! Read why, then keep going.', ok ? 'good' : 'bad');
+        card.append(h('div', { class: 'explain ' + (ok ? 'good' : 'bad') }, h('b', null, ok ? '✅ Yes! ' : `💡 The answer is “${q.a}.” `), q.why),
+          h('div', { class: 'cright' }, h('button', { class: 'btn go', onclick: e => { e.currentTarget.disabled = true; i++; if (i < qs.length) show(); else onDone({ right, total: qs.length }); } }, i + 1 < qs.length ? 'Next ▶' : 'Finish ✔')));
+      };
+      opts.append(b);
+    }
+    card.append(opts); box.append(card);
+  };
+  show();
+}
+
+// Tap-to-reveal cards
+function discover(el, cards, api) {
+  const seen = new Set();
+  el.append(h('p', { class: 'prompt' }, 'Tap every card to discover the facts! ✨'));
+  const grid = h('div', { class: 'dgrid' }); el.append(grid);
+  cards.forEach((c, k) => {
+    const card = h('div', { class: 'dcard panel', role: 'button', tabindex: 0, style: `--c:${c.color || '#ffd23f'}` },
+      h('div', { class: 'front' }, h('div', { class: 'dicon' }, c.icon), h('b', { class: 'toon' }, c.title), h('small', null, 'Tap to discover')));
+    const open = () => {
+      if (card.classList.contains('open')) return;
+      card.classList.add('open'); card.innerHTML = '';
+      card.append(h('div', { class: 'dtop' }, h('span', { class: 'dicon' }, c.icon), h('b', { class: 'toon' }, c.title)), h('p', { html: c.text }));
+      if (c.extra) c.extra(card, api);
+      seen.add(k); sfx.pop(); api.say(c.say || 'Cool fact! Tap another card.');
+      if (seen.size === cards.length) { setTimeout(() => api.say('You discovered everything! Tap Next ▶ when you\'re ready.', 'good'), 1400); api.done(); }
+    };
+    card.addEventListener('click', open); card.addEventListener('keydown', e => { if (e.key === 'Enter') open(); });
+    grid.append(card);
+  });
+}
+
+// Put steps in order by tapping
+function sequence(el, { steps, say, onDone }) {
+  let k = 0, miss = 0;
+  const line = h('div', { class: 'seqline' });
+  const slots = steps.map((s, i) => h('div', { class: 'seqslot' }, `${i + 1}. ?`));
+  line.append(...slots);
+  const pool = h('div', { class: 'seqpool' });
+  shuffle(steps.map((s, i) => [s, i])).forEach(([s, i]) => {
+    const b = h('button', { class: 'seqcard' }, `${s.i} ${s.t}`); b._seq = i;
+    b.onclick = () => {
+      if (i === k) {
+        slots[k].replaceWith(h('div', { class: 'seqdone' }, `${k + 1}. ${s.i} ${s.t}`)); b.remove(); k++;
+        sfx.pop(); say('✅ ' + s.why, 'good');
+        if (k === steps.length) { burst('IN ORDER!', null, null, '#06d6a0'); sfx.good(); onDone({ miss }); }
+      } else { miss++; b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); sfx.bad(); say(`💡 Not yet! Hint for step ${k + 1}: ${steps[k].hint}`, 'bad'); }
+    };
+    pool.append(b);
+  });
+  el.append(line, pool);
+}
+
+// Military dispatch map
+const FORCES = [
+  { id: 'army', n: 'Army', i: '🪖', c: '#a7d36b' }, { id: 'navy', n: 'Navy', i: '⚓', c: '#7aa2ff' },
+  { id: 'marines', n: 'Marine Corps', i: '🏖️', c: '#ff8fa3' }, { id: 'af', n: 'Air Force', i: '✈️', c: '#9fe3ff' },
+  { id: 'sf', n: 'Space Force', i: '🛰️', c: '#c39bff' }, { id: 'cg', n: 'Coast Guard', i: '🛟', c: '#ffb85c' },
+  { id: 'ng', n: 'National Guard', i: '🏠', c: '#7be0bf' },
+];
+const ZP = { space: [[150, 32], [440, 30]], sky: [[170, 98], [430, 100]], land: [[110, 214], [205, 258]], coast: [[318, 210], [322, 262]], sea: [[455, 212], [540, 262]] };
+function sceneSVG() {
+  let stars = ''; for (let i = 0; i < 26; i++) stars += `<circle cx="${(i * 97) % 600}" cy="${8 + (i * 37) % 46}" r="${i % 3 ? 1.5 : 2.5}" fill="#fff"/>`;
+  return `<svg viewBox="0 0 600 300" preserveAspectRatio="xMidYMid meet">
+  <rect width="600" height="62" fill="#2b2a4a"/>${stars}
+  <g transform="translate(520 28)" stroke="${INK}" stroke-width="2"><rect x="-26" y="-6" width="18" height="12" fill="#4cc9f0"/><rect x="8" y="-6" width="18" height="12" fill="#4cc9f0"/><rect x="-8" y="-9" width="16" height="18" rx="3" fill="#ffd23f"/></g>
+  <rect y="62" width="600" height="90" fill="#9fe3ff"/>
+  <g fill="#fff" stroke="${INK}" stroke-width="2.5"><path d="M60 112 q0 -18 20 -16 q8 -14 24 -6 q18 -4 18 14 q12 2 8 12 h-64 q-12 -2 -6 -4z"/><path d="M330 92 q2 -14 18 -12 q8 -12 22 -4 q16 -2 14 12 q10 4 4 10 h-52 q-10 -2 -6 -6z"/></g>
+  <path d="M0 152 H300 Q328 222 304 300 H0Z" fill="#7bd389" stroke="${INK}" stroke-width="3"/>
+  <path d="M20 170 q40 -30 80 0 q40 -26 80 0" fill="#5fbf6f" stroke="${INK}" stroke-width="2.5"/>
+  <g stroke="${INK}" stroke-width="2.5"><rect x="40" y="246" width="26" height="22" fill="#fff"/><path d="M36 248 l17 -14 17 14z" fill="#ff4d6d"/><rect x="236" y="214" width="26" height="22" fill="#fff"/><path d="M232 216 l17 -14 17 14z" fill="#ff9f1c"/></g>
+  <path d="M300 152 Q328 222 304 300 H352 Q384 222 344 152Z" fill="#ffe08a" stroke="${INK}" stroke-width="3"/>
+  <path d="M344 152 H600 V300 H352 Q384 222 344 152Z" fill="#4cc9f0" stroke="${INK}" stroke-width="3"/>
+  <path d="M400 190 q10 -6 20 0 t20 0 M500 236 q10 -6 20 0 t20 0 M420 280 q10 -6 20 0 t20 0" fill="none" stroke="#fff" stroke-width="3"/>
+  <g stroke="${INK}" stroke-width="2.5"><path d="M480 172 h56 l-8 12 h-40z" fill="#fff"/><rect x="500" y="160" width="14" height="12" fill="#ffd23f"/></g>
+  <g font-family="Luckiest Guy,Comic Sans MS,sans-serif" font-size="15" fill="${INK}" opacity=".55"><text x="10" y="56" fill="#fff">SPACE</text><text x="10" y="146">SKY</text><text x="10" y="292">LAND</text><text x="312" y="170" font-size="12">COAST</text><text x="548" y="292">SEA</text></g>
+  <g class="pin" data-bin="pin" id="pin" style="transition:transform .5s"><circle class="pinring" r="22" fill="none" stroke="#ff4d6d" stroke-width="4"/><circle r="20" fill="#ff4d6d" stroke="${INK}" stroke-width="3"/><text y="9" text-anchor="middle" font-size="26" font-family="Luckiest Guy,Comic Sans MS,sans-serif" fill="#fff" stroke="${INK}" stroke-width="1.5">!</text></g>
+  </svg>`;
+}
+function dispatch(el, { calls, say, onDone, auto = 1700 }) {
+  let i = 0, right = 0, first = true, busy = false;
+  const top = h('div', { class: 'panel callcard' }), scene = h('div', { class: 'scene', html: sceneSVG() }), pads = h('div', { class: 'forces' });
+  el.append(top, scene, pads);
+  const pin = scene.querySelector('#pin');
+  const show = () => {
+    const c = calls[i]; first = true; busy = false;
+    top.innerHTML = ''; top.append(h('span', { class: 'ph' }, '📞'), h('div', null, h('div', { class: 'mprog' }, `Call ${i + 1} of ${calls.length}`), h('p', null, c.q)));
+    const [x, y] = pick(ZP[c.z]); pin.setAttribute('transform', `translate(${x} ${y})`);
+    pads.dataset.ans = c.a;
+    say('Who should help? Tap a branch — or drag it onto the ❗ pin.');
+  };
+  const answer = (f, b) => {
+    if (busy) return; const c = calls[i];
+    if (f.id === c.a) {
+      busy = true; if (first) right++;
+      flyTo(f.i, b, pin); sfx.good(); setTimeout(() => burstAt(pin, pick(GOOD), '#06d6a0'), 650);
+      say('✅ ' + c.why, 'good');
+      setTimeout(() => { i++; if (i < calls.length) show(); else onDone({ right, total: calls.length }); }, auto);
+    } else {
+      first = false; b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); sfx.bad();
+      say(`💡 Not the ${f.n} this time. ${c.hint || 'Think: land, sea, air, space, or help at home?'}`, 'bad');
+    }
+  };
+  for (const f of FORCES) {
+    const b = h('button', { class: 'force', 'data-id': f.id, style: `--c:${f.c}` }, h('span', { class: 'fi' }, f.i), h('b', null, f.n));
+    makeDraggable(b, t => { if (t && t.closest('#pin')) answer(f, b); }, () => answer(f, b));
+    pads.append(b);
+  }
+  show();
+}
+
+// Balance scale rounds
+function scaleSVG() {
+  return `<svg viewBox="0 0 400 230"><g stroke="${INK}" stroke-width="4" stroke-linejoin="round">
+    <path d="M160 222 L200 70 L240 222Z" fill="#ffd23f"/><rect x="130" y="214" width="140" height="12" rx="6" fill="#e9e2cf"/>
+    <g id="beam"><rect x="52" y="64" width="296" height="12" rx="6" fill="#ff4d6d"/></g>
+    <g class="pan" id="panL"><path d="M60 76 L36 138 M60 76 L84 138" fill="none" stroke-width="3"/><path d="M26 138 h68 q-34 30 -68 0z" fill="#fff"/><text id="labL" x="60" y="134" text-anchor="middle" font-size="34" stroke="none">🖊️</text></g>
+    <g class="pan" id="panR"><path d="M340 76 L316 138 M340 76 L364 138" fill="none" stroke-width="3"/><path d="M306 138 h68 q-34 30 -68 0z" fill="#fff"/><text id="labR" x="340" y="134" text-anchor="middle" font-size="34" stroke="none">⚖️</text></g>
+    <circle cx="200" cy="70" r="10" fill="#fff"/></g></svg>`;
+}
+function scaleRounds(el, { rounds, say, onDone }) {
+  let i = 0, right = 0;
+  const sw = h('div', { class: 'scalewrap', html: scaleSVG() }); const box = h('div'); el.append(sw, box);
+  const beam = sw.querySelector('#beam'), pl = sw.querySelector('#panL'), pr = sw.querySelector('#panR');
+  const tilt = a => { beam.style.transform = `rotate(${a}deg)`; const dy = Math.sin(a * Math.PI / 180) * 140; pl.style.transform = `translateY(${-dy}px)`; pr.style.transform = `translateY(${dy}px)`; };
+  const show = () => {
+    const r = rounds[i]; sw.querySelector('#labL').textContent = r.icon; sw.querySelector('#labR').textContent = r.other || '⚖️';
+    tilt(0); setTimeout(() => { tilt(-14); sfx.whoosh(); }, 250);
+    box.innerHTML = '';
+    say(`${r.who} used a power — the scale is tipping! Pick the check that balances it.`);
+    matchup(box, { cards: [{ head: r.who, q: r.ev + ' Which check can balance it?', o: r.o, a: r.a, why: r.why }], say, onDone: res => { right += res.right; i++; tilt(0); if (i < rounds.length) show(); else onDone({ right, total: rounds.length }); } });
+    const b = box.querySelector('.opts'); b.addEventListener('click', e => { const t = e.target.closest('.opt'); if (t && t.classList.contains('right')) { tilt(0); burst('BALANCED!', null, null, '#06d6a0'); } }, true);
+  };
+  show();
+}
+
+// ---------- mission framework ----------
+const PH = ['Challenge', 'Discover', 'Experiment', 'Boss', 'Check'];
+const PT = [30, 60, 120, 90, 0];
+let cur = null, tInt = null;
+
+function bubble(text, mood) {
+  const b = $('#bubble'); if (!b) return;
+  b.className = 'bubble' + (mood ? ' ' + mood : ''); void b.offsetWidth; b.classList.add('say'); b.textContent = text;
+}
+function setNext(on) { const n = $('#next'); if (!n) return; n.disabled = !on; n.classList.toggle('pulse', on); if (cur) cur.ready = on; }
+function startTimer(sec) {
+  clearInterval(tInt); const chip = $('#timer'); if (!chip) return;
+  if (!sec) { chip.hidden = true; return; }
+  chip.hidden = false; chip.classList.remove('out'); let left = sec;
+  const show = () => chip.textContent = `⏱ ${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`; show();
+  tInt = setInterval(() => {
+    if (document.hidden) return;
+    if (--left > 0) return show();
+    clearInterval(tInt); chip.textContent = '⏱ Take your time!'; chip.classList.add('out');
+    if (cur && !cur.ready) {
+      if (cur.phase === 3) bubble('Time\'s up — no worries! Keep going, you\'ve got this. 💪');
+      else { bubble('Time\'s up! Keep playing, or tap Next ▶ to move on.'); setNext(true); }
+    }
+  }, 1000);
+}
+
+function showScreen(el) { clearInterval(tInt); const app = $('#app'); app.innerHTML = ''; app.append(el); $('#fx').innerHTML = ''; document.querySelectorAll('.overlay,.chip-item.ghost').forEach(x => x.remove()); }
+
+function startMission(mi) {
+  const m = MISSIONS[mi]; cur = { mi, m, phase: 0, ready: false };
+  const steps = h('ol', { class: 'steps' }, PH.map((p, k) => h('li', null, k === 4 ? '✔' : String(k + 1), h('span', { class: 'lb' }, ' ' + (k === 4 ? 'Check' : p)))));
+  const scr = h('div', { class: 'screen', id: 'mission' },
+    h('header', { class: 'mhead' },
+      h('button', { class: 'btn sm alt mapbtn', 'aria-label': 'Back to map', onclick: () => { sfx.tap(); renderMap(); } }, '✖', h('span', { class: 'lb2' }, ' Map')),
+      h('div', { class: 'mtitle' }, h('b', null, `Mission ${mi + 1}: ${m.name}`), h('span', null, m.place)),
+      steps, h('span', { class: 'chip', id: 'timer' }, '⏱'), muteBtn()),
+    h('main', { id: 'stage' }),
+    h('footer', { class: 'mfoot' },
+      h('div', { class: 'pupmini', html: pupSVG() }), h('div', { class: 'bubble', id: 'bubble' }, 'Let\'s go!'),
+      h('div', { class: 'fbtns' },
+        h('button', { class: 'btn alt', id: 'skip', onclick: () => { sfx.tap(); runPhase(2); } }, 'Skip ▶'),
+        h('button', { class: 'btn go', id: 'next', onclick: () => { sfx.tap(); if (cur.phase < 4) runPhase(cur.phase + 1); } }, 'Next ▶'))));
+  showScreen(scr); runPhase(0);
+}
+
+function runPhase(p) {
+  cur.phase = p; cur.ready = false;
+  const st = $('#stage'); st.innerHTML = ''; st.scrollTop = 0;
+  document.querySelectorAll('.steps li').forEach((li, k) => { li.className = k === p ? 'on' : k < p ? 'done' : ''; });
+  setNext(false); $('#skip').hidden = p !== 1; $('#next').hidden = p === 4;
+  startTimer(PT[p]); sfx.whoosh();
+  st.append(h('div', { class: 'phead' }, h('span', { class: 'ptag' }, p === 4 ? '✔ Quick Check' : `${p + 1} · ${PH[p]}`), h('h2', { class: 'big' }, cur.m.titles[p])));
+  const body = h('div', { class: 'pbody' }); st.append(body);
+  const api = { done: res => phaseDone(p, res, body), say: bubble };
+  cur.m.phases[p](body, api);
+}
+
+function phaseDone(p, res, body) {
+  if (!cur || cur.phase !== p) return;
+  if (p < 3) { setNext(true); return; }
+  if (p === 3) {
+    if (res && res.pass === false) {
+      bubble('So close! Bosses take practice. Try again — you\'ll get it!', 'bad');
+      const r = h('div', { class: 'panel retry' }, h('h2', { class: 'big' }, 'So close!'), h('p', null, res.msg || 'Give it one more go!'),
+        h('button', { class: 'btn yel', onclick: () => runPhase(3) }, '↻ Try again'));
+      body.append(r); r.scrollIntoView({ behavior: 'smooth', block: 'center' }); return;
+    }
+    burst('BOSS BEATEN!', null, null, '#ffd23f'); sfx.win(); confetti(30);
+    bubble('You beat the boss! 🎉 Tap Next ▶ for a quick check.', 'good'); setNext(true); return;
+  }
+  // knowledge check finished
+  const stars = Math.max(1, res.right);
+  const mi = cur.mi;
+  if (!save.done.includes(mi)) save.done.push(mi);
+  save.stars[mi] = Math.max(save.stars[mi] || 0, stars); persist();
+  clearInterval(tInt); sfx.win(); confetti(mi === 6 ? 120 : 50);
+  const last = mi === MISSIONS.length - 1;
+  const ov = h('div', { class: 'overlay' }, h('div', { class: 'panel mcard' },
+    h('h2', { class: 'big' }, last ? 'CAPITOL CHAMPION!' : 'MISSION COMPLETE!'),
+    h('div', { class: 'bigstars', html: [0, 1, 2].map(k => k < stars ? '★' : '<span class="off">★</span>').join('') }),
+    h('p', null, `You got ${res.right} of ${res.total} right on the quick check.`),
+    h('div', { class: 'badgebig' }, h('i', null, cur.m.badge.i), 'Badge: ' + cur.m.badge.n),
+    last ? h('p', null, 'You toured all of Capitol City and learned how the whole government works together. Great reporting, Captain Pup!') : null,
+    h('div', { class: 'tbtns' },
+      h('button', { class: 'btn alt', onclick: () => renderMap() }, '🗺 Map'),
+      !last ? h('button', { class: 'btn go', onclick: () => startMission(mi + 1) }, 'Next Mission ▶') : null,
+      h('button', { class: 'btn yel', onclick: () => startMission(mi) }, '↻ Replay'))));
+  document.body.append(ov);
+}
+
+// ---------- screens ----------
+function renderTitle() {
+  cur = null;
+  const scr = h('div', { class: 'screen', id: 'title' },
+    h('div', { class: 'tbar' }, h('a', { class: 'btn alt sm', href: '../' }, '⬅ Games'), muteBtn()),
+    h('div', { class: 'tmain' },
+      h('div', { class: 'tleft' },
+        h('h1', { class: 'big' }, 'Capitol ', h('span', null, 'Quest')),
+        h('div', { class: 'sub panel' }, 'How Government Works'),
+        h('p', { class: 'lead' }, 'Junior reporter Captain Pup is touring Capitol City! Explore the three branches, checks and balances, and the teams that keep the country safe.'),
+        h('div', { class: 'tbtns' },
+          h('button', { class: 'btn go', style: 'font-size:32px;padding:12px 40px 6px', onclick: () => { sfx.good(); renderMap(); } }, 'PLAY ▶'),
+          save.done.length ? h('button', { class: 'btn alt sm', onclick: () => { if (confirm('Start over? This erases your stars and badges.')) { save.done = []; save.stars = {}; persist(); renderTitle(); } } }, '↺ Reset') : null)),
+      h('div', { class: 'tpup', html: pupSVG({ full: true }) })),
+    h('div', { class: 'skyline', html: skyline() }));
+  showScreen(scr);
+}
+function skyline() {
+  return `<svg viewBox="0 -20 1000 190" preserveAspectRatio="xMidYMax meet">
+    <g transform="translate(40 30) scale(.85)">${inner(ART.court())}</g>
+    <g transform="translate(330 -4) scale(1.1)">${inner(ART.capitol())}</g>
+    <g transform="translate(600 32) scale(.85)">${inner(ART.whitehouse())}</g>
+    <g transform="translate(820 34) scale(.82)">${inner(ART.archives())}</g></svg>`;
+}
+function inner(svg) { return svg.replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, ''); }
+
+function unlocked(i) { return i === 0 || save.done.includes(i - 1); }
+function renderMap() {
+  cur = null;
+  const total = Object.values(save.stars).reduce((a, b) => a + b, 0);
+  const tiles = h('div', { class: 'tiles' });
+  const nextIdx = MISSIONS.findIndex((m, i) => unlocked(i) && !save.done.includes(i));
+  MISSIONS.forEach((m, i) => {
+    const lock = !unlocked(i), st = save.stars[i] || 0;
+    const t = h('div', { class: 'tile' + (lock ? ' locked' : '') + (i === nextIdx ? ' next' : ''), role: 'button', tabindex: 0, 'data-m': i },
+      h('div', { class: 'num' }, String(i + 1)), h('div', { class: 'art', style: `--c:${m.color}`, html: ART[m.art]() }),
+      h('b', null, m.name), h('small', null, m.place),
+      h('div', { class: 'st', html: [0, 1, 2].map(k => k < st ? '★' : '<span class="off">★</span>').join('') }),
+      lock ? h('div', { class: 'lock' }, '🔒') : null);
+    const go = () => { if (lock) { sfx.bad(); toast(`Finish Mission ${i} first to unlock this!`); } else { sfx.good(); startMission(i); } };
+    t.addEventListener('click', go); t.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+    tiles.append(t);
+  });
+  const cc = h('div', { class: 'tile side', role: 'button', tabindex: 0 }, h('div', { class: 'num' }, '★'), h('div', { class: 'art', style: '--c:#d9fff0', html: ART.citizen() }), h('b', null, 'Citizen Corner'), h('small', null, 'How YOU take part'), h('div', { class: 'st' }, 'Bonus'));
+  cc.onclick = () => { sfx.pop(); citizenCorner(); };
+  tiles.append(cc);
+  const badges = h('div', { class: 'badges panel' }, h('span', { class: 'lbl' }, 'Badges:'), MISSIONS.map((m, i) => h('div', { class: 'bdg' + (save.done.includes(i) ? '' : ' off'), title: m.badge.n }, m.badge.i)));
+  const scr = h('div', { class: 'screen', id: 'map' },
+    h('div', { class: 'mbar' }, h('button', { class: 'btn alt sm', onclick: () => { sfx.tap(); renderTitle(); } }, '⬅ Title'),
+      h('div', { class: 'grow' }, h('h2', null, '🗺 Capitol City')), h('span', { class: 'starcount' }, `★ ${total} / ${MISSIONS.length * 3}`), muteBtn()),
+    h('div', { class: 'mapscroll' }, badges, tiles));
+  showScreen(scr);
+}
+function toast(text) {
+  const t = h('div', { class: 'panel', style: 'position:fixed;left:50%;top:90px;transform:translateX(-50%) rotate(-1deg);padding:10px 20px 6px;z-index:150;background:#ffd23f;font-size:19px;animation:popIn .25s;max-width:90vw;text-align:center' }, text);
+  document.body.append(t); setTimeout(() => t.remove(), 2200);
+}
+function citizenCorner() {
+  const body = h('div', { style: 'text-align:left' });
+  const ov = h('div', { class: 'overlay' }, h('div', { class: 'panel mcard', style: 'max-width:min(980px,96vw)' },
+    h('h2', { class: 'big' }, '🗳️ Citizen Corner'), h('p', null, 'Government works best when people take part. Tap the cards!'), body,
+    h('div', { class: 'tbtns', style: 'margin-top:14px' }, h('button', { class: 'btn go', onclick: () => ov.remove() }, 'Back to map'))));
+  document.body.append(ov);
+  discover(body, CITIZEN_CARDS, { say: () => {}, done: () => {} });
+}
+
+// ---------- content ----------
+const BR = {
+  leg: { id: 'leg', label: 'Legislative', icon: '🏛️', color: 'var(--leg)' },
+  exe: { id: 'exe', label: 'Executive', icon: '🖊️', color: 'var(--exe)' },
+  jud: { id: 'jud', label: 'Judicial', icon: '⚖️', color: 'var(--jud)' },
+};
+const BRO = ['Legislative (Congress)', 'Executive (President)', 'Judicial (Courts)'];
+const CITIZEN_CARDS = [
+  { icon: '🗳️', title: 'Voting', color: '#9fe3ff', text: 'U.S. citizens who are <b>18 or older</b> can vote. Voters choose leaders like members of Congress and the President.' },
+  { icon: '✉️', title: 'Speak Up', color: '#ffd23f', text: 'Anyone — <b>kids too!</b> — can write a letter or email to their representatives and senators to share ideas.' },
+  { icon: '🧑‍⚖️', title: 'Jury Duty', color: '#c39bff', text: 'Adult citizens can be called to serve on a <b>jury</b>: a group of regular people who listen to a case in court and help decide it.' },
+  { icon: '🤝', title: 'Help Out', color: '#7be0bf', text: 'Learning how government works, going to public meetings and volunteering are all ways to be a great citizen at any age.' },
+];
+const check = qs => (el, api) => { api.say('Quick check! Answer to earn up to 3 stars. ⭐'); quiz(el, qs, r => api.done(r), api.say); };
+const disc = (cards, intro) => (el, api) => { api.say(intro); discover(el, cards, api); };
+
+const MISSIONS = [
+// ===== 1. Constitution =====
+{ name: 'The Rulebook', place: 'Rulebook Hall', art: 'archives', color: '#fff3c4', badge: { i: '📜', n: 'Rulebook Reader' },
+  titles: ['Treehouse Trouble', 'The Big Rulebook', 'Rights Finder', 'Branch Builder', 'Rulebook Check'],
+  phases: [
+    (el, api) => {
+      api.say('The Treehouse Club needs a leader! Drag (or tap) each job onto Boss Bot. 🤖');
+      const jobs = [{ t: '📜 Make the rules', bin: 'w' }, { t: '🚦 Carry out the rules', bin: 'd' }, { t: '⚖️ Judge who broke a rule', bin: 'j' }];
+      const s1 = h('div'); el.append(s1);
+      sorter(s1, { bins: [{ id: 'bot', label: 'Boss Bot', icon: '🤖', color: '#ff9f1c' }], items: jobs.map(j => ({ t: j.t, bin: 'bot', why: 'Boss Bot grabs that job too…' })), say: api.say,
+        onDone: () => {
+          burst('UH-OH!', null, null, '#ff8fa3'); sfx.bad();
+          api.say('Uh-oh! When ONE helper has every job, nobody can stop an unfair rule.', 'bad');
+          s1.append(h('div', { class: 'panel overload' }, h('div', { class: 'toon', style: 'font-size:30px;color:#e5383b' }, '⚠️ TOO MUCH POWER!'), h('div', { class: 'meter' }, h('i')),
+            h('p', null, 'Boss Bot made a rule: “Only Boss Bot rides the swing.” Then he enforced it… and judged his own rule fair! 😬'),
+            h('button', { class: 'btn yel', onclick: () => { el.innerHTML = ''; split(); } }, '✂️ Split the power!')));
+        } });
+      function split() {
+        api.say('Give each job to a DIFFERENT helper team!');
+        sorter(el, { bins: [{ id: 'w', label: 'Rule Writers', icon: '✍️', color: 'var(--leg)' }, { id: 'd', label: 'Rule Doers', icon: '🚦', color: 'var(--exe)' }, { id: 'j', label: 'Rule Judges', icon: '⚖️', color: 'var(--jud)' }],
+          items: jobs.map(j => ({ ...j, why: 'Each team has its own job now.' })), say: api.say,
+          onDone: () => { burst('FAIR!', null, null, '#06d6a0'); api.say('Now each team can keep an eye on the others. The founders of the U.S. had this same idea! Tap Next ▶', 'good'); api.done(); } });
+      }
+    },
+    disc([
+      { icon: '📜', title: 'The Rulebook', color: '#fff3c4', text: 'The <b>Constitution</b> is the rulebook for the U.S. government. It was written in <b>1787</b> in Philadelphia and begins with the words <b>“We the People.”</b>' },
+      { icon: '🌳', title: 'Three Branches', color: '#9fe3ff', text: 'The founders split power into three branches so no one branch gets too powerful: <b>Legislative</b> makes laws, <b>Executive</b> carries out laws, and <b>Judicial</b> interprets laws.', say: 'Article I of the Constitution sets up Congress, Article II the President, and Article III the courts!' },
+      { icon: '🛡️', title: 'Bill of Rights', color: '#ffb3c1', text: 'The first <b>10 amendments</b> (changes) are called the <b>Bill of Rights</b>. Added in 1791, they protect freedoms like speech, religion, the press, and a fair trial.' },
+      { icon: '✏️', title: 'It Can Change', color: '#c7f9e5', text: 'The Constitution can be <b>amended</b>, but it\'s hard on purpose: it takes big agreement from Congress <i>and</i> the states. Today it has <b>27 amendments</b>.' },
+    ], 'This is Rulebook Hall! Tap each card to learn about the Constitution.'),
+    (el, api) => {
+      api.say('Rights Finder! Which of these are really protected by the Bill of Rights? Sort them!');
+      const Y = 'y', N = 'n';
+      sorter(el, { prompt: 'Is it in the Bill of Rights?', say: api.say, onDone: () => { api.say('Great sorting! The real Bill of Rights protects big freedoms — not free pizza. 🍕 Tap Next ▶', 'good'); api.done(); },
+        bins: [{ id: Y, label: 'In the Bill of Rights', icon: '✅', color: '#7be0bf' }, { id: N, label: 'Nope! Made up', icon: '❌', color: '#ffb3c1' }],
+        items: [
+          { t: '🗣️ Freedom of speech', bin: Y, why: 'The First Amendment protects freedom of speech.' },
+          { t: '🙏 Freedom of religion', bin: Y, why: 'The First Amendment protects freedom of religion.' },
+          { t: '📰 Freedom of the press', bin: Y, why: 'The press (news) is protected by the First Amendment.' },
+          { t: '👥 Gathering peacefully', bin: Y, why: 'People may assemble (gather) peacefully — First Amendment.' },
+          { t: '🏠 No unreasonable searches', bin: Y, why: 'The Fourth Amendment protects against unreasonable searches.' },
+          { t: '🧑‍⚖️ A speedy, public trial', bin: Y, why: 'The Sixth Amendment promises a speedy and public trial.' },
+          { t: '🍕 Free pizza on Fridays', bin: N, why: 'Yum, but no — that\'s not in the Constitution!' },
+          { t: '🐉 A pet dragon', bin: N, why: 'Sadly, no dragon rights in the Bill of Rights.' },
+          { t: '📚 Never doing homework', bin: N, why: 'Nice try! Homework is not banned by the Constitution.' },
+        ] });
+    },
+    (el, api) => {
+      api.say('BOSS: Build the government! Put every card with the right building.');
+      sorter(el, { prompt: 'Drag each card to its building.', say: api.say,
+        onDone: r => api.done({ pass: r.miss <= 6, msg: `You had ${r.miss} oopses. Try for 6 or fewer!` }),
+        bins: [{ id: 'leg', label: 'Capitol', art: ART.capitol(), color: 'var(--leg)' }, { id: 'exe', label: 'White House', art: ART.whitehouse(), color: 'var(--exe)' }, { id: 'jud', label: 'Supreme Court', art: ART.court(), color: 'var(--jud)' }],
+        items: [
+          { t: 'Legislative branch', bin: 'leg', why: 'The Legislative branch meets in the Capitol.' },
+          { t: 'Executive branch', bin: 'exe', why: 'The President leads the Executive branch from the White House.' },
+          { t: 'Judicial branch', bin: 'jud', why: 'The Supreme Court is the top of the Judicial branch.' },
+          { t: 'Congress', bin: 'leg', why: 'Congress is the Legislative branch.' },
+          { t: 'The President', bin: 'exe', why: 'The President leads the Executive branch.' },
+          { t: 'Federal courts', bin: 'jud', why: 'Courts make up the Judicial branch.' },
+          { t: '📜 Makes the laws', bin: 'leg', why: 'Congress makes the laws.' },
+          { t: '🚦 Carries out the laws', bin: 'exe', why: 'The Executive branch carries out and enforces laws.' },
+          { t: '🔍 Interprets the laws', bin: 'jud', why: 'Courts decide what laws mean.' },
+          { t: 'Senate + House', bin: 'leg', why: 'Congress has two parts: the Senate and the House.' },
+          { t: 'Vice President & Cabinet', bin: 'exe', why: 'The VP and Cabinet are part of the Executive branch.' },
+          { t: '9 justices', bin: 'jud', why: 'The Supreme Court has 9 justices.' },
+        ] });
+    },
+    check([
+      { q: 'Why did the founders split power into three branches?', o: ['So no one branch gets too powerful', 'So there could be three Presidents', 'To make the government finish faster'], a: 'So no one branch gets too powerful', why: 'Separation of powers means each branch has its own job and can keep an eye on the others.' },
+      { q: 'What are the first 10 amendments called?', o: ['The Bill of Rights', 'The Rule of Ten', 'The Treaty Book'], a: 'The Bill of Rights', why: 'The Bill of Rights protects freedoms like speech, religion, and a fair trial.' },
+      { q: 'Which branch MAKES the laws?', o: ['Legislative', 'Executive', 'Judicial'], a: 'Legislative', why: 'The Legislative branch — Congress — makes laws. Executive carries them out; Judicial interprets them.' },
+    ]),
+  ] },
+
+// ===== 2. Congress =====
+{ name: 'Congress', place: 'The Capitol', art: 'capitol', color: '#bfeaff', badge: { i: '🏛️', n: 'Bill Booster' },
+  titles: ['Bill Order Mix-Up', 'Inside Congress', 'House or Senate?', 'The Bill Board Game', 'Congress Check'],
+  phases: [
+    (el, api) => {
+      api.say('A kid has an idea for a new law! Can you guess the order of the steps? Tap them 1, 2, 3…');
+      sequence(el, { say: api.say, onDone: () => { api.say('That\'s the road from idea to law! Tap Next ▶', 'good'); api.done(); }, steps: [
+        { i: '💡', t: 'Someone has an idea', why: 'Laws start as ideas — from citizens, groups, or members of Congress.', hint: 'Everything starts with a thought…' },
+        { i: '📄', t: 'Bill is introduced', why: 'A member of Congress introduces the idea as a bill.', hint: 'The idea gets written down and handed in.' },
+        { i: '🧐', t: 'Committee studies it', why: 'A small group of members studies the bill closely.', hint: 'Experts look at it before everyone votes.' },
+        { i: '🏛️', t: 'House votes', why: 'Our bill started in the House. It needs a majority to pass.', hint: 'One chamber of Congress votes first.' },
+        { i: '🏛️', t: 'Senate votes', why: 'The Senate must pass the same bill too.', hint: 'Then the OTHER chamber votes.' },
+        { i: '🖊️', t: 'President signs', why: 'The President signs it… or vetoes it!', hint: 'It goes to the White House.' },
+        { i: '🎉', t: 'It\'s a law!', why: 'Signed bills become laws.', hint: 'The happy ending!' },
+      ] });
+    },
+    disc([
+      { icon: '🏛️', title: 'Congress Makes Laws', color: '#bfeaff', text: 'The Legislative branch is called <b>Congress</b>. Its main job is to write and pass <b>laws</b> for the whole country. It meets in the <b>Capitol</b>.' },
+      { icon: '🪑', title: 'Two Parts', color: '#ffd23f', text: 'Congress has two chambers. Every state gets <b>2 senators</b>, but House seats depend on how many people live in a state.',
+        extra: card => {
+          const out = h('div'), dots = h('div', { class: 'seats' });
+          const r = h('input', { type: 'range', min: '0.5', max: '40', step: '0.5', value: '6', 'aria-label': 'State population in millions' });
+          const upd = () => { const pop = +r.value, n = Math.max(1, Math.round(pop * 1e6 / 761000)); out.innerHTML = `🧍 ${pop} million people → <b>${n}</b> House seat${n > 1 ? 's' : ''} · <b>2</b> senators`; dots.innerHTML = '<i class="sen"></i><i class="sen"></i>' + '<i></i>'.repeat(n); };
+          r.addEventListener('input', () => { upd(); sfx.tap(); }); upd();
+          card.append(h('div', { class: 'two' }, h('div', { style: 'background:#ffe3e8' }, h('b', null, 'Senate'), h('br'), '100 senators · 2 per state · 6-year terms'), h('div', { style: 'background:#d6f3ff' }, h('b', null, 'House of Representatives'), h('br'), '435 voting members · based on population · 2-year terms')),
+            h('div', { class: 'mini' }, h('b', null, 'Try it! Slide your state\'s population:'), r, out, dots, h('small', null, 'Each House member represents roughly 760,000 people. Every state gets at least 1.')));
+        } },
+      { icon: '💰', title: 'Power of the Purse', color: '#c7f9e5', text: 'Congress controls the nation\'s money. It passes the <b>budget</b> and decides how federal money is spent and what taxes are collected.' },
+      { icon: '📜', title: 'Big Powers', color: '#ffb3c1', text: 'Only Congress can <b>declare war</b>. The <b>Senate</b> approves treaties (two-thirds of senators must agree) and votes to <b>confirm</b> many people the President picks, like judges and Cabinet members.' },
+    ], 'Welcome to the Capitol! Tap each card to learn about Congress.'),
+    (el, api) => {
+      api.say('Sort each fact: is it about the House, the Senate, or both?');
+      sorter(el, { say: api.say, onDone: () => { api.say('You know your chambers! Tap Next ▶', 'good'); api.done(); },
+        bins: [{ id: 'h', label: 'House', icon: '🏠', color: '#9fe3ff' }, { id: 's', label: 'Senate', icon: '🏛️', color: '#ffb3c1' }, { id: 'b', label: 'Both', icon: '🤝', color: '#ffd23f' }],
+        items: [
+          { t: '100 members', bin: 's', why: '50 states × 2 senators = 100.' },
+          { t: '435 voting members', bin: 'h', why: 'The House has 435 voting members.' },
+          { t: '2 per state', bin: 's', why: 'Every state gets 2 senators, big or small.' },
+          { t: 'Seats based on population', bin: 'h', why: 'States with more people get more House seats.' },
+          { t: '6-year terms', bin: 's', why: 'Senators serve 6-year terms.' },
+          { t: '2-year terms', bin: 'h', why: 'Representatives serve 2-year terms.' },
+          { t: 'Approves treaties', bin: 's', why: 'Two-thirds of the Senate must approve a treaty.' },
+          { t: 'Confirms judges', bin: 's', why: 'The Senate votes to confirm judges.' },
+          { t: 'Votes on bills', bin: 'b', why: 'Both chambers must pass a bill.' },
+          { t: 'Part of Congress', bin: 'b', why: 'Congress = House + Senate.' },
+          { t: 'Can impeach (accuse) officials', bin: 'h', why: 'The House has the power to impeach.' },
+          { t: 'Holds impeachment trials', bin: 's', why: 'After the House impeaches, the Senate holds the trial.' },
+        ] });
+    },
+    billGame,
+    check([
+      { q: 'How many senators does each state get?', o: ['2', '1', 'It depends on population'], a: '2', why: 'Every state gets 2 senators, so there are 100 in all. The House is the one based on population.' },
+      { q: 'How long is a term in the House of Representatives?', o: ['2 years', '4 years', '6 years'], a: '2 years', why: 'House members serve 2-year terms; senators serve 6-year terms.' },
+      { q: 'How can Congress override a President\'s veto?', o: ['A two-thirds vote in both the House and Senate', 'Ask the Supreme Court', 'Wait one week'], a: 'A two-thirds vote in both the House and Senate', why: 'With two-thirds of both chambers agreeing, a vetoed bill still becomes law.' },
+    ]),
+  ] },
+
+// ===== 3. President =====
+{ name: 'The President', place: 'The White House', art: 'whitehouse', color: '#ffe0b3', badge: { i: '🖊️', n: 'Executive Expert' },
+  titles: ['Whose Job Is It?', 'The Executive Branch', 'Cabinet Match', 'The President\'s Inbox', 'Executive Check'],
+  phases: [
+    (el, api) => {
+      api.say('Captain Pup is visiting the White House! Is each job the President\'s? Take a guess!');
+      matchup(el, { say: api.say, auto: 1500, onDone: () => { api.say('Some jobs belong to other branches! Let\'s learn more. Tap Next ▶', 'good'); api.done(); }, cards: [
+        { q: 'Lead the military as Commander in Chief', o: ['Yes!', 'Nope'], a: 'Yes!', keep: 1, why: 'The President is Commander in Chief of the armed forces.' },
+        { q: 'Write and vote on new laws', o: ['Yes!', 'Nope'], a: 'Nope', keep: 1, why: 'Congress writes and votes on laws. The President signs or vetoes them.' },
+        { q: 'Sign bills into law', o: ['Yes!', 'Nope'], a: 'Yes!', keep: 1, why: 'Yes! The President\'s signature turns a passed bill into a law.' },
+        { q: 'Decide if a law follows the Constitution', o: ['Yes!', 'Nope'], a: 'Nope', keep: 1, why: 'That\'s the courts\' job — the Judicial branch.' },
+        { q: 'Be President for 20 years', o: ['Yes!', 'Nope'], a: 'Nope', keep: 1, why: 'A President serves 4-year terms and can be elected at most two times.' },
+      ] });
+    },
+    disc([
+      { icon: '🏠', title: 'Carries Out Laws', color: '#ffe0b3', text: 'The <b>Executive</b> branch makes sure laws are carried out and enforced. The <b>President</b> leads it and is both head of state and head of government.' },
+      { icon: '🗓️', title: 'President Rules', color: '#bfeaff', text: 'A President\'s term is <b>4 years</b>, and a person can be elected <b>at most two times</b>. To run, you must be at least <b>35</b>, a natural-born citizen, and have lived in the U.S. for 14 years.' },
+      { icon: '🤝', title: 'Vice President', color: '#c7f9e5', text: 'The <b>Vice President</b> is ready to take over if the President can\'t serve. The VP is also <b>President of the Senate</b> and breaks tie votes there.' },
+      { icon: '🗂️', title: 'The Cabinet', color: '#ffd23f', text: 'The leaders of <b>15 executive departments</b> — like Education, Agriculture and the Treasury — are part of the <b>Cabinet</b>. They run big parts of the government and advise the President.' },
+      { icon: '🖊️', title: 'Pen & Powers', color: '#ffb3c1', text: 'The President <b>signs or vetoes</b> bills, is <b>Commander in Chief</b>, makes <b>treaties</b> (the Senate must approve), and <b>appoints judges</b> (the Senate must confirm).' },
+    ], 'Tap each card to learn about the Executive branch.'),
+    (el, api) => {
+      api.say('Cabinet Match! Which department handles each job?');
+      const D = { ed: 'Education', ag: 'Agriculture', st: 'State', tr: 'Treasury', in: 'Interior', co: 'Commerce', tp: 'Transportation', de: 'Defense' };
+      const all = Object.values(D);
+      const mk = (q, a, why) => ({ q, a, why, o: shuffle([a, ...shuffle(all.filter(x => x !== a)).slice(0, 3)]).map(x => x) });
+      matchup(el, { say: api.say, auto: 1700, onDone: () => { api.say('Great teamwork! The Cabinet helps the President run a huge government. Tap Next ▶', 'good'); api.done(); }, cards: [
+        mk('🏫 Help schools and students', D.ed, 'The Department of Education works on programs for schools and students.'),
+        mk('🌽 Help farmers and check that meat is safe', D.ag, 'The Department of Agriculture works with farmers and inspects meat for safety.'),
+        mk('🌍 Work with other countries', D.st, 'The Department of State works with other countries through diplomats.'),
+        mk('💵 Print the nation\'s paper money', D.tr, 'Paper money is printed by a bureau inside the Treasury Department.'),
+        mk('🏞️ Take care of national parks', D.in, 'The National Park Service is part of the Department of the Interior.'),
+        mk('🌦️ Make weather forecasts', D.co, 'Surprise! The National Weather Service is part of the Department of Commerce.'),
+        mk('🛣️ Keep highways and airports working', D.tp, 'The Department of Transportation works on roads, airports, and railroads.'),
+        mk('🎖️ Keep the military ready', D.de, 'The Department of Defense oversees most of the armed forces.'),
+      ] });
+    },
+    (el, api) => {
+      api.say('BOSS: The President\'s inbox is full! Sort each task into the right pile.');
+      sorter(el, { prompt: 'Can the President do it alone, does it need the Senate\'s OK, or is it not the President\'s job?', say: api.say,
+        onDone: r => api.done({ pass: r.miss <= 5, msg: `You had ${r.miss} oopses. Try for 5 or fewer!` }),
+        bins: [{ id: 'a', label: 'President can do it', icon: '✅', color: '#7be0bf' }, { id: 's', label: 'Needs Senate OK', icon: '🤝', color: '#ffd23f' }, { id: 'n', label: 'Not the President\'s job', icon: '🚫', color: '#ffb3c1' }],
+        items: [
+          { t: '🎖️ Command the armed forces', bin: 'a', why: 'The President is Commander in Chief.' },
+          { t: '✍️ Sign a bill into law', bin: 'a', why: 'Signing bills is the President\'s job.' },
+          { t: '✋ Veto a bill', bin: 'a', why: 'The President can veto (reject) a bill.' },
+          { t: '🌍 Make a treaty', bin: 's', why: 'Treaties need approval from two-thirds of the Senate.' },
+          { t: '🧑‍⚖️ Appoint a Supreme Court justice', bin: 's', why: 'The Senate must confirm justices.' },
+          { t: '🗂️ Appoint Cabinet secretaries', bin: 's', why: 'The Senate confirms Cabinet secretaries.' },
+          { t: '📣 Declare war', bin: 'n', why: 'Only Congress can declare war.' },
+          { t: '🔍 Rule that a law breaks the Constitution', bin: 'n', why: 'That\'s a job for the courts.' },
+          { t: '📜 Write and pass laws', bin: 'n', why: 'Congress writes and passes laws.' },
+          { t: '3️⃣ Get elected a third time', bin: 'n', why: 'The Constitution limits Presidents to two elected terms.' },
+        ] });
+    },
+    check([
+      { q: 'How long is one presidential term?', o: ['4 years', '2 years', '6 years'], a: '4 years', why: 'A term is 4 years, and a President can be elected at most twice.' },
+      { q: 'Who breaks a tie vote in the Senate?', o: ['The Vice President', 'The Chief Justice', 'The oldest senator'], a: 'The Vice President', why: 'The Vice President is President of the Senate and can cast a tie-breaking vote.' },
+      { q: 'The President is Commander in Chief of…', o: ['The armed forces', 'The Supreme Court', 'Congress'], a: 'The armed forces', why: 'The President leads the military — that keeps it under civilian control.' },
+    ]),
+  ] },
+
+// ===== 4. Courts =====
+{ name: 'The Courts', place: 'Supreme Court', art: 'court', color: '#e6d6ff', badge: { i: '⚖️', n: 'Junior Judge' },
+  titles: ['Order in the Court!', 'The Judicial Branch', 'Whose Job?', 'Judge Pup\'s Courtroom', 'Court Check'],
+  phases: [
+    (el, api) => {
+      api.say('Judge Pup\'s first cases! Read the rulebook of Pawtopia (a made-up land), then decide.');
+      el.append(pawRules());
+      matchup(el, { say: api.say, onDone: () => { api.say('Judges compare rules to the rulebook. Let\'s learn how real courts do it! Tap Next ▶', 'good'); api.done(); }, cards: [
+        { head: 'Case 1', q: 'New town rule: “Only cats may give speeches in the park.”', o: ['Follows the rulebook', 'Breaks the rulebook'], a: 'Breaks the rulebook', keep: 1, why: 'Rule 1 says EVERYONE may share their ideas — not just cats!', hint: 'Check Rule 1 again.' },
+        { head: 'Case 2', q: 'New town rule: “Bikes must have a bell.”', o: ['Follows the rulebook', 'Breaks the rulebook'], a: 'Follows the rulebook', keep: 1, why: 'Nothing in the rulebook says no to bike bells. Ding ding!', hint: 'Does any rule talk about bikes?' },
+      ] });
+    },
+    disc([
+      { icon: '⚖️', title: 'Interpreting Laws', color: '#e6d6ff', text: 'The <b>Judicial</b> branch is made of courts. Judges decide what laws mean and settle <b>cases</b> when people disagree.' },
+      { icon: '🧑‍⚖️', title: 'The Supreme Court', color: '#ffd23f', text: 'The highest court has <b>9 justices</b>, led by the <b>Chief Justice</b>. The President nominates them, the Senate confirms them, and they serve “during good behavior” — often for life.' },
+      { icon: '🔍', title: 'Judicial Review', color: '#ffb3c1', text: 'Courts can decide that a law or government action goes against the Constitution. Then it can\'t be enforced. This power is called <b>judicial review</b>.' },
+      { icon: '🪜', title: 'The Court Ladder', color: '#c7f9e5', text: 'Most federal cases start in one of <b>94 district courts</b>. Appeals go to <b>13 courts of appeals</b>. Only a few reach the Supreme Court.',
+        extra: card => {
+          const rungs = ['🏛️ Supreme Court — the Court picks a small number of cases', '🏢 Court of Appeals — checks if the trial was done right', '🏠 District Court — trials happen here'];
+          let lvl = 2; const lad = h('div', { class: 'ladder' }); const rs = rungs.map(t => h('div', { class: 'rung' }, t)); lad.append(...rs);
+          const draw = () => rs.forEach((r, k) => { r.classList.toggle('on', k === lvl); const f = r.querySelector('.fold'); if (f) f.remove(); if (k === lvl) r.append(h('span', { class: 'fold' }, '📁')); });
+          const b = h('button', { class: 'btn yel sm' }, 'Appeal! ⬆');
+          b.onclick = e => { e.stopPropagation(); if (lvl > 0) { lvl--; sfx.pop(); } else { lvl = 2; sfx.whoosh(); } b.textContent = lvl ? 'Appeal! ⬆' : '↺ New case'; draw(); };
+          draw(); card.append(h('div', { class: 'mini' }, lad, h('div', { style: 'text-align:center;margin-top:8px' }, b)));
+        } },
+    ], 'Welcome to the Supreme Court! Tap each card.'),
+    (el, api) => {
+      api.say('Whose job is it? Sort each task to the right branch.');
+      sorter(el, { say: api.say, onDone: () => { api.say('Three branches, three different jobs! Tap Next ▶', 'good'); api.done(); },
+        bins: [BR.leg, BR.exe, BR.jud],
+        items: [
+          { t: '🚌 Write a new bus-safety law', bin: 'leg', why: 'Writing laws is Congress\'s job.' },
+          { t: '🚦 Make sure the bus law is carried out', bin: 'exe', why: 'The Executive branch carries out laws.' },
+          { t: '🔨 Decide a case about the bus law', bin: 'jud', why: 'Courts decide cases.' },
+          { t: '💰 Decide money for national parks', bin: 'leg', why: 'Congress has the power of the purse.' },
+          { t: '🎖️ Lead the armed forces', bin: 'exe', why: 'The President is Commander in Chief.' },
+          { t: '📜 Decide if a law fits the Constitution', bin: 'jud', why: 'That\'s judicial review.' },
+          { t: '🌍 Approve a treaty', bin: 'leg', why: 'The Senate (part of Congress) approves treaties.' },
+          { t: '✋ Veto a bill', bin: 'exe', why: 'The President can veto bills.' },
+          { t: '📁 Hear an appeal', bin: 'jud', why: 'Courts of appeals review lower-court decisions.' },
+        ] });
+    },
+    (el, api) => {
+      api.say('BOSS: Bang the gavel! Does each new rule follow the Pawtopia rulebook?');
+      el.append(pawRules());
+      const F = 'Follows the rulebook', B = 'Breaks the rulebook';
+      matchup(el, { say: api.say, auto: 2200, onDone: r => api.done({ pass: r.right >= 4, msg: `You got ${r.right} of ${r.total} on the first try. Aim for 4!` }), cards: [
+        { head: '🔨 Case 1', q: '“Anyone caught littering goes straight to jail — no trial.”', o: [F, B], a: B, keep: 1, why: 'Rule 3: anyone accused gets a fair trial. Littering is bad, but a trial is still required!' },
+        { head: '🔨 Case 2', q: '“Everyone must wear a helmet when riding a bike.”', o: [F, B], a: F, keep: 1, why: 'Nothing in the rulebook is against safety helmets.' },
+        { head: '🔨 Case 3', q: '“Only pups wearing blue hats may vote.”', o: [F, B], a: B, keep: 1, why: 'Rule 4: every citizen 18 or older may vote — hats don\'t matter!' },
+        { head: '🔨 Case 4', q: '“The library closes at 8 p.m.”', o: [F, B], a: F, keep: 1, why: 'No rule is broken. Even books need sleep!' },
+        { head: '🔨 Case 5', q: '“Everyone must join the Purple Club\'s religion.”', o: [F, B], a: B, keep: 1, why: 'Rule 2: everyone may follow any religion, or none.' },
+        { head: '🔨 Case 6', q: '“Nobody may share ideas about the new playground.”', o: [F, B], a: B, keep: 1, why: 'Rule 1: everyone may share their ideas.' },
+      ] });
+    },
+    check([
+      { q: 'How many justices are on the Supreme Court?', o: ['9', '7', '12'], a: '9', why: 'There are 9 justices: the Chief Justice and 8 associate justices.' },
+      { q: 'What is judicial review?', o: ['Courts deciding if a law fits the Constitution', 'Judges writing new laws', 'The President grading judges'], a: 'Courts deciding if a law fits the Constitution', why: 'If a law conflicts with the Constitution, courts can say it can\'t be enforced.' },
+      { q: 'Who confirms Supreme Court justices?', o: ['The Senate', 'The House', 'The Vice President'], a: 'The Senate', why: 'The President nominates a justice, and the Senate votes to confirm.' },
+    ]),
+  ] },
+
+// ===== 5. Checks & balances =====
+{ name: 'Checks & Balances', place: 'Balance Park', art: 'park', color: '#d9fff0', badge: { i: '🔄', n: 'Balance Keeper' },
+  titles: ['Tipping Scale', 'Keeping Balance', 'Checks Triangle', 'Power Sort Showdown', 'Balance Check'],
+  phases: [
+    (el, api) => {
+      scaleRounds(el, { say: api.say, onDone: () => { api.say('Each branch can check the others. That keeps things balanced! Tap Next ▶', 'good'); api.done(); }, rounds: [
+        { who: 'The President', icon: '✋', other: '🏛️', ev: 'The President vetoes a bill Congress passed.', o: ['Congress overrides with a two-thirds vote', 'The Supreme Court signs the bill', 'Nothing can ever happen'], a: 'Congress overrides with a two-thirds vote', why: 'Congress can override a veto with two-thirds of both chambers.' },
+        { who: 'The President', icon: '🧑‍⚖️', other: '🏛️', ev: 'The President picks a new Supreme Court justice.', o: ['The Senate votes to confirm or reject', 'The justices vote for themselves', 'The House picks someone else'], a: 'The Senate votes to confirm or reject', why: 'The Senate must confirm Supreme Court justices.' },
+      ] });
+    },
+    disc([
+      { icon: '⚖️', title: 'What\'s a Check?', color: '#d9fff0', text: 'A <b>check</b> is a way one branch can stop or limit another. <b>Checks and balances</b> keep any one branch from getting too powerful.' },
+      { icon: '✋', title: 'Veto & Override', color: '#ffe0b3', text: 'The President can <b>veto</b> (reject) a bill. Congress can <b>override</b> the veto with a <b>two-thirds</b> vote in both the House and the Senate.' },
+      { icon: '📣', title: 'Impeachment', color: '#ffb3c1', text: 'The <b>House</b> can impeach (formally accuse) officials like a President or a judge. The <b>Senate</b> holds a trial, and two-thirds of senators must agree to remove them.' },
+      { icon: '🔍', title: 'Courts & Judges', color: '#e6d6ff', text: 'Courts can strike down laws that break the Constitution. But the <b>President picks</b> federal judges, and the <b>Senate must confirm</b> them.' },
+    ], 'Tap each card to learn how the branches keep each other in check.'),
+    (el, api) => {
+      api.say('Tap one branch, then another, to see how the first can check the second!');
+      checksTriangle(el, api);
+    },
+    (el, api) => {
+      api.say('BOSS: For each power, pick WHO has it — then pick the CHECK against it!');
+      const P = [
+        ['✋ Veto a bill', 1, 'Congress can override with a two-thirds vote', 'The President vetoes bills, and Congress can override.'],
+        ['📜 Pass a bill', 0, 'The President can veto it', 'Congress passes bills; the President can veto them.'],
+        ['🔍 Strike down a law', 2, 'Congress and the states can amend the Constitution', 'Courts strike down laws; the Constitution itself can be amended.'],
+        ['🧑‍⚖️ Appoint a federal judge', 1, 'The Senate must confirm the judge', 'The President appoints judges; the Senate confirms.'],
+        ['🌍 Make a treaty', 1, 'Two-thirds of the Senate must approve it', 'The President makes treaties; the Senate approves.'],
+        ['💰 Decide how federal money is spent', 0, 'The President can veto spending bills', 'Congress controls money; the President can veto spending bills.'],
+      ];
+      const wrongChecks = ['The Vice President cancels it', 'The Army votes on it', 'Nobody can check it', 'The oldest senator says no', 'It is decided by coin flip'];
+      const cards = [];
+      for (const [pw, b, chk, why] of P) {
+        cards.push({ head: pw, q: 'Which branch has this power?', o: BRO, a: BRO[b], keep: 1, why: `${BRO[b]} has this power.` });
+        cards.push({ head: pw, q: 'What check can stop or limit it?', o: shuffle([chk, ...shuffle(wrongChecks).slice(0, 2)]), a: chk, why });
+      }
+      matchup(el, { cards, say: api.say, auto: 1600, onDone: r => api.done({ pass: r.right >= 8, msg: `You got ${r.right} of ${r.total} on the first try. Aim for 8!` }) });
+    },
+    check([
+      { q: 'If the President vetoes a bill, Congress can…', o: ['Override it with two-thirds of both chambers', 'Fire the President right away', 'Ask the Army to decide'], a: 'Override it with two-thirds of both chambers', why: 'A veto override needs two-thirds in the House AND the Senate.' },
+      { q: 'After the House impeaches an official, who holds the trial?', o: ['The Senate', 'The President', 'A district court'], a: 'The Senate', why: 'The Senate holds impeachment trials; two-thirds must agree to remove.' },
+      { q: 'Which branch can check Congress by ruling a law unconstitutional?', o: ['Judicial', 'Executive', 'Nobody'], a: 'Judicial', why: 'Courts use judicial review to check laws passed by Congress.' },
+    ]),
+  ] },
+
+// ===== 6. Military =====
+{ name: 'Defenders', place: 'Defense HQ', art: 'defense', color: '#e9e2cf', badge: { i: '🛟', n: 'Dispatch Hero' },
+  titles: ['Help Is Needed!', 'Who Keeps Us Safe?', 'Dispatch Practice', 'Dispatch Rush', 'Defender Check'],
+  phases: [
+    (el, api) => {
+      dispatch(el, { say: api.say, onDone: () => { api.say('Each branch has a special job. Let\'s learn them! Tap Next ▶', 'good'); api.done(); }, calls: [
+        { q: 'A sailboat tipped over near the beach! Who helps the sailors?', z: 'coast', a: 'cg', why: 'The Coast Guard does search and rescue on the water.', hint: 'Think: rescues on the water.' },
+        { q: 'Satellites that help with GPS and weather need protecting.', z: 'space', a: 'sf', why: 'The Space Force protects U.S. satellites and interests in space.', hint: 'Where do satellites fly?' },
+      ] });
+    },
+    disc([
+      { icon: '🎖️', title: 'Who\'s in Charge?', color: '#e9e2cf', text: 'The military is under <b>civilian control</b>. The <b>President</b> is Commander in Chief. <b>Congress</b> pays for the military and has the power to declare war. The <b>Department of Defense</b>, led by a civilian Secretary, runs most of it.' },
+      { icon: '⚓', title: 'Land & Sea', color: '#bfeaff', text: '<b>Army:</b> the largest branch, focused on land. <b>Navy:</b> operates ships, submarines and aircraft carriers at sea. <b>Marine Corps:</b> a fast-response force that moves from sea to land and works closely with the Navy.' },
+      { icon: '🛰️', title: 'Air & Space', color: '#e6d6ff', text: '<b>Air Force:</b> flies planes and provides air power around the world. <b>Space Force:</b> the newest branch, created in <b>2019</b>, protects U.S. satellites and interests in space.' },
+      { icon: '🛟', title: 'Guards on Duty', color: '#ffe0b3', text: '<b>Coast Guard:</b> search and rescue, boating safety, and law enforcement on the water. It\'s part of Homeland Security in peacetime and can work under the Navy in wartime. <b>National Guard:</b> state-based teams that governors can call to help in floods, fires and other disasters.' },
+    ], 'Defense HQ! Tap each card to meet the teams that defend the country and help in emergencies.'),
+    (el, api) => {
+      dispatch(el, { say: api.say, onDone: () => { api.say('Great dispatching! Tap Next ▶ for the rush.', 'good'); api.done(); }, calls: [
+        { q: 'A fishing boat is sinking in a storm!', z: 'sea', a: 'cg', why: 'The Coast Guard rescues people at sea.', hint: 'Rescue on the water…' },
+        { q: 'An aircraft carrier needs to sail across the ocean.', z: 'sea', a: 'navy', why: 'The Navy operates aircraft carriers, ships, and submarines.' },
+        { q: 'Supplies must fly across the world in a giant cargo plane.', z: 'sky', a: 'af', why: 'The Air Force flies big cargo planes around the world.' },
+        { q: 'After a storm, a team must move quickly from ships onto a beach to deliver help.', z: 'coast', a: 'marines', why: 'The Marine Corps is a fast-response force that moves from sea to land.', hint: 'Sea-to-land, super fast…' },
+        { q: 'A big team needs to work on land for months, setting up camps and roads.', z: 'land', a: 'army', why: 'The Army is the largest branch, focused on land.' },
+        { q: 'A river flooded towns, and the governor calls for help.', z: 'land', a: 'ng', why: 'Governors can call the National Guard to help in disasters at home.', hint: 'Who does a governor call?' },
+      ] });
+    },
+    (el, api) => {
+      api.say('BOSS: Dispatch Rush! Send the right team to each call.');
+      dispatch(el, { say: api.say, auto: 1300, onDone: r => api.done({ pass: r.right >= 5, msg: `You got ${r.right} of ${r.total} right the first time. Aim for 5!` }), calls: shuffle([
+        { q: 'Ice is blocking ships from reaching a port.', z: 'sea', a: 'cg', why: 'Coast Guard icebreakers clear paths for ships.' },
+        { q: 'A submarine needs to patrol deep under the ocean.', z: 'sea', a: 'navy', why: 'The Navy operates submarines.' },
+        { q: 'Someone must track objects zooming around Earth in orbit.', z: 'space', a: 'sf', why: 'The Space Force keeps track of what\'s happening in space.' },
+        { q: 'Planes on a long trip need refueling in mid-air.', z: 'sky', a: 'af', why: 'The Air Force uses tanker planes to refuel other planes in the air.' },
+        { q: 'A large team needs to train for missions on the ground.', z: 'land', a: 'army', why: 'The Army focuses on land.' },
+        { q: 'A wildfire is near towns, and the governor needs helpers.', z: 'land', a: 'ng', why: 'The National Guard helps its state in disasters.' },
+        { q: 'A fast team must go from Navy ships to shore to help after an earthquake.', z: 'coast', a: 'marines', why: 'Marines move quickly from sea to land with the Navy.' },
+        { q: 'Oil spilled in the water and is harming sea life.', z: 'sea', a: 'cg', why: 'The Coast Guard responds to spills that harm the ocean.' },
+      ]) });
+    },
+    check([
+      { q: 'Who is Commander in Chief of the military?', o: ['The President', 'The Chief Justice', 'The oldest general'], a: 'The President', why: 'A civilian leader — the President — is in charge. That\'s civilian control.' },
+      { q: 'Which is the newest branch, created in 2019?', o: ['Space Force', 'Air Force', 'Coast Guard'], a: 'Space Force', why: 'The Space Force was created in 2019 to protect U.S. interests in space.' },
+      { q: 'Which branch has the power to declare war?', o: ['Congress', 'The Army', 'The Supreme Court'], a: 'Congress', why: 'The Constitution gives Congress the power to declare war — another check!' },
+    ]),
+  ] },
+
+// ===== 7. Final =====
+{ name: 'Capitol Challenge', place: 'Quiz Stage', art: 'stage', color: '#ffd6e0', badge: { i: '🏆', n: 'Capitol Champion' },
+  titles: ['Lightning Round', 'The Big Picture', 'Citizen Toolkit', 'Capitol Quiz Show', 'Champion Check'],
+  phases: [
+    (el, api) => {
+      api.say('Lightning round! True or false? ⚡');
+      const T = 'True ✅', F = 'False ❌';
+      matchup(el, { say: api.say, auto: 1500, onDone: () => { api.say('Warmed up! Tap Next ▶', 'good'); api.done(); }, cards: [
+        { q: 'The Supreme Court makes the laws.', o: [T, F], a: F, keep: 1, why: 'Congress makes laws. Courts interpret them.' },
+        { q: 'Every state has 2 senators.', o: [T, F], a: T, keep: 1, why: 'Yep — 50 states × 2 = 100 senators.' },
+        { q: 'A President can be elected as many times as they want.', o: [T, F], a: F, keep: 1, why: 'Presidents can be elected at most two times.' },
+        { q: 'The Coast Guard does search and rescue.', o: [T, F], a: T, keep: 1, why: 'Rescues on the water are a big Coast Guard job.' },
+        { q: 'The Bill of Rights is the first 10 amendments.', o: [T, F], a: T, keep: 1, why: 'Correct! Added in 1791.' },
+      ] });
+    },
+    disc([
+      { icon: '🏛️', title: 'Legislative', color: '#bfeaff', text: '<b>Congress</b> (Senate + House) makes laws, controls the money, and can declare war.' },
+      { icon: '🖊️', title: 'Executive', color: '#ffe0b3', text: 'The <b>President</b>, Vice President and Cabinet carry out laws. The President is Commander in Chief.' },
+      { icon: '⚖️', title: 'Judicial', color: '#e6d6ff', text: 'The <b>courts</b>, led by the Supreme Court, interpret laws and decide if they fit the Constitution.' },
+      ...CITIZEN_CARDS.slice(0, 1),
+    ], 'Let\'s review the big picture before the show!'),
+    (el, api) => {
+      api.say('Citizen Toolkit! Which of these can kids do right now?');
+      sorter(el, { say: api.say, onDone: () => { api.say('You can be a great citizen at any age! Tap Next ▶', 'good'); api.done(); },
+        bins: [{ id: 'k', label: 'Kids can do it now!', icon: '🧒', color: '#7be0bf' }, { id: 'a', label: 'Adults only', icon: '🧑', color: '#9fe3ff' }],
+        items: [
+          { t: '✉️ Write to your representative', bin: 'k', why: 'Anyone can write to members of Congress — kids too!' },
+          { t: '📚 Learn how government works', bin: 'k', why: 'You\'re doing it right now!' },
+          { t: '🤝 Volunteer in your community', bin: 'k', why: 'Helping out is great citizenship at any age.' },
+          { t: '👂 Go to a public meeting and listen', bin: 'k', why: 'Many public meetings are open to everyone.' },
+          { t: '🗳️ Vote in national elections', bin: 'a', why: 'U.S. citizens can vote at 18.' },
+          { t: '🧑‍⚖️ Serve on a jury', bin: 'a', why: 'Juries are made of adult citizens.' },
+          { t: '🏃 Run for President', bin: 'a', why: 'You must be at least 35 years old.' },
+        ] });
+    },
+    (el, api) => {
+      api.say('BOSS: Welcome to the Capitol Quiz Show! Get 7 of 10 to win. 🎤');
+      quiz(el, shuffle([
+        { q: 'Which branch includes the Senate and the House?', o: ['Legislative', 'Executive', 'Judicial'], a: 'Legislative', why: 'Congress — the Legislative branch — has two chambers.' },
+        { q: 'Who can veto a bill?', o: ['The President', 'The Chief Justice', 'The Speaker of the House'], a: 'The President', why: 'The President signs or vetoes bills.' },
+        { q: 'How many justices sit on the Supreme Court?', o: ['9', '5', '100'], a: '9', why: 'Nine justices, led by the Chief Justice.' },
+        { q: 'What is the Constitution?', o: ['The rulebook for the U.S. government', 'A list of state capitals', 'The President\'s diary'], a: 'The rulebook for the U.S. government', why: 'Written in 1787, it sets up the three branches.' },
+        { q: 'How long is a senator\'s term?', o: ['6 years', '2 years', '4 years'], a: '6 years', why: 'Senators: 6 years. House members: 2 years. President: 4 years.' },
+        { q: 'Which branch protects U.S. satellites in space?', o: ['Space Force', 'Navy', 'National Guard'], a: 'Space Force', why: 'Space is the Space Force\'s job.' },
+        { q: 'Who confirms Supreme Court justices?', o: ['The Senate', 'The House', 'The Cabinet'], a: 'The Senate', why: 'The President nominates; the Senate confirms.' },
+        { q: 'How old must U.S. citizens be to vote?', o: ['18', '16', '21'], a: '18', why: 'The voting age for U.S. citizens is 18.' },
+        { q: 'Who can a governor call to help after a flood?', o: ['The National Guard', 'The Supreme Court', 'The Space Force'], a: 'The National Guard', why: 'The National Guard is state-based and helps in disasters at home.' },
+        { q: 'When the House formally accuses an official of wrongdoing, it\'s called…', o: ['Impeachment', 'A veto', 'A treaty'], a: 'Impeachment', why: 'The House impeaches; the Senate holds the trial.' },
+      ]), r => api.done({ pass: r.right >= 7, msg: `You scored ${r.right} of ${r.total}. You need 7 to win!` }), api.say, 'Quiz Show');
+    },
+    check([
+      { q: 'Which branch interprets the laws?', o: ['Judicial', 'Legislative', 'Executive'], a: 'Judicial', why: 'Courts interpret laws and decide cases.' },
+      { q: 'Who controls federal spending (the “power of the purse”)?', o: ['Congress', 'The Supreme Court', 'The Coast Guard'], a: 'Congress', why: 'Congress passes the budget and decides how federal money is spent.' },
+      { q: 'What keeps any one branch from getting too powerful?', o: ['Checks and balances', 'A bigger army', 'Longer terms'], a: 'Checks and balances', why: 'Each branch can check the others — that keeps power balanced!' },
+    ]),
+  ] },
+];
+
+// Pawtopia rulebook (made-up land for court cases)
+function pawRules() {
+  return h('div', { class: 'panel rulebook' }, h('b', { class: 'toon', style: 'font-size:22px' }, '📜 Rulebook of Pawtopia (made up)'),
+    h('ol', null, h('li', null, 'Everyone may share their ideas.'), h('li', null, 'Everyone may follow any religion, or none.'),
+      h('li', null, 'Anyone accused of breaking a law gets a fair trial.'), h('li', null, 'Every citizen 18 or older may vote.')));
+}
+
+// Checks triangle explorer (Mission 5 experiment)
+function checksTriangle(el, api) {
+  const N = { L: { x: 200, y: 62, e: '🏛️', n: 'Legislative', c: '#4cc9f0' }, E: { x: 70, y: 250, e: '🖊️', n: 'Executive', c: '#ff9f1c' }, J: { x: 330, y: 250, e: '⚖️', n: 'Judicial', c: '#c39bff' } };
+  const CH = {
+    'L>E': ['Override a veto with a two-thirds vote', 'Impeach and remove the President', 'Senate approves treaties and confirms appointments', 'Decides how much money agencies get'],
+    'E>L': ['Veto bills', 'Call Congress into a special session'],
+    'E>J': ['Appoint federal judges (Senate confirms)', 'Grant pardons'],
+    'J>E': ['Rule that actions of the President or agencies are unconstitutional'],
+    'J>L': ['Rule that laws are unconstitutional (judicial review)'],
+    'L>J': ['Senate confirms or rejects judges', 'Impeach and remove judges', 'Create lower federal courts', 'Propose amendments to the Constitution'],
+  };
+  const seen = new Set(); let from = null;
+  const wrap = h('div', { class: 'tri' }); const svgBox = h('div', { class: 'panel', style: 'padding:6px;background:#fff' });
+  const info = h('div', { class: 'panel info' }, h('div', { class: 'explored' }, 'Explored: 0 / 6'), h('p', null, 'Tap a branch to start. 👆'));
+  wrap.append(svgBox, info); el.append(wrap);
+  const line = (a, b, key) => {
+    const A = N[a], B = N[b], dx = B.x - A.x, dy = B.y - A.y, d = Math.hypot(dx, dy), ux = dx / d, uy = dy / d, nx = -uy * 9, ny = ux * 9;
+    const st = seen.has(key) ? '#06d6a0' : '#b9ad8f';
+    return `<line x1="${A.x + ux * 52 + nx}" y1="${A.y + uy * 52 + ny}" x2="${B.x - ux * 60 + nx}" y2="${B.y - uy * 60 + ny}" stroke="${st}" stroke-width="7" stroke-linecap="round" marker-end="url(#ah${seen.has(key) ? 'g' : ''})"/>`;
+  };
+  const draw = () => {
+    let s = `<svg viewBox="0 -22 400 352"><defs><marker id="ah" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#b9ad8f"/></marker><marker id="ahg" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#06d6a0"/></marker></defs>`;
+    for (const k of Object.keys(CH)) { const [a, b] = k.split('>'); s += line(a, b, k); }
+    for (const [k, n] of Object.entries(N)) s += `<g class="node" data-n="${k}"><circle cx="${n.x}" cy="${n.y}" r="${from === k ? 50 : 44}" fill="${n.c}" stroke="${INK}" stroke-width="${from === k ? 6 : 4}"/><text x="${n.x}" y="${n.y + 6}" text-anchor="middle" font-size="34">${n.e}</text><text x="${n.x}" y="${n.y + (k === 'L' ? -54 : 64)}" text-anchor="middle" font-size="17" font-family="Luckiest Guy,Comic Sans MS,sans-serif" fill="${INK}">${n.n}</text></g>`;
+    svgBox.innerHTML = s + '</svg>';
+    svgBox.querySelectorAll('.node').forEach(g => g.addEventListener('click', () => tapNode(g.dataset.n)));
+  };
+  const tapNode = k => {
+    if (!from || from === k) { from = from === k ? null : k; sfx.tap(); draw(); if (from) { api.say(`Now tap the branch that ${N[from].n} checks.`); info.querySelector('p') && (info.lastChild.textContent = `${N[from].e} ${N[from].n} selected. Now tap another branch!`); } return; }
+    const key = from + '>' + k, A = N[from], B = N[k]; seen.add(key); from = null; sfx.good(); draw();
+    info.innerHTML = ''; info.append(h('div', { class: 'explored' }, `Explored: ${seen.size} / 6`), h('b', { class: 'toon', style: 'font-size:21px' }, `${A.e} ${A.n} can check ${B.e} ${B.n}:`), h('ul', null, CH[key].map(t => h('li', null, t))));
+    api.say(`${A.n} → ${B.n}: ${CH[key][0]}!`, 'good');
+    if (seen.size >= 4 && !cur.ready) { api.done(); setTimeout(() => api.say('Nice exploring! Find all 6, or tap Next ▶.', 'good'), 1600); }
+    if (seen.size === 6) burst('ALL 6!', null, null, '#06d6a0');
+  };
+  draw();
+}
+
+// Bill board game (Mission 2 boss)
+function billGame(el, api) {
+  api.say('BOSS: Roll the die 🎲 to move the bill! Answer at each yellow checkpoint.');
+  const SQ = [
+    { i: '💡', t: 'Idea' }, { i: '✉️', t: 'Letter', f: 'A kid writes to their representative: “Every park should have a water fountain!”' },
+    { i: '📄', t: 'Introduced', g: 1 }, { i: '🔢', t: 'Gets a number', f: 'Bills get numbers. Bills from the House start with “H.R.”' },
+    { i: '🧐', t: 'Committee', g: 1 }, { i: '🎤', t: 'Hearing', f: 'Committees can hold hearings where experts share facts.' },
+    { i: '✏️', t: 'Changes', f: 'Committees can change a bill\'s words before the big vote.' },
+    { i: '🏠', t: 'House vote', g: 1 }, { i: '🚶', t: 'To the Senate', f: 'Now the other chamber gets its turn!' },
+    { i: '🏛️', t: 'Senate vote', g: 1 }, { i: '🤝', t: 'Same words', f: 'Both chambers must pass the exact same bill.' },
+    { i: '🖊️', t: 'President', g: 2 }, { i: '🎉', t: 'LAW!', end: 1 },
+  ];
+  const Q = {
+    2: { q: 'Who can introduce a bill in Congress?', o: ['A member of Congress', 'Any kid at school', 'A Supreme Court justice'], a: 'A member of Congress', why: 'Anyone can suggest an idea, but only a member of Congress can introduce a bill.' },
+    4: { q: 'What does a committee do with a bill?', o: ['Studies it and decides whether to send it on', 'Signs it into law', 'Decides if it breaks the Constitution'], a: 'Studies it and decides whether to send it on', why: 'Committees are small groups of members who study bills closely and can change them.' },
+    7: { q: 'To pass the House, a bill needs…', o: ['More than half of the members voting', 'Every single member to agree', 'Just one vote'], a: 'More than half of the members voting', why: 'A majority — more than half of those voting — passes a bill.' },
+    9: { q: 'The House and Senate passed the same bill. Where does it go next?', o: ['To the President', 'To the Supreme Court', 'Back to the idea box'], a: 'To the President', why: 'Bills can start in either chamber. Once both pass it, it goes to the President.' },
+  };
+  const cols = ($('#stage').clientWidth || innerWidth) > 760 ? 7 : 4;
+  let pos = 0, busy = false, miss = 0; const cleared = new Set();
+  const board = h('div', { class: 'board', style: `--cols:${cols}` });
+  const sqEls = SQ.map((s, i) => {
+    const row = Math.floor(i / cols), c = row % 2 ? cols - 1 - (i % cols) : i % cols;
+    return h('div', { class: 'sq' + (s.g ? ' gate' : '') + (s.end ? ' end' : ''), style: `grid-row:${row + 1};grid-column:${c + 1}` }, h('span', { class: 'si' }, s.i), h('span', null, s.t));
+  });
+  board.append(...sqEls);
+  const tok = h('div', { class: 'tok', html: pupSVG() });
+  const die = h('div', { class: 'die' }, Array.from({ length: 9 }, () => h('i')));
+  const rollBtn = h('button', { class: 'btn yel' }, '🎲 Roll');
+  const evt = h('div', { class: 'panel evt' }, 'Roll the die to start the bill\'s journey!');
+  el.append(board, h('div', { class: 'bgctl' }, h('div', { style: 'display:flex;flex-direction:column;align-items:center;gap:12px' }, die, rollBtn), evt));
+  const PIPS = { 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
+  const face = n => [...die.children].forEach((p, k) => p.classList.toggle('on', PIPS[n].includes(k)));
+  face(1);
+  const place = () => { sqEls.forEach(s => s.classList.remove('here')); sqEls[pos].append(tok); sqEls[pos].classList.add('here'); };
+  place();
+  rollBtn.onclick = async () => {
+    if (busy) return; busy = true; rollBtn.disabled = true; sfx.dice(); die.classList.add('roll');
+    let n = 1; for (let k = 0; k < 8; k++) { n = 1 + (Math.random() * 6 | 0); face(n); await wait(70); }
+    die.classList.remove('roll');
+    for (let s = 0; s < n; s++) {
+      if (SQ[pos].g && !cleared.has(pos)) break;
+      if (pos >= SQ.length - 1) break;
+      pos++; place(); sfx.pop(); await wait(260);
+      if (SQ[pos].g) break;
+    }
+    land();
+  };
+  const land = () => {
+    const s = SQ[pos];
+    if (s.g === 1 && !cleared.has(pos)) return ask(pos);
+    if (s.g === 2) return president();
+    evt.innerHTML = ''; evt.append(h('b', null, `${s.i} ${s.t}: `), s.f || 'Keep rolling!');
+    api.say(s.f || 'Keep rolling!'); busy = false; rollBtn.disabled = false;
+  };
+  const ask = p => {
+    const q = Q[p]; evt.innerHTML = '';
+    evt.append(h('div', { class: 'qhead' }, `🚧 Checkpoint: ${SQ[p].t}`), h('p', { class: 'q' }, q.q));
+    const opts = h('div', { class: 'opts' });
+    for (const o of shuffle(q.o)) {
+      const b = h('button', { class: 'opt' }, o); b._ok = o === q.a;
+      b.onclick = () => {
+        if (b.disabled) return;
+        if (o === q.a) {
+          cleared.add(p); sqEls[p].classList.add('cleared'); b.classList.add('right'); opts.querySelectorAll('.opt').forEach(x => x.disabled = true);
+          burstAt(b, 'PASSED!', '#06d6a0'); sfx.good(); api.say('✅ ' + q.why + ' Roll again!', 'good');
+          evt.append(h('div', { class: 'explain good' }, q.why));
+          busy = false; rollBtn.disabled = false;
+        } else { miss++; b.classList.add('wrong'); b.disabled = true; burstAt(b, 'OOPS!', '#ff8fa3'); sfx.bad(); api.say('💡 The bill is stuck! Try another answer.', 'bad'); }
+      };
+      opts.append(b);
+    }
+    evt.append(opts); api.say('Checkpoint! Answer to move the bill forward.'); evt.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  };
+  const president = () => {
+    evt.innerHTML = '';
+    const wheel = h('div', { class: 'wheel', html: `<span class="ptr">🔻</span><svg viewBox="-100 -100 200 200"><g stroke="${INK}" stroke-width="5"><path d="M0 -94 A94 94 0 0 1 0 94 Z" fill="#06d6a0"/><path d="M0 94 A94 94 0 0 1 0 -94 Z" fill="#ff8fa3"/><circle r="14" fill="#fff"/></g><text x="46" y="10" font-size="26" text-anchor="middle" font-family="Luckiest Guy,Comic Sans MS,sans-serif">SIGN</text><text x="-46" y="10" font-size="26" text-anchor="middle" font-family="Luckiest Guy,Comic Sans MS,sans-serif">VETO</text></svg>` });
+    const spin = h('button', { class: 'btn yel' }, '🖊️ Spin the pen!');
+    evt.append(h('div', { class: 'qhead' }, '🖊️ The President\'s Desk'), h('p', null, 'The President can SIGN the bill or VETO (reject) it. Spin to see what happens!'), wheel, h('div', { style: 'text-align:center;margin-top:12px' }, spin));
+    api.say('The bill reached the President! Spin the pen.'); evt.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    spin.onclick = async () => {
+      spin.disabled = true; sfx.dice();
+      const veto = Math.random() < .5;
+      const R = 1440 + (veto ? 20 + Math.random() * 140 : 200 + Math.random() * 140);
+      wheel.querySelector('svg').style.transform = `rotate(${R}deg)`;
+      await wait(2300);
+      if (!veto) { burst('SIGNED!', null, null, '#06d6a0'); sfx.good(); evt.append(h('div', { class: 'explain good' }, 'The President signed it! (If it had been vetoed, Congress could still override with a two-thirds vote in both chambers.)')); await wait(1200); return win(); }
+      burst('VETO!', null, null, '#ff8fa3'); sfx.bad();
+      evt.innerHTML = ''; evt.append(h('div', { class: 'qhead' }, '✋ Vetoed!'));
+      api.say('Vetoed! But Congress has a way to fight back…');
+      matchup(evt, { say: api.say, auto: 900, cards: [{ q: 'How can Congress still make the bill a law?', o: ['Override: a two-thirds vote in BOTH the House and Senate', 'Ask the Supreme Court to sign it', 'A majority vote in the House only'], a: 'Override: a two-thirds vote in BOTH the House and Senate', why: 'That\'s a veto override — a check on the President!' }],
+        onDone: async res => {
+          if (!res.right) miss++;
+          evt.innerHTML = ''; const mh = h('i'), ms = h('i');
+          evt.append(h('div', { class: 'qhead' }, '🗳️ Override vote!'), h('div', { class: 'meters' },
+            h('div', { class: 'mrow' }, h('b', null, 'House'), h('div', { class: 'mbarx' }, mh, h('u'))), h('div', { class: 'mrow' }, h('b', null, 'Senate'), h('div', { class: 'mbarx' }, ms, h('u')))),
+            h('small', null, 'The dashed line is two-thirds. Both bars must pass it!'));
+          await wait(80); mh.style.width = '74%'; ms.style.width = '71%'; sfx.whoosh(); await wait(1800);
+          burst('OVERRIDE!', null, null, '#06d6a0'); await wait(700); win();
+        } });
+    };
+  };
+  const win = () => {
+    pos = SQ.length - 1; place(); sfx.win(); burst('LAW!', null, null, '#ffd23f');
+    evt.innerHTML = ''; evt.append(h('b', { class: 'toon', style: 'font-size:28px' }, '🎉 It\'s a law!'), h('p', null, `Every park gets a water fountain! You guided the bill all the way${miss ? ` (with ${miss} oops${miss > 1 ? 'es' : ''})` : ' with no mistakes'}.`));
+    api.done({ pass: true });
+  };
+}
+
+// test hook
+window.__game = {
+  get save() { return save; }, get cur() { return cur; }, startMission, runPhase, renderMap, renderTitle,
+  unlockAll() { save.done = [0, 1, 2, 3, 4, 5]; persist(); renderMap(); },
+};
+renderTitle();
+</script>
+</body>
+</html>
