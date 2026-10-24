@@ -16,49 +16,76 @@
     font-family:Nunito,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; font-weight:800;
     user-select:none; -webkit-user-select:none; -webkit-tap-highlight-color:transparent; }
   button { font:inherit; cursor:pointer; color:inherit; }
-  .toon { font-family:var(--toon); font-weight:400; letter-spacing:1px; }
   .panel { background:var(--paper); border:3px solid var(--ink); border-radius:18px; box-shadow:4px 4px 0 var(--ink); }
   [hidden] { display:none !important; }
+  body.nospeech .say { display:none !important; }
 
   #app { position:fixed; inset:0; display:flex; flex-direction:column; }
-  /* ---------- top bar: step tracker + timer ---------- */
-  #topbar { display:flex; align-items:center; gap:8px; padding:8px 10px 6px; flex-wrap:wrap; }
-  #tracker { display:flex; gap:6px; flex:1 1 auto; flex-wrap:wrap; align-items:center; }
+  /* ---------- top bar ---------- */
+  #topbar { display:flex; align-items:center; gap:8px; padding:8px 10px 6px; }
+  #tracker { display:flex; gap:6px; align-items:center; flex-wrap:nowrap; }
+  #spacer { flex:1 1 auto; }
+  #hubTitle { font-family:var(--toon); font-size:32px; color:var(--yellow); -webkit-text-stroke:2px var(--ink); paint-order:stroke;
+    text-shadow:3px 3px 0 var(--ink); letter-spacing:1px; transform:rotate(-2deg); white-space:nowrap; }
   .stp { font-family:var(--toon); font-size:18px; padding:7px 12px 3px; border-radius:999px; background:var(--paper);
     border:3px solid var(--ink); box-shadow:0 3px 0 var(--ink); white-space:nowrap; opacity:.75; line-height:1.2; }
-  .stp.on { background:var(--yellow); opacity:1; transform:rotate(-2deg) scale(1.06); }
+  .stp.on { background:var(--yellow); opacity:1; transform:rotate(-2deg) scale(1.08); }
   .stp.done { background:var(--green); opacity:1; }
-  .stp .n { display:inline-block; }
   #timerChip { font-family:var(--toon); font-size:20px; padding:7px 14px 3px; border-radius:999px; background:var(--blue);
     border:3px solid var(--ink); box-shadow:0 3px 0 var(--ink); white-space:nowrap; line-height:1.2; }
   #timerChip.relax { background:#ffe8a3; }
   .round { width:60px; height:60px; border-radius:50%; border:3px solid var(--ink); background:var(--paper);
     box-shadow:0 4px 0 var(--ink); font-size:24px; display:grid; place-items:center; padding:0; flex:none; }
   .round:active { transform:translateY(3px); box-shadow:0 1px 0 var(--ink); }
+  .say { width:46px; height:46px; border-radius:50%; border:3px solid var(--ink); background:var(--yellow); box-shadow:0 3px 0 var(--ink);
+    font-size:19px; padding:0; flex:none; display:inline-grid; place-items:center; vertical-align:middle; }
+  .say:active { transform:translateY(2px); box-shadow:0 1px 0 var(--ink); }
 
   /* ---------- stage ---------- */
   #stage { position:relative; flex:1 1 auto; min-height:0; margin:0 8px; border:3px solid var(--ink); border-radius:18px;
     overflow:hidden; box-shadow:4px 4px 0 var(--ink); }
   #cv { position:absolute; inset:0; width:100%; height:100%; display:block; touch-action:none; }
-  #info { position:absolute; left:10px; top:10px; max-width:min(460px,62%); padding:8px 12px 8px; font-size:17px; line-height:1.25; }
-  #info b.big { font-family:var(--toon); font-weight:400; font-size:22px; color:var(--accent); display:block; letter-spacing:1px; }
-  #readout { font-family:var(--toon); font-size:20px; color:#1b6f9a; margin-top:4px; letter-spacing:.5px; }
-  #badgeBar { position:absolute; right:10px; top:10px; display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end; max-width:36%; }
-  .bdg { font-size:14px; padding:4px 10px 3px; border-radius:999px; border:3px solid var(--ink); background:#e8e1cf; color:#8d8577; white-space:nowrap; }
-  .bdg.got { background:var(--yellow); color:var(--ink); }
-  #toast { position:absolute; left:50%; bottom:14px; transform:translate(-50%,10px) rotate(-1deg); padding:8px 18px 6px; font-size:20px;
-    background:var(--yellow); opacity:0; transition:.25s; pointer-events:none; text-align:center; max-width:92%; }
+  /* Captain Pup speech bubble */
+  #info { position:absolute; left:10px; top:10px; max-width:min(520px,70%); padding:6px 8px 6px 6px; display:flex; gap:8px; align-items:center;
+    border-radius:22px; }
+  #info::after { content:''; position:absolute; left:26px; bottom:-14px; width:20px; height:20px; background:var(--paper);
+    border-right:3px solid var(--ink); border-bottom:3px solid var(--ink); transform:rotate(45deg); }
+  #avatar { width:52px; height:52px; flex:none; border-radius:50%; background:#ffe3c2; border:3px solid var(--ink); }
+  #infoText { font-size:19px; line-height:1.2; display:block; }
+  #readout { font-family:var(--toon); font-size:20px; color:#1b6f9a; letter-spacing:.5px; }
+  #readout:empty { display:none; }
+  #badgeBar { position:absolute; right:10px; top:10px; display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end; max-width:30%; }
+  .bdg { font-size:16px; padding:4px 10px 3px; border-radius:999px; border:3px solid var(--ink); background:#e8e1cf; opacity:.55; white-space:nowrap; }
+  .bdg.got { background:var(--yellow); opacity:1; }
+  #toast { position:absolute; left:50%; bottom:14px; transform:translate(-50%,10px) rotate(-1deg); padding:8px 18px 6px; font-size:22px;
+    font-family:var(--toon); letter-spacing:1px; background:var(--yellow); opacity:0; transition:.25s; pointer-events:none; text-align:center; max-width:92%; }
   #toast.show { opacity:1; transform:translate(-50%,0) rotate(-1deg); }
-  #timeup { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); padding:14px 18px; text-align:center; width:min(420px,90%); }
-  #timeup p { margin:4px 0 8px; font-size:18px; }
+  #timeup { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); padding:14px 18px; text-align:center; width:min(420px,90%); z-index:3; }
+  #timeup p { margin:4px 0 10px; font-size:22px; }
+  #hubHint { position:absolute; left:50%; bottom:12px; transform:translateX(-50%); padding:6px 8px 6px 16px; font-size:19px; display:flex; gap:10px;
+    align-items:center; white-space:nowrap; }
+  /* quiz */
+  #qbar { position:absolute; left:50%; top:10px; transform:translateX(-50%); width:min(900px,calc(100% - 20px)); padding:8px 10px 8px 14px;
+    display:flex; gap:10px; align-items:center; }
+  #qNum { font-family:var(--toon); font-size:18px; background:var(--purple); color:#fff; border:3px solid var(--ink); border-radius:999px; padding:4px 10px 1px; flex:none; }
+  #qText { flex:1; font-size:21px; line-height:1.2; }
+  #combo { font-family:var(--toon); font-size:20px; color:var(--accent); flex:none; }
+  #qwhy { position:absolute; left:50%; bottom:12px; transform:translateX(-50%); width:min(640px,calc(100% - 20px)); padding:10px 14px; text-align:center; z-index:2;
+    animation:pop .35s cubic-bezier(.3,1.6,.6,1); }
+  @keyframes pop { from { transform:translateX(-50%) scale(.6); opacity:0; } }
+  #qWhyRow { display:flex; gap:10px; align-items:center; justify-content:center; }
+  #qWhyTxt { font-size:22px; line-height:1.2; }
+  details { margin:6px auto 4px; font-size:16px; text-align:left; max-width:560px; }
+  summary { cursor:pointer; display:inline-block; padding:4px 12px; border:2px solid var(--ink); border-radius:999px; background:#fff; list-style:none; font-size:15px; }
+  summary::-webkit-details-marker { display:none; }
+  details p { margin:8px 0 0 !important; font-size:16px !important; line-height:1.3; }
 
   /* ---------- controls ---------- */
   #controls { margin:8px; padding:8px 12px 10px; display:flex; flex-wrap:wrap; gap:8px 16px; align-items:center; }
-  .sl { display:grid; grid-template-columns:auto 1fr auto; grid-template-rows:auto auto; column-gap:8px; align-items:center; flex:1 1 300px; min-width:260px; }
+  .sl { display:grid; grid-template-columns:auto 1fr auto; grid-template-rows:auto auto; column-gap:8px; align-items:center; flex:1 1 300px; min-width:240px; }
   .sl .hd { grid-column:1 / 4; display:flex; justify-content:space-between; align-items:baseline; font-size:15px; }
-  .sl .hd b { font-family:var(--toon); font-weight:400; font-size:20px; letter-spacing:1px; }
+  .sl .hd b { font-family:var(--toon); font-weight:400; font-size:22px; letter-spacing:1px; }
   .sl output { font-family:var(--toon); font-size:22px; color:#1b6f9a; }
-  .sl .lock { font-size:13px; color:#8d8577; }
   input[type=range] { -webkit-appearance:none; appearance:none; width:100%; height:44px; background:transparent; margin:0; touch-action:pan-y; }
   input[type=range]::-webkit-slider-runnable-track { height:14px; border-radius:10px; background:#e9e2cf; border:3px solid var(--ink); }
   input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:40px; height:40px; margin-top:-16px; border-radius:50%;
@@ -72,7 +99,7 @@
   .stepb:disabled { opacity:.4; }
   .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
   .seg { display:flex; border:3px solid var(--ink); border-radius:999px; overflow:hidden; box-shadow:0 4px 0 var(--ink); }
-  .seg button { border:0; background:#fff; min-height:60px; padding:6px 14px 2px; font-family:var(--toon); font-size:19px; border-right:3px solid var(--ink); }
+  .seg button { border:0; background:#fff; min-height:60px; padding:6px 14px 2px; font-family:var(--toon); font-size:20px; border-right:3px solid var(--ink); }
   .seg button:last-child { border-right:0; }
   .seg button.on { background:var(--ink); color:#fff; }
   .btn { background:var(--accent); color:#fff; font-family:var(--toon); font-size:26px; min-height:60px; padding:10px 28px 4px; border-radius:999px;
@@ -81,89 +108,103 @@
   .btn.go { background:var(--green); color:var(--ink); }
   .btn.alt { background:#fff; color:var(--ink); }
   .btn.yel { background:var(--yellow); color:var(--ink); }
-  .btn:disabled { opacity:.5; }
+  .btn.mini { font-size:20px; min-height:54px; padding:9px 16px 3px; box-shadow:0 4px 0 var(--ink); }
+  .btn:disabled { opacity:.55; }
   .btn.pulse { animation:pulse 1.1s infinite; }
   @keyframes pulse { 50% { transform:scale(1.07); } }
   #jumpBtn { font-size:32px; padding:10px 34px 4px; }
   #notes { flex:1 1 100%; display:flex; gap:6px; overflow-x:auto; touch-action:pan-x; padding:2px 0 4px; align-items:center; }
-  #notes .lbl { font-size:14px; white-space:nowrap; }
   .note { font-size:14px; white-space:nowrap; padding:4px 10px 3px; border-radius:999px; border:2px solid var(--ink); background:#fff; }
 
   /* ---------- overlays ---------- */
-  .overlay { position:fixed; inset:0; display:grid; place-items:center; background:rgba(30,20,60,.5); padding:10px; z-index:5; }
-  .card { padding:18px 22px 20px; text-align:center; width:min(900px,96vw); max-height:calc(100% - 4px); overflow:auto;
+  .overlay { position:fixed; inset:0; display:grid; place-items:center; background:rgba(30,20,60,.45); padding:10px; z-index:5; }
+  .card { position:relative; padding:18px 22px 20px; text-align:center; width:min(760px,96vw); max-height:calc(100% - 4px); overflow:auto;
     border-radius:26px; box-shadow:6px 6px 0 var(--ink); touch-action:pan-y; }
-  h1 { font-family:var(--toon); font-weight:400; margin:0; font-size:clamp(46px,9vw,84px); line-height:1; color:var(--yellow); -webkit-text-stroke:3px var(--ink);
+  h1 { font-family:var(--toon); font-weight:400; margin:0; font-size:clamp(40px,8vw,72px); line-height:1; color:var(--yellow); -webkit-text-stroke:3px var(--ink);
     paint-order:stroke; text-shadow:5px 5px 0 var(--ink); transform:rotate(-2deg); letter-spacing:2px; }
   h1 span { color:var(--accent); }
-  h2 { font-family:var(--toon); font-weight:400; margin:0 0 6px; font-size:clamp(30px,5vw,42px); color:var(--accent); -webkit-text-stroke:2px var(--ink);
+  h2 { font-family:var(--toon); font-weight:400; margin:0 0 6px; font-size:clamp(28px,5vw,40px); color:var(--accent); -webkit-text-stroke:2px var(--ink);
     paint-order:stroke; text-shadow:3px 3px 0 var(--ink); letter-spacing:1px; line-height:1.05; }
-  .card p { margin:8px 0; font-size:18px; line-height:1.3; }
-  .mcard { text-align:left; margin:16px auto 10px; padding:14px 18px; max-width:640px; background:#fff; position:relative; }
-  .tag { display:inline-block; background:var(--yellow); border:2px solid var(--ink); border-radius:999px; font-size:13px; padding:3px 12px 1px; letter-spacing:1.5px; font-family:var(--toon); }
-  .mcard h3 { font-family:var(--toon); font-weight:400; font-size:30px; margin:6px 0 4px; color:var(--accent); letter-spacing:1px; }
+  .card p { margin:8px 0; font-size:19px; line-height:1.25; }
+  .tag { display:inline-block; background:var(--yellow); border:3px solid var(--ink); border-radius:999px; font-size:16px; padding:4px 14px 1px; letter-spacing:1.5px; font-family:var(--toon); }
+  .xbtn { position:absolute; right:10px; top:10px; }
+  #cardArt { width:100%; height:180px; display:block; border:3px solid var(--ink); border-radius:16px; margin:10px 0 8px; }
+  .obj { display:flex; gap:10px; align-items:center; justify-content:center; }
   .chips { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin:8px 0; }
-  .chip { font-size:15px; padding:5px 12px 4px; border-radius:999px; border:2px solid var(--ink); background:#fff; }
+  .chip { font-size:17px; padding:5px 12px 4px; border-radius:999px; border:3px solid var(--ink); background:#fff; font-family:var(--toon); letter-spacing:.5px; }
   .titleRow { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:10px; }
   #titleStars { font-size:30px; color:#f4a100; letter-spacing:4px; -webkit-text-stroke:1px var(--ink); }
-  .hint { font-size:15px !important; opacity:.7; }
 
-  /* discover cards */
+  /* discover */
   #discover .card { width:min(1100px,97vw); }
+  .gbars { display:grid; grid-template-columns:auto 1fr; gap:4px 10px; align-items:center; max-width:560px; margin:6px auto 4px; text-align:left; }
+  .gbars span { font-size:20px; white-space:nowrap; }
+  .gbar { height:24px; border:3px solid var(--ink); border-radius:999px; background:#fff; overflow:hidden; }
+  .gbar i { display:block; height:100%; border-right:3px solid var(--ink); font-style:normal; font-family:var(--toon); font-size:15px; color:var(--ink);
+    padding:3px 8px 0; text-align:right; width:0; transition:width 1.2s cubic-bezier(.3,1.4,.5,1); }
+  .lead { display:flex; gap:10px; align-items:center; justify-content:center; }
+  .lead b { font-size:21px; }
   .dgrid { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin:10px 0 12px; }
   .dcard { text-align:left; padding:10px 12px 12px; background:#fff; }
-  .dcard h4 { font-family:var(--toon); font-weight:400; font-size:22px; margin:0 0 4px; color:var(--ink); letter-spacing:1px; }
-  .dcard canvas { width:100%; height:150px; display:block; border:3px solid var(--ink); border-radius:12px; background:#fff; }
-  .dcard p { font-size:16px !important; margin:6px 0 6px !important; min-height:2.6em; }
-  .dcard .btn { font-size:20px; padding:8px 18px 3px; }
+  .dcard h4 { font-family:var(--toon); font-weight:400; font-size:24px; margin:0 0 4px; letter-spacing:1px; }
+  .dcard canvas { width:100%; height:160px; display:block; border:3px solid var(--ink); border-radius:12px; background:#fff; }
+  .cap { display:flex; gap:8px; align-items:center; margin:8px 0 2px !important; }
+  .cap span { font-size:18px; line-height:1.2; flex:1; }
+  .dcard .btn { font-size:22px; padding:8px 18px 3px; }
+  .dcard .row { margin-top:6px; }
+  .tile { min-width:64px; min-height:60px; font-size:28px; border:3px solid var(--ink); border-radius:16px; background:#fff; box-shadow:0 4px 0 var(--ink); }
+  .tile.on { background:var(--yellow); }
+  .tile:active { transform:translateY(3px); box-shadow:0 1px 0 var(--ink); }
   .dcard.seen { background:#effcf6; }
-  .bigfact { background:var(--yellow); border:3px solid var(--ink); border-radius:14px; padding:8px 12px; display:inline-block; font-size:18px; transform:rotate(-1deg); }
 
-  /* quiz */
-  .opts { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin:14px 0; }
-  .opt { min-height:64px; background:#fff; border:3px solid var(--ink); border-radius:16px; box-shadow:0 5px 0 var(--ink); font-size:19px; padding:10px 12px; }
-  .opt:active { transform:translateY(3px); box-shadow:0 2px 0 var(--ink); }
-  .opt.right { background:var(--green); }
-  .opt.wrong { background:#ff8fa3; }
-  .opt:disabled { cursor:default; }
-  #qExplain { text-align:left; padding:10px 14px; background:#fff7d6; border-radius:14px; border:3px dashed var(--ink); font-size:18px; line-height:1.3; }
-  #qBurst { display:inline-block; font-family:var(--toon); font-size:34px; padding:18px 26px 10px; margin:0 0 6px;
-    clip-path:polygon(50% 0,61% 22%,85% 8%,78% 33%,100% 40%,80% 56%,96% 80%,70% 74%,62% 100%,48% 80%,30% 98%,28% 74%,3% 82%,18% 58%,0 40%,22% 33%,14% 8%,38% 22%);
-    background:var(--yellow); color:var(--ink); }
-  #qBurst.bad { background:#ff8fa3; }
-  .qnum { font-size:15px; opacity:.7; }
-  #resStars { font-size:64px; color:#f4a100; letter-spacing:8px; -webkit-text-stroke:2px var(--ink); line-height:1; margin:6px 0; }
+  #resStars { font-size:70px; color:#f4a100; letter-spacing:8px; -webkit-text-stroke:2px var(--ink); line-height:1; margin:6px 0; }
+  #resStars span { display:inline-block; animation:starpop .5s cubic-bezier(.3,1.8,.6,1) backwards; }
+  @keyframes starpop { from { transform:scale(0) rotate(-90deg); } }
   .off { color:#e7e0cf; }
-  #mapSvg { width:100%; max-width:760px; height:auto; display:block; margin:6px auto; }
+  .bigline { font-family:var(--toon); font-size:26px; letter-spacing:1px; }
+
+  /* demo hand */
+  #hand { position:fixed; left:0; top:0; z-index:30; pointer-events:none; font-size:56px; line-height:1; margin:-6px 0 0 -22px;
+    filter:drop-shadow(3px 3px 0 #1d1b26); }
+  #hand.tap { animation:htap .9s ease-in-out infinite; }
+  @keyframes htap { 0%,100% { transform:translateY(14px); } 50% { transform:translateY(0) scale(.88); } }
+  #hand.drag { animation:hdrag 2s ease-in-out infinite; }
+  @keyframes hdrag { 0% { transform:translate(0,0); opacity:0; } 12% { opacity:1; transform:translate(0,0) scale(.9); }
+    70% { transform:translate(var(--dx),var(--dy)) scale(.9); opacity:1; } 100% { transform:translate(var(--dx),var(--dy)); opacity:0; } }
 
   @media (max-width:700px) {
-    #topbar { flex-wrap:nowrap; gap:5px; padding:6px 6px 5px; }
-    #tracker { gap:4px; flex-wrap:nowrap; }
+    #topbar { gap:5px; padding:6px 6px 5px; }
+    #hubTitle { font-size:22px; }
+    #tracker { gap:4px; }
     .stp { font-size:15px; padding:5px 0 1px; width:32px; text-align:center; }
     .stp.on { width:auto; padding:5px 8px 1px; }
     .stp .t { display:none; }
     #timerChip { font-size:15px; padding:5px 8px 1px; }
     #timerChip.relax { font-size:12px; }
     .round { width:48px; height:48px; font-size:19px; }
+    .btn.mini { font-size:16px; min-height:48px; padding:8px 10px 2px; }
     #stage { margin:0 6px; }
-    #info { font-size:13px; max-width:calc(100% - 16px); left:6px; top:6px; padding:5px 9px; border-radius:14px; }
-    #info b.big { font-size:16px; }
-    #readout { font-size:15px; margin-top:2px; }
-    #badgeBar { top:auto; bottom:6px; right:6px; max-width:80%; }
-    .bdg { font-size:11px; padding:2px 6px 1px; border-width:2px; }
-    #toast { font-size:16px; padding:6px 12px 4px; bottom:auto; top:40%; }
+    #info { max-width:calc(100% - 16px); left:6px; top:6px; }
+    #avatar { width:40px; height:40px; }
+    #infoText { font-size:15px; }
+    #readout { font-size:15px; }
+    .say { width:40px; height:40px; font-size:16px; }
+    #badgeBar { top:auto; bottom:6px; right:6px; max-width:90%; }
+    .bdg { font-size:13px; padding:2px 6px 1px; border-width:2px; }
+    #toast { font-size:17px; padding:6px 12px 4px; bottom:auto; top:40%; }
+    #hubHint { font-size:15px; white-space:normal; width:calc(100% - 20px); }
+    #qText { font-size:16px; }
+    #qWhyTxt { font-size:18px; }
     #controls { padding:6px 8px 6px; gap:4px 8px; margin:6px; }
     .sl { min-width:0; flex-basis:100%; grid-template-columns:78px auto 1fr auto; grid-template-rows:auto; column-gap:6px; }
     .sl .hd { grid-column:1; flex-direction:column; align-items:flex-start; line-height:1.05; font-size:12px; }
     .sl .hd b { font-size:16px; }
     .sl output { font-size:17px; }
-    .sl .lock { display:none; }
     .stepb { width:52px; height:52px; font-size:26px; }
     input[type=range] { height:52px; }
-    .row { gap:6px; flex-wrap:wrap; width:100%; }
+    .row { gap:6px; width:100%; }
     .seg { flex:none; }
     .pn { display:none; }
-    #qText { -webkit-text-stroke:1.5px var(--ink); text-shadow:2px 2px 0 var(--ink); }
     .seg button { font-size:22px; padding:6px 10px 2px; min-height:56px; }
     .btn { font-size:20px; padding:10px 14px 4px; min-height:56px; }
     #controls .row .btn { flex:1 1 auto; white-space:nowrap; }
@@ -172,38 +213,53 @@
     #notes { padding:0; }
     .note { font-size:12px; }
     .dgrid { grid-template-columns:1fr; }
-    .opts { grid-template-columns:1fr; }
     .card { padding:14px 12px 16px; }
-    .card p { font-size:16px; }
-  }
-  @media (max-height:520px) {
-    .dcard canvas { height:110px; }
+    .card p { font-size:17px; }
+    #cardArt { height:140px; }
   }
 </style>
 </head>
 <body>
 <div id="app">
-  <header id="topbar" hidden>
-    <div id="tracker">
-      <span class="stp" data-p="challenge"><span class="n">1</span> <span class="t">Challenge</span></span>
-      <span class="stp" data-p="discover"><span class="n">2</span> <span class="t">Discover</span></span>
-      <span class="stp" data-p="experiment"><span class="n">3</span> <span class="t">Experiment</span></span>
-      <span class="stp" data-p="boss"><span class="n">4</span> <span class="t">Boss</span></span>
-      <span class="stp" data-p="quiz"><span class="n">✔</span> <span class="t">Check</span></span>
+  <header id="topbar">
+    <a class="btn alt mini" id="gamesLink" href="../">⬅ Games</a>
+    <span id="hubTitle">Martian Jump</span>
+    <div id="tracker" hidden>
+      <span class="stp" data-p="challenge">1 <span class="t">🛰 Challenge</span></span>
+      <span class="stp" data-p="discover">2 <span class="t">💡 Discover</span></span>
+      <span class="stp" data-p="experiment">3 <span class="t">🧪 Experiment</span></span>
+      <span class="stp" data-p="boss">4 <span class="t">⭐ Boss</span></span>
+      <span class="stp" data-p="quiz">✔ <span class="t">Check</span></span>
     </div>
-    <span id="timerChip">⏱ 0:30</span>
-    <button class="round" id="homeBtn" aria-label="Mission menu">🏠</button>
-    <button class="round" id="muteBtn" aria-label="Sound on/off">🔊</button>
+    <span id="spacer"></span>
+    <span id="timerChip" hidden>⏱ 0:30</span>
+    <button class="round" id="homeBtn" aria-label="Back to the map" hidden>🗺</button>
+    <button class="round" id="muteBtn" aria-label="Sound effects on/off">🎵</button>
   </header>
 
   <div id="stage">
     <canvas id="cv"></canvas>
-    <div id="info" class="panel" hidden><b class="big" id="infoTitle"></b><span id="infoText"></span><div id="readout"></div></div>
+    <div id="info" class="panel" hidden>
+      <canvas id="avatar" width="104" height="104"></canvas>
+      <div><span id="infoText"></span><div id="readout"></div></div>
+      <button class="say" data-for="infoText" aria-label="Read aloud">🔊</button>
+    </div>
     <div id="badgeBar" hidden></div>
-    <div id="toast" class="panel toon"></div>
+    <div id="hubHint" class="panel" hidden><span id="hubHintTxt">✋ Drag to fly! Crash into crater 1 💥</span>
+      <button class="say" data-for="hubHintTxt" aria-label="Read aloud">🔊</button></div>
+    <div id="qbar" class="panel" hidden>
+      <span id="qNum">1/3</span><span id="qText"></span><span id="combo"></span>
+      <button class="say" data-for="qText" aria-label="Read aloud">🔊</button>
+    </div>
+    <div id="qwhy" class="panel" hidden>
+      <div id="qWhyRow"><span id="qWhyTxt"></span><button class="say" data-for="qWhyTxt" aria-label="Read aloud">🔊</button></div>
+      <details id="qMoreBox"><summary>📖 More</summary><p id="qMore"></p></details>
+      <button class="btn go" id="qNextBtn">Next ▶</button>
+    </div>
+    <div id="toast" class="panel"></div>
     <div id="timeup" class="panel" hidden>
-      <h2 style="font-size:30px">Time check!</h2>
-      <p id="timeupText">No rush — you can keep going or move on.</p>
+      <h2 style="font-size:30px">⏰ Time check!</h2>
+      <p id="timeupText"></p>
       <div class="row" style="justify-content:center">
         <button class="btn alt" id="keepBtn">Keep going</button>
         <button class="btn go" id="moveBtn">Next ▶</button>
@@ -212,14 +268,14 @@
   </div>
 
   <div id="controls" class="panel" hidden>
-    <div class="sl" id="angleBox">
+    <div class="sl">
       <div class="hd"><b>📐 Angle</b><output id="angleOut">40°</output></div>
       <button class="stepb" data-k="angle" data-d="-1" aria-label="less angle">−</button>
       <input type="range" id="angle" min="10" max="80" step="1" value="40" aria-label="Jump angle">
       <button class="stepb" data-k="angle" data-d="1" aria-label="more angle">+</button>
     </div>
-    <div class="sl" id="speedBox">
-      <div class="hd"><b>💪 Strength</b><span><span class="lock" id="speedLock"></span> <output id="speedOut">5.0 m/s</output></span></div>
+    <div class="sl">
+      <div class="hd"><b>💪 Strength</b><output id="speedOut">5.0 m/s</output></div>
       <button class="stepb" data-k="speed" data-d="-0.1" aria-label="less strength">−</button>
       <input type="range" id="speed" min="2" max="7" step="0.1" value="5" aria-label="Jump strength">
       <button class="stepb" data-k="speed" data-d="0.1" aria-label="more strength">+</button>
@@ -236,90 +292,66 @@
   </div>
 </div>
 
-<!-- ============ TITLE ============ -->
-<div class="overlay" id="title">
+<!-- ============ MISSION CARD (opens when Pup flies into crater 1) ============ -->
+<div class="overlay" id="title" hidden>
   <div class="card panel">
-    <h1>Martian <span>Jump!</span></h1>
-    <div class="mcard panel">
-      <span class="tag">MISSION 01</span>
-      <h3>The Martian Jump</h3>
-      <p style="margin:4px 0"><b>🎯 Learning objective:</b> Understand gravity and how it affects weight.</p>
-      <p style="margin:4px 0">Captain Pup's rover is stranded on Mars! Jump craters, learn how gravity works, and get the rover fixed.</p>
-      <div class="chips">
-        <span class="chip">1 Challenge · 0:30</span><span class="chip">2 Discover · 1:00</span>
-        <span class="chip">3 Experiment · 2:00</span><span class="chip">4 Boss · 1:30</span><span class="chip">✔ Check</span>
-      </div>
-      <div id="titleStars"></div>
+    <button class="round xbtn" id="cardClose" aria-label="Close">✖</button>
+    <span class="tag">MISSION 01</span>
+    <h1>The Martian <span>Jump</span></h1>
+    <canvas id="cardArt"></canvas>
+    <p class="obj"><span>🎯 <span id="objTxt">Understand gravity and how it affects weight.</span></span>
+      <button class="say" data-for="objTxt" aria-label="Read aloud">🔊</button></p>
+    <div class="chips">
+      <span class="chip">1 🛰 0:30</span><span class="chip">2 💡 1:00</span><span class="chip">3 🧪 2:00</span><span class="chip">4 ⭐ 1:30</span><span class="chip">✔ ❓</span>
     </div>
-    <div class="titleRow">
-      <button class="btn go pulse" id="startBtn">▶ Start Mission</button>
-      <button class="btn yel" id="titleMapBtn" hidden>🗺 Region Map</button>
-      <a class="btn alt" href="../">⬅ Games</a>
-    </div>
-    <p class="hint">Timers are just a guide — take your time! 🔊 sound can be turned off with the speaker button.</p>
+    <div id="titleStars"></div>
+    <div class="titleRow"><button class="btn go pulse" id="startBtn">▶ Start!</button></div>
   </div>
 </div>
 
 <!-- ============ DISCOVER ============ -->
 <div class="overlay" id="discover" hidden>
   <div class="card panel">
-    <h2>Discover: Gravity!</h2>
-    <p>Gravity is a planet's <b>pull</b>. <span class="bigfact">Earth pulls harder than Mars. Mars has about <b>38%</b> of Earth's surface gravity.</span></p>
+    <h2>💡 Gravity = a planet's pull</h2>
+    <div class="gbars">
+      <span>🌍 Earth</span><div class="gbar"><i style="background:#4cc9f0" data-w="100">100%</i></div>
+      <span>🔴 Mars</span><div class="gbar"><i style="background:#ff9f1c" data-w="38">38%</i></div>
+      <span>🌙 Moon</span><div class="gbar"><i style="background:#c9b8ff" data-w="16">16%</i></div>
+    </div>
+    <p class="lead"><b id="leadTxt">Mars pulls about 38% as hard as Earth.</b><button class="say" data-for="leadTxt" aria-label="Read aloud">🔊</button></p>
     <div class="dgrid">
       <div class="dcard panel" id="dc0">
-        <h4>🏀 Drop test</h4>
+        <h4>💥 Crash test</h4>
         <canvas id="dcv0"></canvas>
-        <p id="dt0">Drop a ball from the same height on Earth and on Mars. Which lands first?</p>
-        <button class="btn go" data-dc="0">Drop!</button>
+        <p class="cap"><span id="dt0">Same drop. Which crate crashes first?</span><button class="say" data-for="dt0" aria-label="Read aloud">🔊</button></p>
+        <details><summary>📖 More</summary><p>From 2 m up: Earth ≈ 0.64 s, Mars ≈ 1.04 s, Moon ≈ 1.58 s. A stronger pull speeds things up faster.</p></details>
+        <div class="row"><button class="btn go" data-dc="0">💥 Drop!</button></div>
       </div>
       <div class="dcard panel" id="dc1">
         <h4>⚖️ Bathroom scale</h4>
         <canvas id="dcv1"></canvas>
-        <p id="dt1">Captain Pup's friend weighs 100 lb on Earth. Take the scale to Mars!</p>
-        <button class="btn go" data-dc="1">Go to Mars</button>
+        <p class="cap"><span id="dt1">Same pup. Tap a planet!</span><button class="say" data-for="dt1" aria-label="Read aloud">🔊</button></p>
+        <details><summary>📖 More</summary><p><b>Mass</b> = how much stuff you're made of. It never changes. <b>Weight</b> = how hard a planet pulls on you. That changes!</p></details>
+        <div class="row"><button class="tile on" data-sc="earth" aria-label="Earth">🌍</button><button class="tile" data-sc="mars" aria-label="Mars">🔴</button><button class="tile" data-sc="moon" aria-label="Moon">🌙</button></div>
       </div>
       <div class="dcard panel" id="dc2">
         <h4>🤔 Why less pull?</h4>
         <canvas id="dcv2"></canvas>
-        <p id="dt2">Bigger, heavier planets pull harder. Let's compare!</p>
-        <button class="btn go" data-dc="2">Show me</button>
+        <p class="cap"><span id="dt2">Smaller planet, less mass = weaker pull.</span><button class="say" data-for="dt2" aria-label="Read aloud">🔊</button></p>
+        <details><summary>📖 More</summary><p>Mars is about half as wide as Earth and has only about 1/10 of Earth's mass. More mass pulls harder.</p></details>
+        <div class="row"><button class="btn go" data-dc="2">🧲 Pull!</button></div>
       </div>
       <div class="dcard panel" id="dc3">
         <h4>🚀 Super jump</h4>
         <canvas id="dcv3"></canvas>
-        <p id="dt3">Same push, two planets. How high does Captain Pup go?</p>
-        <button class="btn go" data-dc="3">Jump!</button>
+        <p class="cap"><span id="dt3">Same push: about 2.6× higher on Mars!</span><button class="say" data-for="dt3" aria-label="Read aloud">🔊</button></p>
+        <details><summary>📖 More</summary><p>100 ÷ 38 ≈ 2.6, so the same jump goes about 2.6 times as high (and as far) on Mars. On the Moon, about 6 times!</p></details>
+        <div class="row"><button class="btn go" data-dc="3">🚀 Jump!</button></div>
       </div>
     </div>
     <div class="row" style="justify-content:center">
-      <button class="btn yel" id="discNext">Got it! Experiment ▶</button>
+      <button class="btn yel" id="discNext">Got it! 🧪 ▶</button>
       <button class="btn alt" id="discSkip">Skip ▶</button>
-    </div>
-  </div>
-</div>
-
-<!-- ============ REGION MAP ============ -->
-<div class="overlay" id="map" hidden>
-  <div class="card panel">
-    <h2 id="mapTitle">Region 2 unlocked!</h2>
-    <p id="mapSub">The rover is fixed! Next stop on Mars:</p>
-    <svg id="mapSvg" viewBox="0 0 760 300" role="img" aria-label="Mars region map"></svg>
-    <div class="row" style="justify-content:center">
-      <button class="btn go pulse" id="mapNext">Knowledge Check ▶</button>
-    </div>
-  </div>
-</div>
-
-<!-- ============ QUIZ ============ -->
-<div class="overlay" id="quiz" hidden>
-  <div class="card panel">
-    <div class="qnum" id="qNum">Question 1 of 3</div>
-    <h2 style="font-size:clamp(24px,4vw,34px)" id="qText"></h2>
-    <div class="opts" id="qOpts"></div>
-    <div id="qAfter" hidden>
-      <div id="qBurst">YES!</div>
-      <div id="qExplain"></div>
-      <div style="margin-top:12px"><button class="btn go" id="qNextBtn">Next ▶</button></div>
     </div>
   </div>
 </div>
@@ -327,17 +359,19 @@
 <!-- ============ RESULTS ============ -->
 <div class="overlay" id="results" hidden>
   <div class="card panel">
-    <h2>Mission Complete!</h2>
+    <h2>🏆 Mission Complete!</h2>
     <div id="resStars"></div>
-    <p id="resText"></p>
-    <p id="resBadges" class="hint"></p>
+    <p class="bigline" id="resLine"></p>
+    <p class="obj"><span id="resTxt">Mars pulls about 38% as hard as Earth!</span><button class="say" data-for="resTxt" aria-label="Read aloud">🔊</button></p>
     <div class="titleRow">
-      <button class="btn go" id="replayBtn">↻ Replay Mission</button>
-      <button class="btn yel" id="resMapBtn">🗺 Region Map</button>
+      <button class="btn go" id="replayBtn">↻ Replay</button>
+      <button class="btn yel" id="resMapBtn">🗺 Map</button>
       <a class="btn alt" href="../">⬅ Games</a>
     </div>
   </div>
 </div>
+
+<div id="hand" hidden>👆</div>
 
 <script>
 'use strict';
@@ -349,23 +383,24 @@
 const INK = '#1d1b26', TAU = Math.PI * 2;
 const G = { earth: 9.8, mars: 3.7, moon: 1.6 };
 const PCOL = { earth: '#2f8fe0', mars: '#ff6a1a', moon: '#9b5de5' };
-const PNAME = { earth: 'Earth', mars: 'Mars', moon: 'Moon' };
 const PEMO = { earth: '🌍', mars: '🔴', moon: '🌙' };
 const TIMES = { challenge: 30, discover: 60, experiment: 120, boss: 90 };
 const CH_SPEED = 5.0;                       // "jump the way you'd jump on Earth" (m/s)
 const SKEY = 'tg-martian-jump-v1';
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const lerp = (a, b, t) => a + (b - a) * t;
+const rnd = (a, b) => a + Math.random() * (b - a);
 const $ = id => document.getElementById(id);
 const rangeOf = (v, deg, g) => v * v * Math.sin(2 * deg * Math.PI / 180) / g;
+const EMOJI_FONT = '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",system-ui,sans-serif';
 
 /* ---------------- save data (always safe) ---------------- */
-let save = { done: false, stars: 0, badges: [], region2: false };
+let save = { done: false, stars: 0, badges: [], region2: false, r2Shown: false };
 try { const s = JSON.parse(localStorage.getItem(SKEY) || 'null'); if (s && typeof s === 'object') save = Object.assign(save, s); } catch (e) {}
 function persist() { try { localStorage.setItem(SKEY, JSON.stringify(save)); } catch (e) {} }
 
 /* ---------------- sound (Web Audio, made on first tap) ---------------- */
-let actx = null, muted = false;
+let actx = null, muted = false, noiseBuf = null;
 try { muted = localStorage.getItem(SKEY + '-mute') === '1'; } catch (e) {}
 function ensureAudio() {
   if (actx) { if (actx.state === 'suspended') actx.resume(); return; }
@@ -381,20 +416,57 @@ function tone(f, dur = 0.12, type = 'sine', vol = 0.13, f2 = null, delay = 0) {
     o.connect(g); g.connect(actx.destination); o.start(t0); o.stop(t0 + dur + 0.02);
   } catch (e) {}
 }
+function noise(dur = 0.5, vol = 0.3, freq = 900, delay = 0) {
+  if (!actx || muted) return;
+  try {
+    if (!noiseBuf) { noiseBuf = actx.createBuffer(1, actx.sampleRate, actx.sampleRate); const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
+    const t0 = actx.currentTime + delay, s = actx.createBufferSource(), f = actx.createBiquadFilter(), g = actx.createGain();
+    s.buffer = noiseBuf; f.type = 'lowpass'; f.frequency.setValueAtTime(freq, t0); f.frequency.exponentialRampToValueAtTime(60, t0 + dur);
+    g.gain.setValueAtTime(vol, t0); g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+    s.connect(f); f.connect(g); g.connect(actx.destination); s.start(t0); s.stop(t0 + Math.min(0.99, dur + 0.05));
+  } catch (e) {}
+}
+let lastThud = 0;
 const sfx = {
   click() { tone(660, 0.06, 'square', 0.05); },
   jump() { tone(220, 0.35, 'triangle', 0.14, 720); },
-  land() { tone(140, 0.16, 'sine', 0.2, 60); },
+  land() { tone(140, 0.16, 'sine', 0.2, 60); noise(0.2, 0.15, 500); },
   good() { [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.18, 'triangle', 0.12, null, i * 0.09)); },
-  bad() { tone(392, 0.18, 'triangle', 0.1, null, 0); tone(294, 0.3, 'triangle', 0.1, null, 0.15); },
+  bad() { tone(392, 0.18, 'triangle', 0.1); tone(294, 0.3, 'triangle', 0.1, null, 0.15); },
   badge() { [784, 988, 1319].forEach((f, i) => tone(f, 0.14, 'square', 0.05, null, i * 0.07)); },
   boing() { tone(300, 0.25, 'sine', 0.12, 600); },
+  pew() { tone(1300, 0.13, 'square', 0.045, 260); },
+  boom() { noise(0.6, 0.45, 1400); tone(95, 0.4, 'sine', 0.22, 40); },
+  bigboom() { noise(0.95, 0.6, 2200); tone(70, 0.9, 'sine', 0.3, 28); noise(0.6, 0.3, 900, 0.25); },
+  bonk() { tone(190, 0.14, 'square', 0.07, 110); },
+  thud() { const n = performance.now(); if (n - lastThud < 70) return; lastThud = n; noise(0.16, 0.22, 380); tone(110, 0.12, 'sine', 0.13, 55); },
+  ding() { tone(1320, 0.12, 'triangle', 0.08); tone(1760, 0.16, 'triangle', 0.06, null, 0.07); },
+  whoosh() { noise(0.5, 0.18, 2500); },
 };
-function setMuteIcon() { $('muteBtn').textContent = muted ? '🔇' : '🔊'; }
+function setMuteIcon() { $('muteBtn').textContent = muted ? '🔇' : '🎵'; }
 setMuteIcon();
 $('muteBtn').onclick = () => { muted = !muted; setMuteIcon(); try { localStorage.setItem(SKEY + '-mute', muted ? '1' : '0'); } catch (e) {} sfx.click(); };
 document.addEventListener('pointerdown', ensureAudio, { capture: true });
 document.addEventListener('keydown', ensureAudio, { capture: true });
+
+/* ---------------- read-aloud (Web Speech API) ---------------- */
+const canSpeak = 'speechSynthesis' in window && typeof window.SpeechSynthesisUtterance === 'function';
+if (!canSpeak) document.body.classList.add('nospeech');
+function speakable(t) {
+  return t.replace(/(\d)\s?m\/s/g, '$1 meters per second').replace(/(\d)\s?m\b/g, '$1 meters').replace(/(\d)\s?s\b/g, '$1 seconds')
+    .replace(/\blb\b/g, 'pounds').replace(/×/g, ' times').replace(/≈/g, ' about ').replace(/🆚/g, ' versus ').replace(/=/g, ' equals ')
+    .replace(/°/g, ' degrees').replace(/[\u{1F000}-\u{1FFFF}\u{2190}-\u{21FF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}]/gu, ' ');
+}
+function speak(t) {
+  if (!canSpeak || !t) return;
+  try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(speakable(t)); u.rate = 0.95; u.pitch = 1.1; u.lang = 'en-US'; speechSynthesis.speak(u); } catch (e) {}
+}
+function stopSpeak() { if (canSpeak) try { speechSynthesis.cancel(); } catch (e) {} }
+document.addEventListener('click', e => {
+  const b = e.target.closest('.say'); if (!b) return;
+  const el = $(b.dataset.for); if (el) speak(el.textContent);
+});
+document.addEventListener('toggle', e => { if (e.target.tagName === 'DETAILS' && e.target.open) { const p = e.target.querySelector('p'); if (p) speak(p.textContent); } }, true);
 
 /* ---------------- canvas ---------------- */
 const cv = $('cv'), mainCtx = cv.getContext('2d');
@@ -405,6 +477,7 @@ function resize() {
   DPR = Math.min(2, window.devicePixelRatio || 1);
   W = Math.max(100, r.width); H = Math.max(100, r.height);
   cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+  if (phase === 'hub') hubLayout(false);
 }
 window.addEventListener('resize', resize);
 function ell(x, y, rx, ry, rot = 0) { ctx.beginPath(); ctx.ellipse(x, y, Math.max(0.1, rx), Math.max(0.1, ry), rot, 0, TAU); }
@@ -414,6 +487,12 @@ function inkText(c, txt, x, y, px, fill = '#fff', align = 'center', lw = null) {
   c.font = toonFont(px); c.textAlign = align; c.textBaseline = 'middle'; c.lineJoin = 'round';
   c.lineWidth = lw || Math.max(3, px * 0.18); c.strokeStyle = INK; c.strokeText(txt, x, y);
   c.fillStyle = fill; c.fillText(txt, x, y);
+}
+function emoji(c, e, x, y, px) { c.font = `${Math.round(px)}px ${EMOJI_FONT}`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillStyle = '#000'; c.fillText(e, x, y); }
+function starPath(c, x, y, r1, r2, n = 5, rot = 0) {
+  c.beginPath();
+  for (let k = 0; k < n * 2; k++) { const a = rot - Math.PI / 2 + k * Math.PI / n, rr = k % 2 ? r2 : r1; c.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); }
+  c.closePath();
 }
 function hash(n) { const s = Math.sin(n * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); }
 
@@ -572,10 +651,11 @@ function drawStation(c, x, y, u, t) {
   c.restore();
 }
 
+
 /* =====================================================================
    WORLD + PHYSICS
    ===================================================================== */
-const world = { planet: 'mars', craters: [], pads: [], flags: [], view: [-3, 8], viewH: 3.5, depth: 1.4,
+const world = { planet: 'mars', craters: [], pads: [], flags: [], crates: [], view: [-3, 8], viewH: 3.5, depth: 1.4,
   rover: null, station: null };
 let roverFixed = false, roverHop = 0;
 function groundY(x) {
@@ -602,8 +682,7 @@ function stepJumper(j, dt) {
     const gy = groundY(nx);
     if (ny <= gy) {
       if (j.y >= gy - 1e-6) { j.x = nx; j.y = gy; j.landed = true; break; }          // landed from above
-      // hit a crater wall from the side: slide down it
-      nx = j.x; j.vx = 0;
+      nx = j.x; j.vx = 0;                                                            // hit a crater wall: slide down
       if (ny <= groundY(nx)) { j.x = nx; j.y = groundY(nx); j.landed = true; break; }
     }
     j.x = nx; j.y = ny; j.t += h;
@@ -612,6 +691,8 @@ function stepJumper(j, dt) {
   }
   if (j.landed) { j.trail.push([j.x, j.y]); onLand(j); }
 }
+// where will this jumper touch ground level (y = 0)?  y + vy·t − g·t²/2 = 0
+function predictLandX(j) { const t = (j.vy + Math.sqrt(j.vy * j.vy + 2 * j.g * Math.max(0, j.y))) / j.g; return j.x + j.vx * t; }
 
 /* ---------------- camera ---------------- */
 const cam = { x0: -3, x1: 8, scale: 50, ox: 0, gy: 400, viewH: 3.5 };
@@ -759,72 +840,113 @@ function drawTrail(tr, alpha) {
   ctx.restore();
 }
 
-/* ---------------- particles, bursts, confetti ---------------- */
-let smoke = [], bursts = [], confetti = [], sparkles = [];
+
+/* ---------------- particles (capped), bursts, popups, shake ---------------- */
+let parts = [], bursts = [], popups = [], shake = 0;
+const PMAX = 300;
+function addPart(p) { if (parts.length >= PMAX) parts.shift(); parts.push(p); }
+const FIRE = ['#ffd23f', '#ff9f1c', '#ff4d6d', '#ffffff'];
+function explode(x, y, s = 1, cols = FIRE) {
+  addPart({ type: 'ring', x, y, r: 6 * s, vr: 520 * s, life: 0.35, max: 0.35, col: '#fff' });
+  for (let i = 0; i < 24 * s; i++) { const a = rnd(0, TAU), sp = rnd(90, 420) * s;
+    addPart({ type: 'dot', x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, g: 260, r: rnd(3, 8) * s, life: rnd(0.4, 0.9), max: 0.9, col: cols[i % cols.length] }); }
+  for (let i = 0; i < 7 * s; i++) { const a = rnd(0, TAU), sp = rnd(60, 260) * s;
+    addPart({ type: 'star', x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, g: 200, r: rnd(7, 13) * s, rot: rnd(0, 6), vrot: rnd(-8, 8), life: rnd(0.6, 1.1), max: 1.1, col: '#ffd23f' }); }
+  for (let i = 0; i < 5 * s; i++) { const a = rnd(0, TAU), sp = rnd(20, 90) * s;
+    addPart({ type: 'smoke', x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 20, g: -10, r: rnd(10, 22) * s, grow: 30 * s, life: rnd(0.8, 1.3), max: 1.3, col: '120,110,120' }); }
+}
+function puff(x, y, s = 1, col = '170,95,60') {
+  for (let i = 0; i < 7; i++) addPart({ type: 'smoke', x: x + rnd(-8, 8) * s, y, vx: rnd(-90, 90) * s, vy: rnd(-60, -10) * s, g: 40, r: rnd(5, 10) * s, grow: 18 * s, life: rnd(0.4, 0.8), max: 0.8, col });
+}
+function sparks(x, y, n = 10, col = '#ffd23f') {
+  for (let i = 0; i < n; i++) { const a = rnd(0, TAU), sp = rnd(120, 360);
+    addPart({ type: 'spark', x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, g: 300, life: rnd(0.2, 0.45), max: 0.45, col }); }
+}
+function confettiBurst(n = 120) {
+  const cols = ['#ff4d6d', '#ffd23f', '#06d6a0', '#4cc9f0', '#9b5de5', '#ff9f1c'];
+  for (let i = 0; i < n; i++) addPart({ type: 'conf', x: W / 2 + rnd(-0.2, 0.2) * W, y: H * 0.35, vx: rnd(-350, 350), vy: rnd(-800, -300), g: 700,
+    rot: rnd(0, TAU), vrot: rnd(-12, 12), col: cols[i % cols.length], life: rnd(2.2, 3.2), max: 3.2 });
+}
+function drawParts(dt) {
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const p = parts[i]; p.life -= dt; if (p.life <= 0) { parts.splice(i, 1); continue; }
+    const k = p.life / p.max;
+    if (p.vx !== undefined) { p.vy += (p.g || 0) * dt; p.x += p.vx * dt; p.y += p.vy * dt; if (p.type !== 'conf') { p.vx *= Math.exp(-dt * 1.5); } }
+    if (p.vrot) p.rot += p.vrot * dt;
+    ctx.save();
+    if (p.type === 'dot') { ctx.globalAlpha = Math.min(1, k * 1.6); ctx.fillStyle = p.col; ell(p.x, p.y, p.r, p.r); ctx.fill(); }
+    else if (p.type === 'star') { ctx.globalAlpha = Math.min(1, k * 1.6); ctx.fillStyle = p.col; ctx.strokeStyle = INK; ctx.lineWidth = 2; starPath(ctx, p.x, p.y, p.r, p.r * 0.45, 5, p.rot); ctx.fill(); ctx.stroke(); }
+    else if (p.type === 'smoke') { p.r += (p.grow || 0) * dt; ctx.fillStyle = `rgba(${p.col},${0.5 * k})`; ell(p.x, p.y, p.r, p.r); ctx.fill(); }
+    else if (p.type === 'spark') { ctx.globalAlpha = k; ctx.strokeStyle = p.col; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - p.vx * 0.04, p.y - p.vy * 0.04); ctx.stroke(); }
+    else if (p.type === 'ring') { p.r += p.vr * dt; ctx.globalAlpha = k; ctx.strokeStyle = p.col; ctx.lineWidth = 8 * k + 1; ell(p.x, p.y, p.r, p.r); ctx.stroke(); }
+    else if (p.type === 'conf') { ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.fillStyle = p.col; ctx.fillRect(-6, -3, 12, 7); }
+    else if (p.type === 'shard') { ctx.globalAlpha = k; ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.fillStyle = 'rgba(120,220,255,.7)'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(-p.r, -p.r * 0.5); ctx.lineTo(p.r, -p.r * 0.2); ctx.lineTo(-p.r * 0.2, p.r); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+    ctx.restore();
+  }
+}
 function addBurst(text, x, y, col = '#ffd23f', size = 1) { bursts.push({ text, x, y, col, t: 0, size }); }
 function drawBursts(dt) {
   for (let i = bursts.length - 1; i >= 0; i--) {
     const b = bursts[i]; b.t += dt; if (b.t > 1.4) { bursts.splice(i, 1); continue; }
     const k = b.t < 0.15 ? b.t / 0.15 : 1, a = b.t > 1.1 ? (1.4 - b.t) / 0.3 : 1;
     const R = clamp(Math.min(W, H) * 0.12, 46, 110) * k * b.size;
-    ctx.save(); ctx.globalAlpha = a; ctx.translate(b.x, b.y - b.t * 20); ctx.rotate(-0.08);
+    const bx = clamp(b.x, R * 1.25, W - R * 1.25), by = clamp(b.y, R * 0.85, H - R * 0.85);
+    ctx.save(); ctx.globalAlpha = a; ctx.translate(bx, by - b.t * 20); ctx.rotate(-0.08);
     ctx.beginPath();
     for (let s = 0; s < 28; s++) { const ang = s / 28 * TAU, rr = s % 2 ? R * 0.62 : R; ctx.lineTo(Math.cos(ang) * rr * 1.25, Math.sin(ang) * rr * 0.8); }
     ctx.closePath(); ctx.fillStyle = b.col; ctx.fill(); ctx.lineWidth = 4; ctx.strokeStyle = INK; ctx.stroke();
-    inkText(ctx, b.text, 0, 3, R * 0.42, '#fff', 'center', Math.max(4, R * 0.08));
+    const fs = Math.min(R * 0.42, R * 2.1 / Math.max(4, b.text.length) * 1.5);
+    inkText(ctx, b.text, 0, 3, fs, '#fff', 'center', Math.max(4, fs * 0.2));
     ctx.restore();
   }
 }
-function confettiBurst(n = 140) {
-  const cols = ['#ff4d6d', '#ffd23f', '#06d6a0', '#4cc9f0', '#9b5de5', '#ff9f1c'];
-  for (let i = 0; i < n; i++) confetti.push({ x: W / 2 + (Math.random() - 0.5) * W * 0.4, y: H * 0.35, vx: (Math.random() - 0.5) * 700,
-    vy: -300 - Math.random() * 500, r: Math.random() * TAU, vr: (Math.random() - 0.5) * 12, c: cols[i % cols.length], life: 3 + Math.random() });
-}
-function drawParticles(dt, t) {
-  // rover smoke
-  if (world.rover && !roverFixed && Math.random() < dt * 9) {
-    const u = cam.scale;
-    smoke.push({ x: SX(world.rover.x) + u * (Math.random() * 0.6 - 0.3), y: SY(0) - u * 1.3, vx: 10 + Math.random() * 14, vy: -25 - Math.random() * 20, r: u * 0.15, t: 0 });
-  }
-  for (let i = smoke.length - 1; i >= 0; i--) {
-    const s = smoke[i]; s.t += dt; if (s.t > 2.6) { smoke.splice(i, 1); continue; }
-    s.x += s.vx * dt; s.y += s.vy * dt; s.r += dt * cam.scale * 0.2;
-    ctx.fillStyle = `rgba(90,80,90,${0.45 * (1 - s.t / 2.6)})`; ell(s.x, s.y, s.r, s.r); ctx.fill();
-  }
-  for (let i = sparkles.length - 1; i >= 0; i--) {
-    const s = sparkles[i]; s.t += dt; if (s.t > 0.9) { sparkles.splice(i, 1); continue; }
-    s.x += s.vx * dt; s.y += s.vy * dt;
-    ctx.save(); ctx.translate(s.x, s.y); ctx.rotate(s.t * 4); ctx.globalAlpha = 1 - s.t / 0.9;
-    ctx.fillStyle = '#ffd23f'; ctx.beginPath();
-    for (let k = 0; k < 8; k++) { const a = k / 8 * TAU, rr = k % 2 ? 3 : 9; ctx.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); }
-    ctx.closePath(); ctx.fill(); ctx.restore();
-  }
-  for (let i = confetti.length - 1; i >= 0; i--) {
-    const p = confetti[i]; p.life -= dt; if (p.life <= 0 || p.y > H + 30) { confetti.splice(i, 1); continue; }
-    p.vy += 700 * dt; p.vx *= 0.99; p.x += p.vx * dt; p.y += p.vy * dt; p.r += p.vr * dt;
-    ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.fillStyle = p.c; ctx.fillRect(-6, -3, 12, 7); ctx.restore();
+function popup(text, x, y, col = '#ffd23f') { popups.push({ text, x, y, col, t: 0 }); }
+function drawPopups(dt) {
+  for (let i = popups.length - 1; i >= 0; i--) {
+    const p = popups[i]; p.t += dt; if (p.t > 1) { popups.splice(i, 1); continue; }
+    ctx.globalAlpha = 1 - p.t * p.t; inkText(ctx, p.text, p.x, p.y - p.t * 50, 24, p.col); ctx.globalAlpha = 1;
   }
 }
+
+/* ---------------- demo hand ---------------- */
+let handFor = null;
+function handTap(el, tag) {
+  const h = $('hand'), r = el.getBoundingClientRect(); if (!r.width) return;
+  h.className = 'tap'; h.style.left = (r.left + r.width * 0.55) + 'px'; h.style.top = (r.top + r.height * 0.55) + 'px'; h.hidden = false; handFor = tag;
+}
+function handAt(x, y, tag) {   // stage coords
+  const h = $('hand'), r = cv.getBoundingClientRect();
+  h.className = 'tap'; h.style.left = (r.left + x) + 'px'; h.style.top = (r.top + y) + 'px'; h.hidden = false; handFor = tag;
+}
+function handDrag(x1, y1, x2, y2, tag) {
+  const h = $('hand'), r = cv.getBoundingClientRect();
+  h.className = 'drag'; h.style.left = (r.left + x1) + 'px'; h.style.top = (r.top + y1) + 'px';
+  h.style.setProperty('--dx', (x2 - x1) + 'px'); h.style.setProperty('--dy', (y2 - y1) + 'px'); h.hidden = false; handFor = tag;
+}
+function hideHand(tag) { if (!tag || handFor === tag) { $('hand').hidden = true; handFor = null; } }
 
 /* =====================================================================
    PHASES
    ===================================================================== */
-let phase = 'title', phaseLeft = 0, timeUpShown = false, timerRelaxed = false;
+let phase = 'hub', phaseLeft = 0, timeUpShown = false;
 const PH_ORDER = ['challenge', 'discover', 'experiment', 'boss', 'quiz'];
-let challengeTried = false, boss = { D: 8, half: 1.0, attempts: 0, won: false, anim: 0, misses: 0 };
-let notes = [], badges = new Set(save.badges || []), drone = null;
+let challengeTried = false;
+const boss = { D: 8, half: 1.0, attempts: 0, won: false, misses: 0, cleared: false, blasts: 0, meteorQ: [] };
+let notes = [], badges = new Set(save.badges || []), drone = null, winSeq = null;
+let bolts = [], devils = [], meteors = [], asts = [], gunAim = -Math.PI / 2, timeScale = 1, slowT = 0;
 const BADGES = [
-  { id: 'f4', name: '🚩 4 m flag' }, { id: 'f8', name: '🚩 8 m flag' }, { id: 'f12', name: '🚩 12 m flag' },
-  { id: 'moon', name: '🌙 Moon hop' }, { id: 'hopper', name: '🪐 Planet hopper' }, { id: 'angle', name: '📐 Angle ace' },
+  { id: 'f4', name: '🚩4 m' }, { id: 'f8', name: '🚩8 m' }, { id: 'f12', name: '🚩12 m' }, { id: 'crates', name: '📦×3' },
+  { id: 'moon', name: '🌙' }, { id: 'hopper', name: '🪐' }, { id: 'angle', name: '📐45°' },
 ];
 
 function show(id, on) { $(id).hidden = !on; }
 function setTracker() {
-  const idx = PH_ORDER.indexOf(phase === 'map' ? 'boss' : phase === 'results' ? 'quiz' : phase);
+  const idx = PH_ORDER.indexOf(phase === 'results' ? 'quiz' : phase);
   document.querySelectorAll('.stp').forEach(el => {
     const i = PH_ORDER.indexOf(el.dataset.p);
     el.classList.toggle('on', i === idx && phase !== 'results');
-    el.classList.toggle('done', i < idx || phase === 'results' || (phase === 'map' && i === idx));
+    el.classList.toggle('done', i < idx || phase === 'results');
   });
 }
 function fmt(s) { s = Math.max(0, Math.ceil(s)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
@@ -833,42 +955,50 @@ function updateTimerChip() {
   if (!(phase in TIMES)) { chip.hidden = true; return; }
   chip.hidden = false;
   if (phaseLeft > 0) { chip.textContent = '⏱ ' + fmt(phaseLeft); chip.classList.remove('relax'); }
-  else { chip.textContent = '⏳ Take your time'; chip.classList.add('relax'); }
+  else { chip.textContent = '⏳ No rush'; chip.classList.add('relax'); }
 }
-function setInfo(title, text) { $('infoTitle').textContent = title; $('infoText').innerHTML = text; }
+function setInfo(text) { $('infoText').textContent = text; }
 function setReadout(t) { $('readout').textContent = t; }
 let toastTimer = 0;
 function toast(msg, ms = 2600) { const el = $('toast'); el.textContent = msg; el.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), ms); }
-
-function hideOverlays() { ['title', 'discover', 'map', 'quiz', 'results'].forEach(id => show(id, false)); show('timeup', false); }
+function hideOverlays() { ['title', 'discover', 'results'].forEach(id => show(id, false)); show('timeup', false); }
 
 function goto(p) {
-  hideOverlays();
-  phase = p; timeUpShown = false;
-  phaseLeft = TIMES[p] || 0;
-  show('topbar', p !== 'title');
+  stopSpeak(); hideHand(); hideOverlays();
+  phase = p; timeUpShown = false; phaseLeft = TIMES[p] || 0;
+  const mission = PH_ORDER.includes(p) || p === 'results';
+  show('tracker', mission); show('hubTitle', !mission); show('gamesLink', !mission); show('homeBtn', mission);
   const play = p === 'challenge' || p === 'experiment' || p === 'boss';
-  show('controls', play); show('info', play);
-  show('badgeBar', p === 'experiment');
-  jumpers = []; flying = false; pendingLaunch = null; crouch = 0; bursts = [];
+  show('controls', play); show('info', play); show('badgeBar', p === 'experiment');
+  show('qbar', p === 'quiz'); show('qwhy', false); show('hubHint', p === 'hub');
+  jumpers = []; flying = false; pendingLaunch = null; crouch = 0; bursts = []; popups = []; bolts = []; devils = []; meteors = []; asts = [];
+  timeScale = 1; slowT = 0; drone = null; winSeq = null;
   pupState = { x: 0, y: 0, pose: 'stand', squash: 0, sad: false };
-  setReadout('');
-  $('jumpBtn').textContent = 'JUMP!'; $('jumpBtn').dataset.retry = ''; $('jumpBtn').disabled = false;
-  if (p === 'title') { setupTitleScene(); refreshTitle(); show('title', true); }
+  setReadout(''); $('jumpBtn').textContent = 'JUMP!'; $('jumpBtn').dataset.retry = ''; $('jumpBtn').disabled = false;
+  if (p === 'hub') setupHub();
   if (p === 'challenge') setupChallenge();
-  if (p === 'discover') { setupTitleScene(); openDiscover(); }
+  if (p === 'discover') { setupScenery(); openDiscover(); }
   if (p === 'experiment') setupExperiment();
   if (p === 'boss') setupBoss();
-  if (p === 'quiz') { setupTitleScene(); startQuiz(); }
   setTracker(); updateTimerChip();
-  requestAnimationFrame(() => { resize(); updateCamera(0, true); });
+  requestAnimationFrame(() => { resize(); updateCamera(0, true); if (p === 'hub') hubLayout(true); if (p === 'quiz') startQuiz(); demoFor(p); });
+}
+function demoFor(p) {
+  setTimeout(() => {
+    if (phase !== p) return;
+    if (p === 'hub' && !hub.moved) { const p1 = hub.portals[0]; if (p1) handDrag(hub.x, hub.y, lerp(hub.x, p1.x, 0.6), lerp(hub.y, p1.y, 0.6), 'hub'); }
+    if (p === 'challenge' && !challengeTried) handTap($('jumpBtn'), 'jump');
+    if (p === 'experiment') handTap(document.querySelector('[data-pl=moon]'), 'planet');
+    if (p === 'boss' && devils[0]) { const d = devilPos(devils[0]); handAt(d.sx, d.sy, 'shoot'); }
+    if (p === 'quiz') handAt(W / 2, H * 0.45, 'shoot');
+    if (p === 'discover') handTap(document.querySelector('[data-dc="0"]'), 'disc');
+  }, 900);
 }
 
 function setControls({ speedLocked, planets, clear, next, notesOn }) {
   aim.locked = speedLocked;
   $('speed').disabled = speedLocked;
   document.querySelectorAll('.stepb[data-k=speed]').forEach(b => b.disabled = speedLocked);
-  $('speedLock').textContent = speedLocked ? '🔒 Earth-style jump' : '';
   show('planetSeg', planets); show('clearBtn', clear);
   if (next) { $('nextBtn').textContent = next; show('nextBtn', true); } else show('nextBtn', false);
   $('nextBtn').classList.remove('pulse');
@@ -878,67 +1008,84 @@ function setControls({ speedLocked, planets, clear, next, notesOn }) {
 function syncSliders() {
   $('angle').value = aim.angle; $('speed').value = aim.speed;
   $('angleOut').textContent = Math.round(aim.angle) + '°';
-  $('speedOut').textContent = aim.speed.toFixed(1) + ' m/s';
+  $('speedOut').textContent = (aim.locked ? '🔒 ' : '') + aim.speed.toFixed(1) + ' m/s';
 }
 function setPlanet(pl) {
   world.planet = pl;
   document.querySelectorAll('#planetSeg button').forEach(b => b.classList.toggle('on', b.dataset.pl === pl));
 }
-
-function setupTitleScene() {
+function setupScenery() {
   setPlanet('mars');
-  world.craters = [{ x0: 1.2, x1: 4.8, d: 1.3 }]; world.pads = []; world.flags = [];
+  world.craters = [{ x0: 1.2, x1: 4.8, d: 1.3 }]; world.pads = []; world.flags = []; world.crates = [];
   world.view = [-3.4, 8]; world.viewH = 3.4; world.depth = 1.3;
   world.rover = { x: -1.9 }; world.station = { x: 6.6 };
-  trails = []; jumpers = [];
+  trails = []; jumpers = []; roverFixed = false;
 }
+
+/* ---------------- 1. CHALLENGE ---------------- */
 function setupChallenge() {
   setPlanet('mars');
-  world.craters = [{ x0: 0.45, x1: 4.6, d: 1.4 }]; world.pads = []; world.flags = [];
+  world.craters = [{ x0: 0.45, x1: 4.6, d: 1.4 }]; world.pads = []; world.flags = []; world.crates = [];
   world.view = [-3.3, 8.6]; world.viewH = 3.2; world.depth = 1.4;
-  world.rover = { x: -1.9 }; world.station = { x: 7.0 };
+  world.rover = { x: -1.9 }; world.station = { x: 7.0 }; roverFixed = false;
   trails = []; aim.speed = CH_SPEED; aim.angle = 40; challengeTried = false;
   setControls({ speedLocked: true, planets: false, clear: false, next: null, notesOn: false });
-  setInfo('🛰 Your rover is stranded!', 'Jump across the crater to the repair station. Strength is set to a normal <b>Earth-style jump</b>. Pick an angle (or drag on the scene), then tap <b>JUMP!</b>');
+  setInfo('Rover broke! 🛰 Jump the crater to the repair shop! 🔧');
+  setReadout('💪 Normal Earth jump: 5 m/s');
 }
+/* ---------------- 3. EXPERIMENT ---------------- */
 function setupExperiment() {
   setPlanet('mars');
   world.craters = []; world.pads = []; world.depth = 0;
   world.flags = [{ x: 4, col: '#ff4d6d', id: 'f4' }, { x: 8, col: '#ffd23f', id: 'f8' }, { x: 12, col: '#9b5de5', id: 'f12' }];
+  resetCrates();
   world.view = [-1.6, 14]; world.viewH = 4; world.rover = null; world.station = null;
   trails = []; aim.speed = 5; aim.angle = 45;
-  setControls({ speedLocked: false, planets: true, clear: true, next: 'Boss Jump ▶', notesOn: true });
-  setInfo('🧪 Jump lab', 'Change <b>strength</b>, <b>angle</b> and <b>planet</b>. Hit the flags! Tip: same strength at 30°, 45° and 60° — which goes farthest?');
+  setControls({ speedLocked: false, planets: true, clear: true, next: 'Boss ⭐ ▶', notesOn: true });
+  setInfo('Smash crates! 📦 Try 🌍 🔴 🌙. Which angle flies farthest?');
   renderBadges(); renderNotes();
 }
+function resetCrates() { world.crates = [{ x: 3, y: 1.9 }, { x: 7, y: 2.4 }, { x: 10.5, y: 1.4 }].map(c => ({ ...c, broken: false })); }
+/* ---------------- 4. BOSS ---------------- */
 function setupBoss() {
-  setPlanet('mars'); boss.won = false; boss.anim = 0; boss.attempts = 0; boss.misses = 0; boss.half = 1.0; drone = null;
+  setPlanet('mars'); boss.won = false; boss.attempts = 0; boss.misses = 0; boss.half = 1.0; boss.cleared = false; boss.blasts = 0;
   roverFixed = false; roverHop = 0;
   setControls({ speedLocked: false, planets: false, clear: false, next: null, notesOn: true });
   aim.speed = 5; aim.angle = 45; syncSliders();
   newBossRound();
+  spawnDevils();
+  $('jumpBtn').disabled = true; $('jumpBtn').textContent = '💥 Blast!';
+  setInfo('Dust devils! 🌪 Tap them to blast! 💥');
 }
 function newBossRound() {
   boss.D = Math.round((6 + Math.random() * 5) * 10) / 10;   // 6.0 – 11.0 m
   const D = boss.D, hf = boss.half;
   world.craters = [{ x0: 0.45, x1: D + hf + 2.2, d: 2.2 }];
   world.pads = [{ x0: D - hf, x1: D + hf }];
-  world.flags = []; world.depth = 2.2;
+  world.flags = []; world.crates = []; world.depth = 2.2;
   world.view = [-3.4, D + hf + 3.2]; world.viewH = 3.6;
   world.rover = { x: -2.0 }; world.station = { x: D + hf * 0.35 };
-  trails = []; jumpers = []; flying = false; pupState = { x: 0, y: 0, pose: 'stand', squash: 0, sad: false };
-  setInfo('⭐ Boss: ONE jump!', `The repair pad is <b>${D.toFixed(1)} m</b> away (center). Use your Mars notes, pick strength + angle, then JUMP! Mars gravity: 3.7 m/s².`);
-  setReadout(`Distance to platform: ${D.toFixed(1)} m`);
-  $('jumpBtn').disabled = false; $('jumpBtn').textContent = 'JUMP!';
+  trails = []; jumpers = []; flying = false; meteors = []; pupState = { x: 0, y: 0, pose: 'stand', squash: 0, sad: false };
+  if (boss.cleared) setInfo('Pick 💪 + 📐. ONE jump to the pad! 🎯');
+  setReadout(`🎯 Pad: ${D.toFixed(1)} m`);
+  $('jumpBtn').disabled = !boss.cleared; $('jumpBtn').textContent = boss.cleared ? 'JUMP!' : '💥 Blast!';
   show('nextBtn', false); renderNotes();
+}
+function spawnDevils() {
+  const D = boss.D;
+  devils = [0, 1, 2].map(i => ({ bx: 1.4 + (D - 2.4) * (i + 0.5) / 3, by: 0.9 + (i % 2) * 1.2, amp: rnd(0.4, 0.8), ph: rnd(0, 6), hp: 2, hit: 0, alive: true }));
+}
+function devilPos(d) {
+  const x = d.bx + Math.sin(T * 0.9 + d.ph) * d.amp, y = d.by + Math.sin(T * 1.7 + d.ph) * 0.25;
+  return { x, y, sx: SX(x), sy: SY(y), r: clamp(cam.scale * 0.5, 22, 60) };
 }
 
 /* ---------------- jumping ---------------- */
 function doJump() {
   if (flying || pendingLaunch) return;
-  if (phase === 'boss' && boss.won) return;
+  if (phase === 'boss' && (boss.won || !boss.cleared)) return;
   if (phase === 'boss' && $('jumpBtn').dataset.retry === '1') { $('jumpBtn').dataset.retry = ''; newBossRound(); return; }
-  sfx.click();
+  hideHand('jump'); sfx.click();
   if (phase === 'experiment' && trails.length > 9) trails.shift();
   if (phase !== 'experiment') trails = [];
   jumpers = [];
@@ -950,76 +1097,62 @@ function launch() {
   pendingLaunch = null;
   jumpers.push(makeJumper(world.planet, false));
   if (phase === 'challenge') jumpers.push(makeJumper('earth', true));
-  sfx.jump();
+  if (phase === 'boss') boss.meteorQ = [0.25, 0.75, 1.3, 1.9];
+  puff(SX(0), SY(0), 1.2); sfx.jump();
 }
 function onLand(j) {
   if (j.ghost) {
-    trails.push({ pts: j.trail, color: PCOL.earth, planet: 'earth', landX: j.x, maxY: j.maxY, ghost: true,
-      label: `Earth: ${(j.crossX ?? j.x).toFixed(1)} m`, lx: j.crossX ?? j.x });
-    return;
+    trails.push({ pts: j.trail, color: PCOL.earth, planet: 'earth', landX: j.x, maxY: j.maxY, ghost: true, label: `🌍 ${(j.crossX ?? j.x).toFixed(1)} m` });
+    puff(SX(j.x), SY(j.y), 0.8, '120,140,200'); return;
   }
-  sfx.land();
+  sfx.land(); puff(SX(j.x), SY(j.y), 1.3); shake = Math.max(shake, 5);
   const dist = j.crossX ?? j.x, inCrater = j.y < -0.01;
-  trails.push({ pts: j.trail, color: PCOL[j.planet], planet: j.planet, landX: j.x, maxY: j.maxY,
-    label: `${PEMO[j.planet]} ${dist.toFixed(1)} m`, lx: dist });
+  trails.push({ pts: j.trail, color: PCOL[j.planet], planet: j.planet, landX: j.x, maxY: j.maxY, label: `${PEMO[j.planet]} ${dist.toFixed(1)} m` });
   pupState = { x: j.x, y: j.y, pose: inCrater ? 'sad' : 'happy', squash: 0.25, sad: inCrater };
   const sx = SX(j.x), sy = SY(j.y) - pupR() * 5;
-  if (phase === 'experiment' || phase === 'boss') {
-    notes.unshift({ planet: j.planet, v: j.v, a: j.angle, d: dist });
-    if (notes.length > 30) notes.pop();
-  }
+  if (phase === 'experiment' || phase === 'boss') { notes.unshift({ planet: j.planet, v: j.v, a: j.angle, d: dist }); if (notes.length > 30) notes.pop(); }
   if (phase === 'challenge') {
     challengeTried = true;
     const ok = !inCrater && j.x > world.craters[0].x1;
     const earthD = rangeOf(CH_SPEED, j.angle, G.earth);
-    if (ok) { addBurst('WOW!', sx, sy); sfx.good(); }
-    else { addBurst('OOPS!', sx, sy, '#ff8fa3'); sfx.bad(); }
-    setInfo(ok ? '🎉 You made it across!' : '😅 Into the crater!',
-      (ok ? `On Mars you flew <b>${dist.toFixed(1)} m</b>! ` : `You went <b>${dist.toFixed(1)} m</b> — try a different angle! `) +
-      `The faded blue pup shows the <b>same jump on Earth</b>: only <b>${earthD.toFixed(1)} m</b>. Why is Mars so different? 🤔`);
-    setReadout(`Mars: ${dist.toFixed(1)} m · Earth: ${earthD.toFixed(1)} m`);
-    setControls({ speedLocked: true, planets: false, clear: false, next: 'Discover ▶', notesOn: false });
-    $('nextBtn').classList.add('pulse');
-    $('jumpBtn').textContent = 'Try again';
+    if (ok) { addBurst('WOW!', sx, sy); sfx.good(); } else { addBurst('SPLAT!', sx, sy, '#ff8fa3'); sfx.bad(); }
+    setInfo(ok ? 'Made it! 🎉 Earth-me fell in! Why? 🤔' : 'Splat! 😅 Try another angle!');
+    setReadout(`🔴 ${dist.toFixed(1)} m 🆚 🌍 ${earthD.toFixed(1)} m`);
+    setControls({ speedLocked: true, planets: false, clear: false, next: 'Why? 💡 ▶', notesOn: false });
+    $('nextBtn').classList.add('pulse'); $('jumpBtn').textContent = '↻ Again';
   }
   if (phase === 'experiment') {
-    setReadout(`${PEMO[j.planet]} ${j.v.toFixed(1)} m/s · ${j.angle}° → ${dist.toFixed(1)} m (peak ${j.maxY.toFixed(1)} m)`);
-    for (const f of world.flags) if (Math.abs(dist - f.x) <= 0.6) { f.hit = true; addBurst('BULLSEYE!', SX(f.x), SY(0) - 120); earnBadge(f.id); }
+    setReadout(`${PEMO[j.planet]} ${j.v.toFixed(1)} m/s · ${j.angle}° → ${dist.toFixed(1)} m`);
+    for (const f of world.flags) if (Math.abs(dist - f.x) <= 0.6 && !inCrater) { f.hit = true; addBurst('BULLSEYE!', SX(f.x), SY(0) - 120); explode(SX(f.x), SY(0) - 40, 0.8, ['#06d6a0', '#ffd23f', '#fff']); earnBadge(f.id); }
     if (j.planet === 'moon') earnBadge('moon');
     const same = notes.filter(n => Math.abs(n.v - j.v) < 0.05 && n.a === j.angle);
-    if (same.some(n => n.planet === 'earth') && same.some(n => n.planet === 'mars')) {
-      if (earnBadge('hopper')) toast('Same jump, Mars went about 2.6× farther than Earth!', 4200);
-    }
+    if (same.some(n => n.planet === 'earth') && same.some(n => n.planet === 'mars')) { if (earnBadge('hopper')) toast('🪐 Same jump: Mars ≈ 2.6× farther!', 4200); }
     const sp = notes.filter(n => n.planet === j.planet && Math.abs(n.v - j.v) < 0.05);
     const angles = new Set(sp.map(n => n.a));
-    if (angles.has(45) && angles.size >= 3) {
-      const best = sp.reduce((a, b) => (b.d > a.d ? b : a));
-      if (Math.abs(best.a - 45) <= 0 && earnBadge('angle')) toast('Look! On flat ground, 45° goes farthest!', 4500);
-    }
+    if (angles.has(45) && angles.size >= 3) { const best = sp.reduce((a, b) => (b.d > a.d ? b : a)); if (best.a === 45 && earnBadge('angle')) toast('📐 45° flies farthest!', 4500); }
     renderNotes();
   }
   if (phase === 'boss') {
-    boss.attempts++;
+    boss.attempts++; timeScale = 1;
     const p = world.pads[0], ok = !inCrater && j.x >= p.x0 && j.x <= p.x1;
     if (ok) bossWin(j);
     else {
-      boss.misses++;
-      addBurst('SO CLOSE!', sx, sy, '#ff8fa3'); sfx.bad();
+      boss.misses++; addBurst('SO CLOSE!', sx, sy, '#ff8fa3'); sfx.bad();
       const short = dist < boss.D;
-      setInfo('💪 Almost!', `You went <b>${dist.toFixed(1)} m</b> — the pad was at <b>${boss.D.toFixed(1)} m</b>. Next time try a little <b>${short ? 'MORE' : 'LESS'}</b> strength${Math.abs(j.angle - 45) > 8 ? ', or an angle closer to 45°' : ''}. You get a new pad distance each try!`);
-      setReadout(`Missed by ${Math.abs(dist - boss.D).toFixed(1)} m`);
-      if (boss.misses >= 3 && boss.half < 1.5) { boss.half = 1.5; toast('Bonus: the repair pad got BIGGER! 🛠', 3200); }
-      $('jumpBtn').textContent = 'Try again ↻'; $('jumpBtn').dataset.retry = '1';
+      setInfo(`Missed by ${Math.abs(dist - boss.D).toFixed(1)} m. Try ${short ? 'MORE' : 'LESS'} 💪!`);
+      setReadout(`🎯 ${boss.D.toFixed(1)} m · you ${dist.toFixed(1)} m`);
+      if (boss.misses >= 3 && boss.half < 1.5) { boss.half = 1.5; toast('🛠 Bigger landing pad!', 3200); }
+      $('jumpBtn').textContent = '↻ Again'; $('jumpBtn').dataset.retry = '1';
       renderNotes();
     }
   }
 }
 function bossWin(j) {
-  boss.won = true; boss.anim = 0;
-  addBurst('YES!', SX(j.x), SY(0) - pupR() * 6, '#06d6a0', 1.2); sfx.good(); confettiBurst();
+  boss.won = true;
+  addBurst('YES!', SX(j.x), SY(0) - pupR() * 6, '#06d6a0', 1.2); sfx.good(); confettiBurst(); explode(SX(j.x), SY(0), 1, ['#06d6a0', '#ffd23f', '#fff']);
   pupState.pose = 'cheer';
-  setInfo('🏆 Perfect landing!', 'Captain Pup reached the repair station! Sending a repair drone to the rover…');
-  setReadout(`Landed ${(j.crossX ?? j.x).toFixed(1)} m — on the pad!`);
+  setInfo('Landed! 🎉 Repair drone, GO! 🔧');
+  setReadout(`✅ ${(j.crossX ?? j.x).toFixed(1)} m`);
   drone = { t: 0, from: { x: world.station.x, y: 1.6 }, to: { x: world.rover.x, y: 2.2 } };
   save.region2 = true; persist();
   $('jumpBtn').disabled = true;
@@ -1027,31 +1160,132 @@ function bossWin(j) {
 function earnBadge(id) {
   if (badges.has(id)) return false;
   badges.add(id); save.badges = [...badges]; persist(); sfx.badge();
-  const b = BADGES.find(x => x.id === id); toast('New badge: ' + b.name + '!');
+  const b = BADGES.find(x => x.id === id); toast('🏅 New badge: ' + b.name);
   renderBadges(); return true;
 }
-function renderBadges() {
-  $('badgeBar').innerHTML = BADGES.map(b => `<span class="bdg ${badges.has(b.id) ? 'got' : ''}">${b.name}</span>`).join('');
-}
+function renderBadges() { $('badgeBar').innerHTML = BADGES.map(b => `<span class="bdg ${badges.has(b.id) ? 'got' : ''}">${b.name}</span>`).join(''); }
 function renderNotes() {
   const list = phase === 'boss' ? notes.filter(n => n.planet === 'mars') : notes;
-  $('notes').innerHTML = `<span class="lbl">📒 ${phase === 'boss' ? 'Your Mars notes:' : 'Notes:'}</span>` +
+  $('notes').innerHTML = `<span class="note" style="background:var(--yellow)">📒</span>` +
     (list.length ? list.slice(0, 12).map(n => `<span class="note">${PEMO[n.planet]} ${n.v.toFixed(1)} m/s · ${n.a}° → <b>${n.d.toFixed(1)} m</b></span>`).join('')
-      : '<span class="note">No jumps yet — your results will show up here.</span>');
+      : '<span class="note">Your jumps go here ✏️</span>');
+}
+
+/* ---------------- shooting ---------------- */
+function gunOrigin() {
+  if (phase === 'quiz') return { x: W / 2, y: H - shipR() * 1.5 };
+  const m = jumpers.find(j => !j.ghost), R = pupR();
+  const x = m ? m.x : pupState.x, y = m ? m.y : pupState.y;
+  return { x: SX(x), y: SY(y) - R * 3.1 };
+}
+function shoot(tx, ty) {
+  const o = gunOrigin(), dx = tx - o.x, dy = ty - o.y, m = Math.hypot(dx, dy) || 1, sp = 1500;
+  // a bolt aimed at a specific target only hits that one (so others in the way don't "steal" the shot)
+  const tgt = phase === 'quiz' ? asts.find(a => a.alive && Math.hypot(tx - a.x, ty - a.y) < a.r * 1.15) : null;
+  bolts.push({ x: o.x, y: o.y, vx: dx / m * sp, vy: dy / m * sp, life: 1.2, tgt });
+  if (bolts.length > 8) bolts.shift();
+  gunAim = Math.atan2(dy, dx); sfx.pew(); sparks(o.x, o.y, 5, '#9ff3ff'); hideHand('shoot');
+}
+function updateBolts(dt) {
+  for (let i = bolts.length - 1; i >= 0; i--) {
+    const b = bolts[i]; b.life -= dt; b.x += b.vx * dt; b.y += b.vy * dt;
+    let dead = b.life <= 0 || b.x < -40 || b.x > W + 40 || b.y < -40 || b.y > H + 40;
+    if (!dead && phase === 'boss') {
+      for (const d of devils) { if (!d.alive) continue; const p = devilPos(d); if (Math.hypot(b.x - p.sx, b.y - p.sy) < p.r) { hitDevil(d, p, b); dead = true; break; } }
+      if (!dead) for (const m of meteors) { if (m.dead) continue; if (Math.hypot(b.x - m.x, b.y - m.y) < m.r + 8) { m.dead = true; explode(m.x, m.y, 0.8); sfx.boom(); shake = Math.max(shake, 6); boss.blasts++; popup('+1 ☄️', m.x, m.y); dead = true; break; } }
+    }
+    if (!dead && phase === 'quiz') {
+      for (const a of asts) { if (!a.alive || (b.tgt && b.tgt !== a)) continue; if (Math.hypot(b.x - a.x, b.y - a.y) < a.r) { hitAst(a, b); dead = true; break; } }
+    }
+    if (dead) bolts.splice(i, 1);
+  }
+}
+function drawBolts() {
+  for (const b of bolts) {
+    const m = Math.hypot(b.vx, b.vy), ux = b.vx / m, uy = b.vy / m;
+    ctx.strokeStyle = 'rgba(76,201,240,.45)'; ctx.lineWidth = 12; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(b.x - ux * 34, b.y - uy * 34); ctx.lineTo(b.x, b.y); ctx.stroke();
+    ctx.fillStyle = '#bff6ff'; ctx.strokeStyle = INK; ctx.lineWidth = 2.5; ell(b.x, b.y, 9, 9); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#fff'; ell(b.x - 3, b.y - 3, 3, 3); ctx.fill();
+  }
+}
+function hitDevil(d, p, b) {
+  d.hp--; d.hit = 0.15; d.bx += Math.sign(b.vx) * 0.25; sparks(p.sx, p.sy, 12, '#ffd23f'); sfx.bonk(); popup('POW!', p.sx, p.sy - p.r);
+  if (d.hp > 0) return;
+  d.alive = false; explode(p.sx, p.sy, 1.3, ['#c98a5a', '#ffd23f', '#fff', '#ff9f1c']); sfx.boom(); shake = Math.max(shake, 12);
+  addBurst('POOF!', p.sx, p.sy - p.r, '#ffd23f', 0.8);
+  if (devils.every(x => !x.alive)) {
+    boss.cleared = true; timeScale = 0.3; slowT = 0.8;                // slow-mo on the final blow
+    setTimeout(() => { if (phase !== 'boss') return; addBurst('PATH CLEAR!', W / 2, H * 0.35, '#06d6a0'); sfx.good(); }, 500);
+    $('jumpBtn').disabled = false; $('jumpBtn').textContent = 'JUMP!'; $('jumpBtn').classList.add('pulse');
+    setTimeout(() => $('jumpBtn').classList.remove('pulse'), 2500);
+    setInfo('Pick 💪 + 📐. ONE jump to the pad! 🎯');
+  }
+}
+function drawDevil(d) {
+  const p = devilPos(d), r = p.r;
+  ctx.save(); ctx.translate(p.sx, p.sy);
+  if (d.hit > 0) { d.hit -= 1 / 60; ctx.scale(1.15, 0.9); }
+  ctx.lineWidth = 3; ctx.strokeStyle = INK;
+  for (let k = 4; k >= 0; k--) {               // funnel of spinning rings
+    const yy = -r * 0.9 + k * r * 0.45, w = r * (1.15 - k * 0.2), wob = Math.sin(T * 9 + k) * r * 0.08;
+    ctx.fillStyle = d.hit > 0 ? '#fff' : (k % 2 ? '#d99a68' : '#c07a4a'); ell(wob, yy, w, r * 0.24); ctx.fill(); ctx.stroke();
+  }
+  ctx.strokeStyle = 'rgba(255,255,255,.6)'; ctx.lineWidth = 2;
+  for (let k = 0; k < 3; k++) { const a = T * 8 + k * 2; ctx.beginPath(); ctx.ellipse(0, -r * 0.4 + k * r * 0.35, r * 0.7 - k * r * 0.15, r * 0.12, 0, a, a + 1.6); ctx.stroke(); }
+  for (const sd of [-1, 1]) {                  // goofy eyes
+    ctx.fillStyle = '#fff'; ctx.strokeStyle = INK; ctx.lineWidth = 2.5; ell(sd * r * 0.3, -r * 0.6, r * 0.2, r * 0.22); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = INK; ell(sd * r * 0.3 + Math.sin(T * 3) * r * 0.06, -r * 0.57, r * 0.09, r * 0.09); ctx.fill();
+    ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(sd * r * 0.12, -r * 0.82); ctx.lineTo(sd * r * 0.46, -r * 0.92); ctx.stroke();
+  }
+  ctx.restore();
+  for (let k = 0; k < d.hp; k++) { ctx.fillStyle = '#ff4d6d'; ctx.strokeStyle = INK; ctx.lineWidth = 2; ell(p.sx - 8 + k * 16, p.sy + r * 1.2, 6, 6); ctx.fill(); ctx.stroke(); }
+}
+function updateMeteors(dt, m) {
+  if (m && boss.meteorQ.length && m.t >= boss.meteorQ[0]) {
+    boss.meteorQ.shift();
+    const R = pupR(), tx = SX(m.x + m.vx * 0.7), ty = SY(m.y + m.vy * 0.7) - R * 3;
+    const x0 = W + 30, y0 = rnd(0.05, 0.35) * H, d = Math.hypot(tx - x0, ty - y0), sp = Math.max(260, W * 0.33);
+    meteors.push({ x: x0, y: y0, vx: (tx - x0) / d * sp, vy: (ty - y0) / d * sp, r: clamp(cam.scale * 0.32, 13, 30), rot: 0, bonked: false });
+  }
+  for (let i = meteors.length - 1; i >= 0; i--) {
+    const k = meteors[i]; if (k.dead || k.x < -60 || k.y > H + 60 || k.y < -80) { meteors.splice(i, 1); continue; }
+    k.x += k.vx * dt; k.y += k.vy * dt; k.rot += dt * 4;
+    if (Math.random() < 0.6) addPart({ type: 'smoke', x: k.x, y: k.y, vx: 0, vy: 0, g: 0, r: k.r * 0.5, grow: 10, life: 0.4, max: 0.4, col: '255,160,60' });
+    const o = gunOrigin(), R = pupR() * 1.6, dx = k.x - o.x, dy = k.y - o.y, dd = Math.hypot(dx, dy);
+    if (!k.bonked && dd < R + k.r) {          // bounces off Captain Pup's bubble shield
+      const nx = dx / dd, ny = dy / dd, vn = k.vx * nx + k.vy * ny;
+      if (vn < 0) { k.vx -= 2 * vn * nx; k.vy -= 2 * vn * ny; }
+      k.bonked = true; sparks(o.x + nx * R, o.y + ny * R, 12, '#9ff3ff'); sfx.bonk(); popup('BONK!', o.x, o.y - R - 10, '#9ff3ff'); shieldFlash = 0.4;
+    }
+  }
+}
+let shieldFlash = 0;
+function drawMeteor(k) {
+  ctx.save(); ctx.translate(k.x, k.y); ctx.rotate(k.rot);
+  ctx.fillStyle = '#8a5a44'; ctx.strokeStyle = INK; ctx.lineWidth = 3;
+  ctx.beginPath(); for (let i = 0; i < 9; i++) { const a = i / 9 * TAU, rr = k.r * (0.8 + hash(i + k.r) * 0.3); ctx.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); } ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#6b4433'; ell(k.r * 0.25, -k.r * 0.2, k.r * 0.22, k.r * 0.22); ctx.fill(); ell(-k.r * 0.3, k.r * 0.25, k.r * 0.15, k.r * 0.15); ctx.fill();
+  ctx.restore();
+}
+function drawCrate(c) {
+  if (c.broken) return;
+  const s = clamp(cam.scale * 0.6, 22, 60), x = SX(c.x), y = SY(c.y) + Math.sin(T * 2 + c.x) * 4;
+  ctx.save(); ctx.translate(x, y); ctx.rotate(Math.sin(T * 1.3 + c.x) * 0.08);
+  ctx.fillStyle = '#d99a4e'; ctx.strokeStyle = INK; ctx.lineWidth = 3; rrect(-s / 2, -s / 2, s, s, 6); ctx.fill(); ctx.stroke();
+  ctx.strokeStyle = '#8a5a2a'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-s / 2 + 5, -s / 2 + 5); ctx.lineTo(s / 2 - 5, s / 2 - 5); ctx.moveTo(s / 2 - 5, -s / 2 + 5); ctx.lineTo(-s / 2 + 5, s / 2 - 5); ctx.stroke();
+  ctx.strokeStyle = INK; ctx.lineWidth = 2; ctx.strokeRect(-s / 2 + 4, -s / 2 + 4, s - 8, s - 8);
+  ctx.restore();
 }
 
 /* ---------------- timer-up prompt ---------------- */
 function onTimeUp() {
   if (timeUpShown) return; timeUpShown = true;
   if (phase === 'discover') { $('discNext').classList.add('pulse'); return; }
-  const txt = {
-    challenge: challengeTried ? 'Ready to find out why Mars jumps are so big?' : 'No rush! Keep trying, or move on to find out the secret.',
-    experiment: 'Great experimenting! Keep playing, or head to the Boss jump.',
-    boss: 'Take your time! Want a bigger landing pad to help?',
-  }[phase];
-  const mv = { challenge: 'Discover ▶', experiment: 'Boss Jump ▶', boss: 'Bigger pad 🛠' }[phase];
-  if (!txt) return;
   if (phase === 'challenge' && challengeTried) { $('nextBtn').classList.add('pulse'); return; }
+  const txt = { challenge: 'Ready for the secret? 🤫', experiment: 'Ready for the Boss? ⭐', boss: 'Want a bigger pad? 🛠' }[phase];
+  const mv = { challenge: 'Why? 💡 ▶', experiment: 'Boss ⭐ ▶', boss: 'Bigger 🛠' }[phase];
+  if (!txt) return;
   $('timeupText').textContent = txt; $('moveBtn').textContent = mv; show('timeup', true);
 }
 $('keepBtn').onclick = () => { sfx.click(); show('timeup', false); };
@@ -1059,35 +1293,216 @@ $('moveBtn').onclick = () => {
   sfx.click(); show('timeup', false);
   if (phase === 'challenge') goto('discover');
   else if (phase === 'experiment') goto('boss');
-  else if (phase === 'boss') { boss.half = 1.6; if (!flying) newBossRound(); toast('The repair pad got BIGGER! 🛠'); }
+  else if (phase === 'boss') { boss.half = 1.6; if (!flying) { const c = boss.cleared; newBossRound(); boss.cleared = c; } toast('🛠 Bigger landing pad!'); }
 };
+
+/* =====================================================================
+   HUB MAP — fly Captain Pup's jetpack between craters
+   ===================================================================== */
+const hub = { x: 0, y: 0, vx: 0, vy: 0, joy: null, target: null, portals: [], rocks: [], stars: [], got: 0, entering: null, cool: 0, time: 0, moved: false, pr: 16 };
+const PORTALS = [{ id: 1, name: 'Crater Camp' }, { id: 2, name: 'Dusty Dunes' }, { id: 3, name: 'Ice Caps' }, { id: 4, name: 'Big Volcano' }];
+const keys = new Set();
+function hubLayout(reset) {
+  const port = H > W * 1.05;
+  const pos = port ? [[0.3, 0.72], [0.72, 0.53], [0.3, 0.34], [0.7, 0.15]] : [[0.17, 0.6], [0.4, 0.28], [0.63, 0.66], [0.85, 0.3]];
+  const R = clamp(Math.min(W, H) * 0.1, 42, 120);
+  hub.pr = clamp(Math.min(W, H) * 0.028, 11, 28);
+  hub.portals = PORTALS.map((p, i) => ({ ...p, x: pos[i][0] * W, y: pos[i][1] * H, r: R,
+    open: i === 0, locked: i === 0 ? false : i === 1 ? !save.region2 : true }));
+  const rk = port ? [[0.8, 0.85], [0.12, 0.52], [0.55, 0.38], [0.9, 0.35]] : [[0.3, 0.86], [0.52, 0.47], [0.76, 0.86], [0.08, 0.25]];
+  hub.rocks = rk.map(([fx, fy], i) => ({ x: fx * W, y: fy * H, r: R * (0.35 + 0.12 * (i % 2)) }));
+  if (!hub.stars.length) {
+    const st = port ? [[0.5, 0.86], [0.12, 0.88], [0.55, 0.25], [0.9, 0.7], [0.15, 0.15]] : [[0.3, 0.38], [0.5, 0.8], [0.73, 0.48], [0.93, 0.62], [0.06, 0.88]];
+    hub.stars = st.map(([fx, fy]) => ({ fx, fy, got: false })); hub.got = 0;
+  }
+  if (reset) { const sp = port ? [0.55, 0.8] : [0.36, 0.8]; hub.x = sp[0] * W; hub.y = sp[1] * H; hub.vx = hub.vy = 0; hub.target = null; }
+  hub.x = clamp(hub.x, hub.pr * 2, W - hub.pr * 2); hub.y = clamp(hub.y, hub.pr * 3, H - hub.pr * 2.5);
+}
+function setupHub() { hub.entering = null; hub.time = 0; hub.joy = null; hub.target = null; world.planet = 'mars'; hubLayout(true); }
+function updateHub(dt) {
+  hub.time += dt; hub.cool -= dt;
+  if (hub.entering) {
+    const e = hub.entering; e.t += dt; const k = Math.min(1, e.t / 0.6);
+    hub.x = lerp(e.x0, e.p.x, k); hub.y = lerp(e.y0, e.p.y, k);
+    if (e.t > 0.65 && !e.opened) { e.opened = true; openCard(); }
+    return;
+  }
+  if (!$('title').hidden) return;
+  let ax = 0, ay = 0;
+  if (hub.joy) { const dx = hub.joy.cx - hub.joy.sx, dy = hub.joy.cy - hub.joy.sy, m = Math.hypot(dx, dy); if (m > 6) { const k = Math.min(1, m / 70); ax = dx / m * k; ay = dy / m * k; } }
+  if (keys.has('ArrowLeft') || keys.has('KeyA')) ax -= 1; if (keys.has('ArrowRight') || keys.has('KeyD')) ax += 1;
+  if (keys.has('ArrowUp') || keys.has('KeyW')) ay -= 1; if (keys.has('ArrowDown') || keys.has('KeyS')) ay += 1;
+  if (hub.target) { const dx = hub.target.x - hub.x, dy = hub.target.y - hub.y, m = Math.hypot(dx, dy); if (m < 12) hub.target = null; else { const k = Math.min(1, m / 90); ax = dx / m * k; ay = dy / m * k; } }
+  if (ax || ay) { hub.moved = true; hideHand('hub'); }
+  const sc = Math.min(W, H) / 700, A = 1500 * sc, VMAX = 520 * sc;
+  hub.vx += ax * A * dt; hub.vy += ay * A * dt;
+  const damp = Math.exp(-dt * 2.4); hub.vx *= damp; hub.vy *= damp;
+  const sp = Math.hypot(hub.vx, hub.vy); if (sp > VMAX) { hub.vx *= VMAX / sp; hub.vy *= VMAX / sp; }
+  hub.x += hub.vx * dt; hub.y += hub.vy * dt;
+  const pr = hub.pr, mx = pr * 1.6, top = pr * 3, bot = H - pr * 2.4 - (W < 700 ? 40 : 0);
+  if (hub.x < mx) { hub.x = mx; hub.vx = Math.abs(hub.vx) * 0.6; } if (hub.x > W - mx) { hub.x = W - mx; hub.vx = -Math.abs(hub.vx) * 0.6; }
+  if (hub.y < top) { hub.y = top; hub.vy = Math.abs(hub.vy) * 0.6; } if (hub.y > bot) { hub.y = bot; hub.vy = -Math.abs(hub.vy) * 0.6; }
+  const bounce = (cx, cy, rr, rest, onHit) => {
+    const dx = hub.x - cx, dy = hub.y - cy, d = Math.hypot(dx, dy) || 1;
+    if (d >= rr) return;
+    const nx = dx / d, ny = dy / d; hub.x = cx + nx * rr; hub.y = cy + ny * rr;
+    const vn = hub.vx * nx + hub.vy * ny;
+    if (vn < 0) { hub.vx -= (1 + rest) * vn * nx; hub.vy -= (1 + rest) * vn * ny; }
+    hub.target = null; if (onHit && -vn > 40) onHit(cx + nx * (rr - pr), cy + ny * (rr - pr), -vn);
+  };
+  for (const r of hub.rocks) bounce(r.x, r.y, r.r + pr, 0.6, (x, y, v) => { if (hub.cool <= 0) { sfx.thud(); puff(x, y, 0.8); hub.cool = 0.25; } });
+  for (const p of hub.portals) {
+    if (p.open) {
+      if (Math.hypot(hub.x - p.x, hub.y - p.y) < p.r * 0.6) { hub.entering = { p, t: 0, x0: hub.x, y0: hub.y }; hub.vx = hub.vy = 0; hub.joy = null; sfx.whoosh(); sparks(p.x, p.y, 16); }
+    } else {
+      bounce(p.x, p.y, p.r * 1.05 + pr, 0.9, (x, y) => {
+        if (hub.cool > 0) return; hub.cool = 0.6;
+        sparks(x, y, 18, p.locked ? '#9ff3ff' : '#ffd23f'); sfx.bonk(); shake = Math.max(shake, 6);
+        addBurst(p.locked ? 'LOCKED!' : 'SOON!', p.x, p.y - p.r * 1.2, p.locked ? '#4cc9f0' : '#ffd23f', 0.6);
+      });
+    }
+  }
+  for (const s of hub.stars) {
+    if (s.got) continue;
+    if (Math.hypot(hub.x - s.fx * W, hub.y - s.fy * H) < pr * 2.6) { s.got = true; hub.got++; sfx.ding(); explode(s.fx * W, s.fy * H, 0.5, ['#ffd23f', '#fff']); popup(`⭐ ${hub.got}/5`, s.fx * W, s.fy * H - 20);
+      if (hub.got === 5) { addBurst('ALL STARS!', W / 2, H * 0.3); confettiBurst(80); sfx.good(); } }
+  }
+  // Region 2's force field shatters the first time you come back after beating the boss
+  if (save.region2 && !save.r2Shown && hub.time > 0.9) {
+    save.r2Shown = true; persist();
+    const p = hub.portals[1];
+    for (let i = 0; i < 24; i++) { const a = rnd(0, TAU), sp = rnd(150, 450); addPart({ type: 'shard', x: p.x + Math.cos(a) * p.r, y: p.y + Math.sin(a) * p.r, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, g: 300, r: rnd(6, 14), rot: rnd(0, 6), vrot: rnd(-10, 10), life: 1.2, max: 1.2 }); }
+    explode(p.x, p.y, 1.6, ['#4cc9f0', '#fff', '#ffd23f']); sfx.bigboom(); shake = 16;
+    addBurst('REGION 2 UNLOCKED!', p.x, p.y - p.r * 1.3, '#06d6a0', 1);
+  }
+}
+const marsDots = Array.from({ length: 110 }, (_, i) => [hash(i * 3.1), hash(i * 7.7), 2 + hash(i) * 5]);
+function drawHub(dt) {
+  const g = ctx.createRadialGradient(W * 0.5, H * 0.45, 10, W * 0.5, H * 0.5, Math.max(W, H) * 0.75);
+  g.addColorStop(0, '#ec8d58'); g.addColorStop(1, '#bb5530');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = 'rgba(140,50,20,.28)'; for (const [a, b, r] of marsDots) { ell(a * W, b * H, r, r * 0.7); ctx.fill(); }
+  ctx.strokeStyle = 'rgba(255,220,180,.25)'; ctx.lineWidth = 6;
+  for (let k = 0; k < 4; k++) { ctx.beginPath(); for (let x = 0; x <= W; x += 30) ctx.lineTo(x, H * (0.18 + k * 0.24) + Math.sin(x * 0.01 + k * 2) * 18); ctx.stroke(); }
+  // dotted flight path between craters
+  ctx.setLineDash([4, 14]); ctx.lineCap = 'round'; ctx.strokeStyle = 'rgba(29,27,38,.6)'; ctx.lineWidth = 5; ctx.beginPath();
+  hub.portals.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); ctx.stroke(); ctx.setLineDash([]);
+  for (const r of hub.rocks) {
+    ctx.fillStyle = 'rgba(0,0,0,.18)'; ell(r.x + 6, r.y + r.r * 0.6, r.r, r.r * 0.45); ctx.fill();
+    ctx.fillStyle = '#9c4a28'; ctx.strokeStyle = INK; ctx.lineWidth = 3; ctx.beginPath();
+    for (let i = 0; i < 9; i++) { const a = i / 9 * TAU, rr = r.r * (0.85 + hash(i + r.x) * 0.2); ctx.lineTo(r.x + Math.cos(a) * rr, r.y + Math.sin(a) * rr * 0.85); }
+    ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.fillStyle = 'rgba(255,255,255,.18)'; ell(r.x - r.r * 0.3, r.y - r.r * 0.35, r.r * 0.3, r.r * 0.15); ctx.fill();
+  }
+  for (const p of hub.portals) {
+    const R = p.r;
+    ctx.fillStyle = '#8f3a1a'; ctx.strokeStyle = INK; ctx.lineWidth = 4; ell(p.x, p.y, R * 1.05, R * 0.9); ctx.fill(); ctx.stroke();
+    const ig = ctx.createRadialGradient(p.x, p.y + R * 0.15, 4, p.x, p.y, R);
+    ig.addColorStop(0, p.open ? '#2a0f30' : '#4a1c0c'); ig.addColorStop(1, '#6e2a12');
+    ctx.fillStyle = ig; ell(p.x, p.y + R * 0.06, R * 0.8, R * 0.66); ctx.fill(); ctx.lineWidth = 3; ctx.stroke();
+    if (p.open) {      // swirling portal + bouncing GO arrow
+      for (let k = 0; k < 3; k++) { ctx.strokeStyle = ['#ffd23f', '#ff4d6d', '#4cc9f0'][k]; ctx.lineWidth = 5; ctx.beginPath(); ctx.ellipse(p.x, p.y + R * 0.06, R * (0.65 - k * 0.17), R * (0.52 - k * 0.14), 0, T * (2 + k) + k, T * (2 + k) + k + 4); ctx.stroke(); }
+      const ay = p.y - R * 1.35 + Math.sin(T * 5) * 8;
+      inkText(ctx, 'GO!', p.x, ay - 18, clamp(R * 0.38, 18, 36), '#06d6a0');
+      ctx.fillStyle = '#06d6a0'; ctx.strokeStyle = INK; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(p.x - 14, ay); ctx.lineTo(p.x + 14, ay); ctx.lineTo(p.x, ay + 18); ctx.closePath(); ctx.fill(); ctx.stroke();
+      if (save.done) inkText(ctx, '★'.repeat(save.stars) + '☆'.repeat(3 - save.stars), p.x, p.y + R * 1.32, clamp(R * 0.32, 16, 30), '#ffd23f');
+      ctx.save(); ctx.translate(p.x - R * 1.35, p.y + R * 0.2); drawRover(ctx, 0, 0, R * 0.32, save.region2, T); ctx.restore(); ctx = mainCtx;
+    }
+    inkText(ctx, String(p.id), p.x, p.y + R * 0.08, clamp(R * 0.6, 26, 64), p.open ? '#ffd23f' : '#e7e0cf');
+    const lw = clamp(R * 0.24, 13, 22);
+    ctx.font = `900 ${lw}px Nunito, system-ui`; const tw = ctx.measureText(p.name).width + 22;
+    ctx.fillStyle = '#fffaf0'; ctx.strokeStyle = INK; ctx.lineWidth = 3; rrect(p.x - tw / 2, p.y + R * 0.92, tw, lw + 12, 10); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = INK; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(p.name, p.x, p.y + R * 0.92 + (lw + 12) / 2 + 1);
+    if (!p.open && p.locked) {   // wobbly force field
+      const wob = 1 + Math.sin(T * 3 + p.id) * 0.02;
+      ctx.fillStyle = 'rgba(76,201,240,.22)'; ell(p.x, p.y, R * 1.05 * wob, R * 1.05 / wob); ctx.fill();
+      ctx.strokeStyle = 'rgba(160,240,255,.9)'; ctx.lineWidth = 4; ctx.stroke();
+      ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 2;
+      for (let k = -2; k <= 2; k++) { ctx.beginPath(); ctx.ellipse(p.x, p.y, R * 1.05 * Math.abs(Math.cos(T * 0.8 + k * 0.6)), R * 1.05, 0, 0, TAU); ctx.stroke(); }
+      emoji(ctx, '🔒', p.x + R * 0.75, p.y - R * 0.75, clamp(R * 0.4, 18, 40));
+    } else if (!p.open) {
+      emoji(ctx, '🚧', p.x + R * 0.75, p.y - R * 0.75, clamp(R * 0.4, 18, 40));
+      inkText(ctx, 'SOON', p.x, p.y - R * 1.15, clamp(R * 0.26, 14, 24), '#ffd23f');
+    }
+  }
+  for (const s of hub.stars) {
+    if (s.got) continue;
+    const x = s.fx * W, y = s.fy * H + Math.sin(T * 3 + s.fx * 9) * 5, r = clamp(hub.pr * 1.1, 12, 26);
+    ctx.fillStyle = '#ffd23f'; ctx.strokeStyle = INK; ctx.lineWidth = 3; starPath(ctx, x, y, r, r * 0.45, 5, Math.sin(T * 2 + s.fy * 7) * 0.3); ctx.fill(); ctx.stroke();
+  }
+  // jetpack Pup
+  const pr = hub.pr, sp = Math.hypot(hub.vx, hub.vy), sc = hub.entering ? 1 - Math.min(0.9, hub.entering.t / 0.6) : 1;
+  ctx.save(); ctx.translate(hub.x, hub.y); ctx.scale(sc, sc); if (hub.entering) ctx.rotate(hub.entering.t * 12);
+  const fl = pr * (1.1 + Math.min(1.5, sp / 200) + Math.sin(T * 40) * 0.25);
+  for (const sd of [-1, 1]) {
+    ctx.fillStyle = '#ff9f1c'; ctx.strokeStyle = INK; ctx.lineWidth = 2.5; ctx.beginPath();
+    ctx.moveTo(sd * pr * 0.5 - pr * 0.25, pr * 0.9); ctx.quadraticCurveTo(sd * pr * 0.5, pr * 0.9 + fl * 1.3, sd * pr * 0.5 + pr * 0.25, pr * 0.9); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#ffd23f'; ctx.beginPath(); ctx.moveTo(sd * pr * 0.5 - pr * 0.12, pr * 0.9); ctx.quadraticCurveTo(sd * pr * 0.5, pr * 0.9 + fl * 0.7, sd * pr * 0.5 + pr * 0.12, pr * 0.9); ctx.closePath(); ctx.fill();
+  }
+  if (Math.random() < 0.5 && !hub.entering) addPart({ type: 'smoke', x: hub.x + rnd(-4, 4), y: hub.y + pr * 1.6 + fl, vx: rnd(-20, 20), vy: 40, g: 0, r: pr * 0.3, grow: 14, life: 0.5, max: 0.5, col: '255,230,200' });
+  drawPup(ctx, 0, pr * 2.1, pr, { t: T, pose: 'fly', tilt: clamp(hub.vx * 0.0012, -0.35, 0.35) });
+  ctx.restore();
+  if (hub.joy) {
+    const j = hub.joy, dx = j.cx - j.sx, dy = j.cy - j.sy, m = Math.hypot(dx, dy), k = m > 70 ? 70 / m : 1;
+    ctx.fillStyle = 'rgba(255,250,240,.35)'; ctx.strokeStyle = INK; ctx.lineWidth = 3; ell(j.sx, j.sy, 70, 70); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#ffd23f'; ell(j.sx + dx * k, j.sy + dy * k, 28, 28); ctx.fill(); ctx.stroke();
+  }
+  if (hub.target) { ctx.strokeStyle = '#fffaf0'; ctx.lineWidth = 3; ell(hub.target.x, hub.target.y, 14 + Math.sin(T * 8) * 3, 14 + Math.sin(T * 8) * 3); ctx.stroke(); }
+  inkText(ctx, `⭐ ${hub.got}/5`, W - 60, 28, 22, '#ffd23f');
+}
+function openCard() {
+  show('title', true); hideHand();
+  $('titleStars').innerHTML = save.done ? [0, 1, 2].map(i => i < save.stars ? '★' : '<span class="off">★</span>').join('') : '';
+  sfx.boing();
+}
+$('cardClose').onclick = () => {
+  sfx.click(); show('title', false);
+  const p = hub.portals[0]; hub.entering = null; hub.x = p.x + p.r * 1.4; hub.y = Math.min(H - hub.pr * 3, p.y + p.r * 0.4); hub.vx = 200; hub.vy = 0;
+};
+$('startBtn').onclick = () => { sfx.click(); notes = []; goto('challenge'); };
+$('homeBtn').onclick = () => { sfx.click(); goto('hub'); };
+function drawCardArt(dt) {
+  const c = $('cardArt'), r = c.getBoundingClientRect(); if (!r.width) return;
+  const d = Math.min(2, window.devicePixelRatio || 1), w = r.width, h = r.height;
+  if (c.width !== Math.round(w * d)) { c.width = Math.round(w * d); c.height = Math.round(h * d); }
+  const x = c.getContext('2d'); x.setTransform(d, 0, 0, d, 0, 0);
+  const g = x.createLinearGradient(0, 0, 0, h); g.addColorStop(0, '#d98a5c'); g.addColorStop(1, '#f6b4a3'); x.fillStyle = g; x.fillRect(0, 0, w, h);
+  const gy = h * 0.78, c0 = w * 0.3, c1 = w * 0.68;
+  x.fillStyle = '#a33c14'; x.fillRect(0, gy, w, h); x.fillStyle = '#6e2a12'; x.fillRect(c0, gy, c1 - c0, h);
+  x.strokeStyle = INK; x.lineWidth = 3; x.beginPath(); x.moveTo(0, gy); x.lineTo(c0, gy); x.lineTo(c0, h); x.moveTo(c1, h); x.lineTo(c1, gy); x.lineTo(w, gy); x.stroke();
+  const per = 2.2, tt = (T % per) / per, sx = w * 0.18, ex = w * 0.84, px = lerp(sx, ex, Math.min(1, tt * 1.25)), k = Math.min(1, tt * 1.25);
+  const py = gy - Math.sin(k * Math.PI) * h * 0.5;
+  x.fillStyle = 'rgba(255,106,26,.8)'; for (let i = 0; i <= 20; i++) { const kk = i / 20; if (kk > k) break; x.beginPath(); x.arc(lerp(sx, ex, kk), gy - Math.sin(kk * Math.PI) * h * 0.5, 3, 0, TAU); x.fill(); }
+  drawPup(x, px, py, h * 0.07, { t: T, pose: k < 1 && k > 0 ? 'fly' : 'cheer' });
+  drawRover(x, w * 0.08, gy, h * 0.12, false, T); drawStation(x, w * 0.9, gy, h * 0.13, T); ctx = mainCtx;
+}
 
 /* =====================================================================
    DISCOVER CARDS (mini canvases)
    ===================================================================== */
-const disc = { seen: new Set(), drop: null, scale: { on: false, val: 100 }, why: 0, jump: null };
+const disc = { seen: new Set(), drop: null, scalePl: 'earth', scaleVal: 100, why: 0, jump: null };
 function openDiscover() {
-  show('discover', true); disc.seen.clear(); disc.drop = null; disc.scale = { on: false, val: 100 }; disc.why = 0; disc.jump = null;
+  show('discover', true); disc.seen.clear(); disc.drop = null; disc.scalePl = 'earth'; disc.scaleVal = 100; disc.why = 0; disc.jump = null;
   document.querySelectorAll('.dcard').forEach(c => c.classList.remove('seen'));
-  $('dt0').textContent = 'Drop a ball from the same height (2 m) on Earth and on Mars. Which lands first?';
-  $('dt1').textContent = 'Captain Pup\'s friend weighs 100 lb on Earth. Take the scale to Mars!';
-  $('dt2').textContent = 'Bigger, heavier planets pull harder. Let\'s compare!';
-  $('dt3').textContent = 'Same push, two planets. How high does Captain Pup go?';
-  document.querySelector('[data-dc="1"]').textContent = 'Go to Mars';
+  document.querySelectorAll('[data-sc]').forEach(b => b.classList.toggle('on', b.dataset.sc === 'earth'));
+  document.querySelectorAll('#discover details').forEach(d => d.open = false);
+  $('dt1').textContent = 'Same pup. Tap a planet!';
   $('discNext').classList.remove('pulse');
   $('discover').querySelector('.card').scrollTop = 0;
+  document.querySelectorAll('.gbar i').forEach(i => i.style.width = '0');
+  setTimeout(() => document.querySelectorAll('.gbar i').forEach(i => i.style.width = Math.max(14, +i.dataset.w) + '%'), 120);
 }
+function markSeen(i) { disc.seen.add(i); $('dc' + i).classList.add('seen'); if (disc.seen.size === 4) $('discNext').classList.add('pulse'); hideHand('disc'); }
 document.querySelectorAll('[data-dc]').forEach(b => b.onclick = () => {
-  const i = +b.dataset.dc; sfx.click(); disc.seen.add(i); $('dc' + i).classList.add('seen');
-  if (i === 0) { disc.drop = { t: 0 }; $('dt0').innerHTML = 'Watch… Earth pulls harder, so its ball speeds up faster.'; }
-  if (i === 1) {
-    disc.scale.on = !disc.scale.on; b.textContent = disc.scale.on ? 'Back to Earth' : 'Go to Mars';
-    $('dt1').innerHTML = disc.scale.on ? 'On Mars the scale shows <b>about 38 lb</b>! Same pup, same <b>mass</b> (amount of stuff) — only the <b>weight</b> (the pull) changed.'
-      : 'On Earth: <b>100 lb</b>. Weight = how hard the planet pulls on you.';
-  }
-  if (i === 2) { disc.why = 0.001; $('dt2').innerHTML = 'Mars is about <b>half as wide</b> as Earth and has only about <b>1/10 of its mass</b>. Less mass → less pull!'; }
-  if (i === 3) { disc.jump = { t: 0 }; sfx.boing(); $('dt3').innerHTML = 'With the same push you go about <b>2.6× as high</b> on Mars! (Because 100 ÷ 38 ≈ 2.6)'; }
-  if (disc.seen.size === 4) $('discNext').classList.add('pulse');
+  const i = +b.dataset.dc; sfx.click(); markSeen(i);
+  if (i === 0) disc.drop = { t: 0, lanes: ['earth', 'mars', 'moon'].map(pl => ({ pl, y: 2, v: 0, hits: 0, first: null, rest: false })) };
+  if (i === 2) { disc.why = 0.001; sfx.boing(); }
+  if (i === 3) { disc.jump = { t: 0 }; sfx.boing(); }
+});
+document.querySelectorAll('[data-sc]').forEach(b => b.onclick = () => {
+  sfx.click(); markSeen(1); disc.scalePl = b.dataset.sc;
+  document.querySelectorAll('[data-sc]').forEach(x => x.classList.toggle('on', x === b));
+  const lb = Math.round(100 * G[disc.scalePl] / G.earth);
+  $('dt1').textContent = { earth: 'Earth: 100 lb.', mars: 'Mars: about 38 lb! Same pup!', moon: 'Moon: about 16 lb! Same pup!' }[disc.scalePl] || lb + ' lb';
 });
 $('discNext').onclick = () => { sfx.click(); goto('experiment'); };
 $('discSkip').onclick = () => { sfx.click(); goto('experiment'); };
@@ -1100,195 +1515,228 @@ function prepMini(id) {
 }
 function miniSky(x, x0, w, h, pl) {
   const g = x.createLinearGradient(0, 0, 0, h);
-  if (pl === 'mars') { g.addColorStop(0, '#d98a5c'); g.addColorStop(1, '#f6b4a3'); } else { g.addColorStop(0, '#5fb6ef'); g.addColorStop(1, '#d4efff'); }
+  if (pl === 'mars') { g.addColorStop(0, '#d98a5c'); g.addColorStop(1, '#f6b4a3'); }
+  else if (pl === 'moon') { g.addColorStop(0, '#0d0b18'); g.addColorStop(1, '#2d2848'); }
+  else { g.addColorStop(0, '#5fb6ef'); g.addColorStop(1, '#d4efff'); }
   x.fillStyle = g; x.fillRect(x0, 0, w, h);
-  x.fillStyle = pl === 'mars' ? '#c84a1a' : '#59b84a'; x.fillRect(x0, h - 18, w, 18);
+  x.fillStyle = { mars: '#c84a1a', earth: '#59b84a', moon: '#b9b6c2' }[pl]; x.fillRect(x0, h - 18, w, 18);
   x.strokeStyle = INK; x.lineWidth = 2; x.beginPath(); x.moveTo(x0, h - 18); x.lineTo(x0 + w, h - 18); x.stroke();
-  inkText(x, pl === 'mars' ? 'MARS' : 'EARTH', x0 + w / 2, 14, 15, '#fff', 'center', 3);
+  emoji(x, PEMO[pl], x0 + w / 2, 14, 16);
 }
+let miniParts = [];
 function drawDiscover(dt, t) {
-  // card 0: drop test, real fall times from 2 m
+  // card 0: crash test — crates dropped from 2 m, real gravity, bouncy landings
   {
-    const [x, w, h] = prepMini('dcv0'); const hw = w / 2;
+    const [x, w, h] = prepMini('dcv0'), lw = w / 3, top = 34, bot = h - 18 - 12, H2 = 2;
+    const lanes = disc.drop ? disc.drop.lanes : ['earth', 'mars', 'moon'].map(pl => ({ pl, y: 2, first: null }));
     if (disc.drop) disc.drop.t += dt;
-    const tt = disc.drop ? Math.max(0, disc.drop.t - 0.3) : 0;
-    ['earth', 'mars'].forEach((pl, i) => {
-      const x0 = i * hw; miniSky(x, x0, hw, h, pl);
-      const top = 34, bot = h - 18 - 10, H2 = 2;
-      const fallT = Math.sqrt(2 * H2 / G[pl]);
-      const yM = Math.max(0, H2 - 0.5 * G[pl] * tt * tt);
-      const by = top + (1 - yM / H2) * (bot - top);
-      x.fillStyle = '#ff9f1c'; x.beginPath(); x.arc(x0 + hw / 2, by, 10, 0, TAU); x.fill(); x.lineWidth = 2.5; x.strokeStyle = INK; x.stroke();
-      x.beginPath(); x.moveTo(x0 + hw / 2 - 10, by); x.quadraticCurveTo(x0 + hw / 2, by - 4, x0 + hw / 2 + 10, by); x.stroke();
-      const shown = Math.min(tt, fallT);
-      if (disc.drop) inkText(x, shown.toFixed(2) + ' s' + (tt >= fallT ? ' ✔' : ''), x0 + hw / 2, h - 8, 14, tt >= fallT ? '#ffd23f' : '#fff', 'center', 3);
+    lanes.forEach((L, i) => {
+      const x0 = i * lw; miniSky(x, x0, lw, h, L.pl);
+      if (disc.drop && disc.drop.t > 0.3 && !L.rest) {
+        const sub = 4, hh = dt / sub;
+        for (let s = 0; s < sub; s++) {
+          L.v -= G[L.pl] * hh; L.y += L.v * hh;
+          if (L.y <= 0) {
+            L.y = 0; if (L.first === null) L.first = disc.drop.t - 0.3;
+            const impact = -L.v; L.v = impact * 0.45; L.hits++;
+            for (let k = 0; k < 6; k++) miniParts.push({ x: x0 + lw / 2 + rnd(-10, 10), y: bot + 10, vx: rnd(-60, 60), vy: rnd(-70, -20), life: 0.5 });
+            if (L.hits === 1) sfx.thud();
+            if (L.v < 0.35) { L.v = 0; L.rest = true; }
+          }
+        }
+      }
+      const by = top + (1 - L.y / H2) * (bot - top), s = 22, sq = L.rest || L.y > 0.02 ? 1 : 0.8;
+      x.save(); x.translate(x0 + lw / 2, by + 10); x.scale(1 / sq, sq);
+      x.fillStyle = '#d99a4e'; x.strokeStyle = INK; x.lineWidth = 2.5; x.fillRect(-s / 2, -s, s, s); x.strokeRect(-s / 2, -s, s, s);
+      x.beginPath(); x.moveTo(-s / 2, -s); x.lineTo(s / 2, 0); x.moveTo(s / 2, -s); x.lineTo(-s / 2, 0); x.stroke(); x.restore();
+      if (L.first !== null) inkText(x, L.first.toFixed(2) + ' s', x0 + lw / 2, h - 8, 13, '#ffd23f', 'center', 3);
+      if (L.first !== null && lanes.every(q => q.first !== null) && Math.min(...lanes.map(q => q.first)) === L.first) emoji(x, '🥇', x0 + lw / 2, top + 12, 20);
     });
-    x.fillStyle = INK; x.fillRect(hw - 1.5, 0, 3, h);
-    if (disc.drop && disc.drop.t > 1.9) disc.drop.t = 1.9;   // freeze at end
+    for (let i = miniParts.length - 1; i >= 0; i--) { const p = miniParts[i]; p.life -= dt; if (p.life <= 0) { miniParts.splice(i, 1); continue; }
+      p.vy += 200 * dt; p.x += p.vx * dt; p.y += p.vy * dt; x.fillStyle = `rgba(150,100,70,${p.life * 2})`; x.beginPath(); x.arc(p.x, p.y, 4, 0, TAU); x.fill(); }
+    x.fillStyle = INK; x.fillRect(lw - 1.5, 0, 3, h); x.fillRect(lw * 2 - 1.5, 0, 3, h);
+    if (lanes.every(q => q.first !== null) && $('dt0').dataset.done !== '1') { $('dt0').dataset.done = '1'; $('dt0').textContent = 'Earth crashes first! It pulls hardest. 💥'; }
+    if (!disc.drop) $('dt0').dataset.done = '';
   }
   // card 1: bathroom scale
   {
-    const [x, w, h] = prepMini('dcv1'); const pl = disc.scale.on ? 'mars' : 'earth';
+    const [x, w, h] = prepMini('dcv1'), pl = disc.scalePl;
     miniSky(x, 0, w, h, pl);
-    const target = disc.scale.on ? 38 : 100; disc.scale.val = lerp(disc.scale.val, target, 1 - Math.exp(-dt * 4));
-    const cx = w * 0.62, sy = h - 30, sw = Math.min(110, w * 0.32);
+    const target = 100 * G[pl] / G.earth; disc.scaleVal = lerp(disc.scaleVal, target, 1 - Math.exp(-dt * 4));
+    const cx = w * 0.64, sy = h - 30, sw = Math.min(110, w * 0.32);
     x.fillStyle = '#f4f1ea'; x.strokeStyle = INK; x.lineWidth = 3; x.beginPath(); x.roundRect ? x.roundRect(cx - sw / 2, sy - 14, sw, 22, 8) : x.rect(cx - sw / 2, sy - 14, sw, 22); x.fill(); x.stroke();
-    // dial
-    const dx = w * 0.2 + 10, dy = h * 0.55, dr = Math.min(42, h * 0.3);
+    const dx = w * 0.22, dy = h * 0.55, dr = Math.min(48, h * 0.32);
     x.fillStyle = '#fff'; x.beginPath(); x.arc(dx, dy, dr, 0, TAU); x.fill(); x.stroke();
     for (let k = 0; k <= 10; k++) { const a = Math.PI * 0.75 + k / 10 * Math.PI * 1.5; x.beginPath(); x.moveTo(dx + Math.cos(a) * dr * 0.78, dy + Math.sin(a) * dr * 0.78); x.lineTo(dx + Math.cos(a) * dr * 0.92, dy + Math.sin(a) * dr * 0.92); x.lineWidth = 1.5; x.stroke(); }
-    const a = Math.PI * 0.75 + disc.scale.val / 120 * Math.PI * 1.5;
-    x.strokeStyle = '#ff4d6d'; x.lineWidth = 3; x.beginPath(); x.moveTo(dx, dy); x.lineTo(dx + Math.cos(a) * dr * 0.8, dy + Math.sin(a) * dr * 0.8); x.stroke();
-    inkText(x, Math.round(disc.scale.val) + ' lb', dx, dy + dr * 0.45, 16, '#ffd23f', 'center', 3);
-    drawPup(x, cx, sy - 14, Math.min(15, h * 0.11), { t, pose: disc.scale.on ? 'cheer' : 'stand' });
-    x.font = '800 12px Nunito, system-ui'; x.fillStyle = INK; x.textAlign = 'center';
-    x.fillText('mass: same pup ✔', cx, h - 4);
+    const a = Math.PI * 0.75 + disc.scaleVal / 120 * Math.PI * 1.5;
+    x.strokeStyle = '#ff4d6d'; x.lineWidth = 3.5; x.beginPath(); x.moveTo(dx, dy); x.lineTo(dx + Math.cos(a) * dr * 0.8, dy + Math.sin(a) * dr * 0.8); x.stroke();
+    inkText(x, Math.round(disc.scaleVal) + ' lb', dx, dy + dr * 0.45, 17, '#ffd23f', 'center', 3);
+    const hop = pl === 'earth' ? 0 : Math.abs(Math.sin(t * (pl === 'moon' ? 2 : 3))) * h * (pl === 'moon' ? 0.16 : 0.08);
+    drawPup(x, cx, sy - 14 - hop, Math.min(15, h * 0.1), { t, pose: pl === 'earth' ? 'stand' : 'cheer' });
+    inkText(x, 'MASS = SAME ✔', cx, h - 7, 11, '#fff', 'center', 3);
   }
-  // card 2: planet sizes to scale + gravity arrows
+  // card 2: planets to scale; Earth's bigger pull grabs space rocks harder
   {
     const [x, w, h] = prepMini('dcv2'); x.fillStyle = '#14121f'; x.fillRect(0, 0, w, h);
     for (const [a, b] of stars.slice(0, 30)) { x.fillStyle = 'rgba(255,255,255,.7)'; x.fillRect(a * w, b * h, 1.5, 1.5); }
-    if (disc.why) disc.why = Math.min(1, disc.why + dt * 0.9);
-    const k = disc.why, R = Math.min(h * 0.36, w * 0.19);
-    const ex = w * 0.3, my = h * 0.5, mx = w * 0.74, Rm = R * 0.53;   // Mars ≈ 53% of Earth's diameter
+    if (disc.why) disc.why = Math.min(1.6, disc.why + dt * 0.7);
+    const k = Math.min(1, disc.why), R = Math.min(h * 0.34, w * 0.19);
+    const ex = w * 0.28, my = h * 0.52, mx = w * 0.75, Rm = R * 0.53;   // Mars ≈ 53% of Earth's diameter
     x.lineWidth = 3; x.strokeStyle = INK;
     x.fillStyle = '#2f8fe0'; x.beginPath(); x.arc(ex, my, R, 0, TAU); x.fill();
     x.fillStyle = '#06d6a0'; x.beginPath(); x.ellipse(ex - R * 0.3, my - R * 0.2, R * 0.35, R * 0.22, 0.4, 0, TAU); x.fill(); x.beginPath(); x.ellipse(ex + R * 0.35, my + R * 0.35, R * 0.25, R * 0.18, 0, 0, TAU); x.fill();
     x.beginPath(); x.arc(ex, my, R, 0, TAU); x.stroke();
     x.fillStyle = '#d4582a'; x.beginPath(); x.arc(mx, my, Rm, 0, TAU); x.fill(); x.stroke();
     x.fillStyle = '#a33c14'; x.beginPath(); x.arc(mx - Rm * 0.3, my + Rm * 0.2, Rm * 0.18, 0, TAU); x.fill();
-    inkText(x, 'EARTH', ex, my + R + 12, 13, '#fff', 'center', 3); inkText(x, 'MARS', mx, my + Rm + 12, 13, '#fff', 'center', 3);
-    if (k > 0) {
-      const arrow = (cx, cy, rr, len) => {
-        for (let i = 0; i < 6; i++) {
-          const ang = i / 6 * TAU + 0.3, ox = cx + Math.cos(ang) * (rr + 6 + len * k), oy = cy + Math.sin(ang) * (rr + 6 + len * k);
-          const ix = cx + Math.cos(ang) * (rr + 6), iy = cy + Math.sin(ang) * (rr + 6);
-          x.strokeStyle = '#ffd23f'; x.lineWidth = 3; x.beginPath(); x.moveTo(ox, oy); x.lineTo(ix, iy); x.stroke();
-          const hx = ix, hy = iy, ba = ang; x.fillStyle = '#ffd23f';
-          x.beginPath(); x.moveTo(hx, hy); x.lineTo(hx + Math.cos(ba + 0.5) * 7, hy + Math.sin(ba + 0.5) * 7); x.lineTo(hx + Math.cos(ba - 0.5) * 7, hy + Math.sin(ba - 0.5) * 7); x.closePath(); x.fill();
-        }
+    const big = 1 + Math.sin(t * 4) * 0.05 * k;
+    x.font = '900 13px Nunito, system-ui'; x.textAlign = 'center'; x.fillStyle = '#fff';
+    x.fillText('🧲 ×10 mass', ex, my + R + 13); x.fillText('🧲 ×1', mx, my + Rm + 13);
+    if (k > 0) {   // a rock falls toward each planet; Earth's is pulled in faster
+      const fall = (cx, cy, rr, speed) => {
+        const p = Math.min(1, (disc.why * speed) ** 2), d = lerp(rr + 46, rr + 4, p);
+        x.fillStyle = '#9c8a7a'; x.strokeStyle = INK; x.lineWidth = 2; x.beginPath(); x.arc(cx, cy - d, 6, 0, TAU); x.fill(); x.stroke();
+        if (p >= 1) { x.fillStyle = '#ffd23f'; starPath(x, cx, cy - rr - 2, 10 * big, 4, 5, t * 3); x.fill(); }
       };
-      arrow(ex, my, R, Math.min(26, h * 0.18)); arrow(mx, my, Rm, Math.min(26, h * 0.18) * 0.38);
-      inkText(x, 'BIG PULL', ex, 12, 13, '#ffd23f', 'center', 3); inkText(x, 'small pull', mx, 12, 13, '#ffd23f', 'center', 3);
+      fall(ex, my, R, 1.0); fall(mx, my, Rm, 0.62);
     }
   }
-  // card 3: jump height Earth vs Mars, same push (h = v²/2g)
+  // card 3: same push, three planets: peak = v²/2g
   {
-    const [x, w, h] = prepMini('dcv3'); const hw = w / 2;
+    const [x, w, h] = prepMini('dcv3'), lw = w / 3;
     if (disc.jump) disc.jump.t += dt;
-    const v0 = 3.0, top = 26, base = h - 18, pr = Math.min(13, h * 0.08);
-    const hMars = v0 * v0 / (2 * G.mars), pxPerM = Math.max(8, (base - top - pr * 4.7) / hMars);
-    ['earth', 'mars'].forEach((pl, i) => {
-      const x0 = i * hw; miniSky(x, x0, hw, h, pl);
+    const v0 = 2.5, top = 22, base = h - 18, pr = Math.min(11, h * 0.07);
+    const pxPerM = (base - top - pr * 4.7) / (v0 * v0 / (2 * G.moon));
+    ['earth', 'mars', 'moon'].forEach((pl, i) => {
+      const x0 = i * lw; miniSky(x, x0, lw, h, pl);
       let yy = 0;
-      if (disc.jump) {
-        const flight = 2 * v0 / G[pl]; const tt = (disc.jump.t % (flight + 0.6));
-        yy = tt < flight ? v0 * tt - 0.5 * G[pl] * tt * tt : 0;
-      }
+      if (disc.jump) { const flight = 2 * v0 / G[pl], tt = disc.jump.t % (flight + 0.5); yy = tt < flight ? v0 * tt - 0.5 * G[pl] * tt * tt : 0; }
       const peak = v0 * v0 / (2 * G[pl]);
       if (disc.jump) {
-        x.setLineDash([5, 4]); x.strokeStyle = INK; x.lineWidth = 2; x.beginPath(); x.moveTo(x0 + 8, base - peak * pxPerM - 4); x.lineTo(x0 + hw - 8, base - peak * pxPerM - 4); x.stroke(); x.setLineDash([]);
-        inkText(x, peak.toFixed(2) + ' m', x0 + hw - 30, base - peak * pxPerM - 14, 13, '#ffd23f', 'center', 3);
+        x.setLineDash([4, 4]); x.strokeStyle = pl === 'moon' ? '#fff' : INK; x.lineWidth = 2; x.beginPath(); x.moveTo(x0 + 4, base - peak * pxPerM - 4); x.lineTo(x0 + lw - 4, base - peak * pxPerM - 4); x.stroke(); x.setLineDash([]);
+        inkText(x, peak.toFixed(1) + ' m', x0 + lw - 22, base - peak * pxPerM - 13, 12, '#ffd23f', 'center', 3);
       }
-      drawPup(x, x0 + hw * 0.4, base - yy * pxPerM, pr, { t, pose: yy > 0.02 ? 'fly' : 'stand' });
+      drawPup(x, x0 + lw * 0.35, base - yy * pxPerM, pr, { t, pose: yy > 0.02 ? 'fly' : 'stand' });
     });
-    x.fillStyle = INK; x.fillRect(hw - 1.5, 0, 3, h);
+    x.fillStyle = INK; x.fillRect(lw - 1.5, 0, 3, h); x.fillRect(lw * 2 - 1.5, 0, 3, h);
   }
 }
 
 /* =====================================================================
-   REGION MAP
-   ===================================================================== */
-function renderMap(fromWin) {
-  const r2 = save.region2;
-  const nodes = [
-    { x: 110, y: 200, n: 1, name: 'Crater Camp', st: save.region2 ? 'done' : 'open' },
-    { x: 300, y: 110, n: 2, name: 'Dusty Dunes', st: r2 ? 'unlocked' : 'locked' },
-    { x: 480, y: 200, n: 3, name: 'Polar Ice Caps', st: 'locked' },
-    { x: 650, y: 100, n: 4, name: 'Giant Volcano', st: 'locked' },
-  ];
-  let s = `<defs><pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="2.4" fill="#b8532a" opacity=".5"/></pattern></defs>
-  <rect x="3" y="3" width="754" height="294" rx="22" fill="#e07a4a" stroke="${INK}" stroke-width="4"/>
-  <rect x="3" y="3" width="754" height="294" rx="22" fill="url(#dots)"/>
-  <ellipse cx="210" cy="240" rx="50" ry="16" fill="#b8532a" stroke="${INK}" stroke-width="3"/>
-  <ellipse cx="560" cy="80" rx="36" ry="12" fill="#b8532a" stroke="${INK}" stroke-width="3"/>
-  <path d="M600 150 l60 -70 l60 70 z" fill="#a33c14" stroke="${INK}" stroke-width="3" opacity=".8"/>
-  <path d="M420 270 q40 -30 80 0" fill="none" stroke="#fff" stroke-width="10" opacity=".6"/>
-  <path d="M110 200 Q200 100 300 110 T480 200 T650 100" fill="none" stroke="${INK}" stroke-width="5" stroke-dasharray="4 12" stroke-linecap="round"/>`;
-  for (const nd of nodes) {
-    const fill = nd.st === 'done' ? '#06d6a0' : nd.st === 'unlocked' || nd.st === 'open' ? '#ffd23f' : '#c9c2b2';
-    const icon = nd.st === 'done' ? '✔' : nd.st === 'locked' ? '🔒' : nd.n;
-    s += `<g${nd.st === 'unlocked' ? ' class="bob"' : ''}><circle cx="${nd.x}" cy="${nd.y}" r="34" fill="${fill}" stroke="${INK}" stroke-width="4"/>
-      <text x="${nd.x}" y="${nd.y + 11}" text-anchor="middle" font-family="Luckiest Guy, Comic Sans MS, system-ui" font-size="30" fill="${INK}">${icon}</text></g>
-      <rect x="${nd.x - 86}" y="${nd.y + 40}" width="172" height="${nd.st === 'done' ? 30 : 46}" rx="12" fill="#fffaf0" stroke="${INK}" stroke-width="3"/>
-      <text x="${nd.x}" y="${nd.y + 61}" text-anchor="middle" font-family="Nunito, system-ui" font-weight="900" font-size="16" fill="${INK}">${nd.n}. ${nd.name}</text>`;
-    if (nd.st !== 'done') s += `<text x="${nd.x}" y="${nd.y + 78}" text-anchor="middle" font-family="Nunito, system-ui" font-weight="800" font-size="13" fill="#7a4a3a">${nd.st === 'unlocked' ? 'Unlocked · coming soon!' : nd.st === 'open' ? 'You are here' : 'Coming soon'}</text>`;
-  }
-  $('mapSvg').innerHTML = s;
-  $('mapTitle').textContent = r2 ? 'Region 2 unlocked!' : 'Mars Region Map';
-  $('mapSub').textContent = fromWin ? 'The rover is fixed! Region 1 complete. Next stop on Mars:' : r2 ? 'Region 1 complete! New regions are coming soon.' : 'Beat the Boss jump to unlock Region 2.';
-  $('mapNext').textContent = fromWin ? 'Knowledge Check ▶' : 'Close';
-  $('mapNext').onclick = () => { sfx.click(); if (fromWin) goto('quiz'); else { show('map', false); if (phase === 'map') goto('title'); } };
-}
-function openMap(fromWin) {
-  renderMap(fromWin); show('map', true);
-}
-
-/* =====================================================================
-   QUIZ
+   BLASTER KNOWLEDGE CHECK
    ===================================================================== */
 const QUIZ = [
-  { q: 'If you weigh 100 pounds on Earth, about what would a scale (made for Earth) show on Mars?',
-    o: ['About 38 pounds', 'About 62 pounds', '100 pounds — no change', 'About 260 pounds'], a: 0,
-    e: 'Mars pulls with only about <b>38%</b> of Earth\'s gravity, and 38% of 100 is <b>38</b>. (62 is just 100 − 38. 100 would mean Mars pulls the same as Earth. 260 is backwards — that\'s more like how much <i>farther</i> you can jump on Mars!)' },
-  { q: 'When Captain Pup flies to Mars, does his MASS change?',
-    o: ['No — he\'s made of the same amount of stuff', 'Yes — it drops to 38%', 'Yes — it gets bigger', 'Only while he\'s jumping'], a: 0,
-    e: '<b>Mass</b> is how much stuff you\'re made of — it\'s the same everywhere. <b>Weight</b> is how hard a planet pulls on that stuff. So on Mars, the mass stays the same and only the weight goes down.' },
-  { q: 'Why does Mars pull on you less than Earth does?',
-    o: ['Mars is farther from the Sun', 'Mars is smaller and has less mass', 'Mars has very thin air', 'Because Mars is red'], a: 1,
-    e: 'Gravity comes from <b>mass</b>. Mars is about half as wide as Earth and has only about a tenth of Earth\'s mass, so its pull is weaker. Air, color and distance from the Sun don\'t set a planet\'s surface gravity!' },
+  { q: 'You weigh 100 lb on Earth. What does an Earth scale say on Mars?',
+    o: [['⚖️', '38 lb'], ['⚖️', '62 lb'], ['⚖️', '100 lb'], ['⚖️', '260 lb']], a: 0,
+    why: 'Mars pulls 38% as hard. 38% of 100 = 38!',
+    more: '62 is just 100 − 38. 100 would mean no change. 260 is upside-down: that is more like how much farther you can jump on Mars!' },
+  { q: 'Pup flies to Mars. Does his MASS change?',
+    o: [['🐶', 'Stays same'], ['⬇️', 'Gets smaller'], ['⬆️', 'Gets bigger']], a: 0,
+    why: 'Mass = how much stuff you are. Same everywhere!',
+    more: 'Weight is how hard a planet pulls on that stuff. Mars pulls less, so the scale shows less, but you are still all of you!' },
+  { q: 'Why does Mars pull less than Earth?',
+    o: [['🪐', 'Less mass'], ['☀️', 'Far from Sun'], ['💨', 'Thin air'], ['🔴', 'It is red']], a: 0,
+    why: 'Less mass = less pull!',
+    more: 'Mars is about half as wide as Earth and has about 1/10 of its mass. Air, color and the Sun do not set its gravity.' },
 ];
-let qi = 0, qScore = 0;
-function startQuiz() { qi = 0; qScore = 0; show('quiz', true); renderQ(); }
-function renderQ() {
+let qi = 0, qScore = 0, qFirst = true, qDone = false, combo = 0;
+const shipR = () => clamp(Math.min(W, H) * 0.05, 24, 48);
+function startQuiz() { qi = 0; qScore = 0; combo = 0; $('combo').textContent = ''; spawnAsts(); }
+function spawnAsts() {
+  const Q = QUIZ[qi]; qFirst = true; qDone = false; show('qwhy', false); $('qMoreBox').open = false;
+  $('qNum').textContent = `${qi + 1}/${QUIZ.length}`; $('qText').textContent = Q.q;
+  const n = Q.o.length, r = clamp(Math.min(W, H) * 0.11, 44, 92);
+  const order = [...Q.o.keys()].sort(() => Math.random() - 0.5);
+  asts = order.map((oi, k) => {
+    const cols = n > 3 && W < H ? 2 : n, row = Math.floor(k / cols), col = k % cols, rows = Math.ceil(n / cols);
+    const x = W * (col + 0.5) / cols, y = lerp(H * 0.3, H * 0.6, rows > 1 ? row / (rows - 1) : 0.5);
+    const a = rnd(0, TAU), sp = rnd(30, 60) * Math.min(W, H) / 700;
+    return { i: oi, icon: Q.o[oi][0], label: Q.o[oi][1], x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, r, alive: true, wob: 0, born: k * 0.12, rot: rnd(0, 6) };
+  });
+}
+function updateAsts(dt) {
+  const top = 90, bot = H - shipR() * 3.2;
+  for (const a of asts) {
+    if (!a.alive) continue; a.born -= dt; a.wob = Math.max(0, a.wob - dt);
+    a.x += a.vx * dt; a.y += a.vy * dt; a.rot += dt * 0.3;
+    const sp = Math.hypot(a.vx, a.vy), maxS = 160 * Math.min(W, H) / 700; if (sp > maxS) { a.vx *= 0.98; a.vy *= 0.98; }
+    if (a.x < a.r) { a.x = a.r; a.vx = Math.abs(a.vx); } if (a.x > W - a.r) { a.x = W - a.r; a.vx = -Math.abs(a.vx); }
+    if (a.y < top + a.r) { a.y = top + a.r; a.vy = Math.abs(a.vy); } if (a.y > bot - a.r) { a.y = bot - a.r; a.vy = -Math.abs(a.vy); }
+  }
+  for (let i = 0; i < asts.length; i++) for (let j = i + 1; j < asts.length; j++) {     // asteroid-asteroid bounces
+    const A = asts[i], B = asts[j]; if (!A.alive || !B.alive) continue;
+    const dx = B.x - A.x, dy = B.y - A.y, d = Math.hypot(dx, dy) || 1, min = A.r + B.r;
+    if (d < min) {
+      const nx = dx / d, ny = dy / d, push = (min - d) / 2; A.x -= nx * push; A.y -= ny * push; B.x += nx * push; B.y += ny * push;
+      const rv = (B.vx - A.vx) * nx + (B.vy - A.vy) * ny;
+      if (rv < 0) { A.vx += rv * nx; A.vy += rv * ny; B.vx -= rv * nx; B.vy -= rv * ny; sfx.thud(); }
+    }
+  }
+}
+function hitAst(a, b) {
   const Q = QUIZ[qi];
-  $('qNum').textContent = `Quick knowledge check · Question ${qi + 1} of ${QUIZ.length}`;
-  $('qText').textContent = Q.q; show('qAfter', false);
-  $('qOpts').innerHTML = Q.o.map((o, i) => `<button class="opt" data-i="${i}">${o}</button>`).join('');
-  $('qOpts').querySelectorAll('.opt').forEach(b => b.onclick = () => answer(+b.dataset.i));
+  if (qDone) return;
+  if (a.i === Q.a) {
+    qDone = true; a.alive = false;
+    explode(a.x, a.y, 1.8); explode(a.x, a.y, 1, ['#06d6a0', '#4cc9f0', '#fff']); sfx.bigboom(); sfx.good(); shake = 18; confettiBurst(60);
+    if (qFirst) { qScore++; combo++; } else combo = 0;
+    $('combo').textContent = combo > 1 ? `🔥×${combo}` : '';
+    addBurst(qFirst ? (combo > 1 ? `COMBO ×${combo}!` : 'BOOM!') : 'GOT IT!', a.x, a.y - a.r, '#ffd23f', 1.1);
+    setTimeout(() => { for (const o of asts) if (o.alive) { o.alive = false; explode(o.x, o.y, 0.6, ['#9c8a7a', '#ccc', '#fff']); } sfx.boom(); }, 450);
+    setTimeout(() => {
+      if (phase !== 'quiz') return;
+      $('qWhyTxt').textContent = '✅ ' + Q.why; $('qMore').textContent = Q.more;
+      $('qNextBtn').textContent = qi < QUIZ.length - 1 ? 'Next ▶' : 'My stars ⭐';
+      show('qwhy', true);
+    }, 950);
+  } else {
+    qFirst = false; combo = 0; $('combo').textContent = '';
+    const m = Math.hypot(b.vx, b.vy); a.vx += b.vx / m * 260; a.vy += b.vy / m * 260; a.wob = 0.5;
+    sparks(b.x, b.y, 14, '#9ff3ff'); sfx.bonk(); addBurst('TRY AGAIN!', a.x, a.y - a.r, '#ff8fa3', 0.7);
+  }
 }
-function answer(i) {
-  const Q = QUIZ[qi], right = i === Q.a;
-  if (right) qScore++;
-  $('qOpts').querySelectorAll('.opt').forEach((b, k) => { b.disabled = true; if (k === Q.a) b.classList.add('right'); else if (k === i) b.classList.add('wrong'); });
-  $('qBurst').textContent = right ? ['YES!', 'WOW!', 'NAILED IT!'][qi % 3] : 'GOOD TRY!';
-  $('qBurst').classList.toggle('bad', !right);
-  $('qExplain').innerHTML = (right ? '' : 'The answer is <b>' + Q.o[Q.a] + '</b>. ') + Q.e;
-  $('qNextBtn').textContent = qi < QUIZ.length - 1 ? 'Next ▶' : 'See my stars ⭐';
-  show('qAfter', true); right ? sfx.good() : sfx.bad();
-  setTimeout(() => $('qAfter').scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 50);
+$('qNextBtn').onclick = () => { sfx.click(); stopSpeak(); qi++; if (qi < QUIZ.length) spawnAsts(); else finish(); };
+const spaceStars = Array.from({ length: 120 }, (_, i) => [hash(i * 1.3), hash(i * 2.9), hash(i * 5.1)]);
+function drawQuiz(dt) {
+  const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#120f24'); g.addColorStop(1, '#2d2050'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  for (const [a, b, c] of spaceStars) { const y = (b * H + T * 20 * (0.3 + c)) % H; ctx.fillStyle = `rgba(255,255,255,${0.3 + c * 0.6})`; ctx.fillRect(a * W, y, 1 + c * 2, 1 + c * 2); }
+  const pr = Math.min(W, H) * 0.35;      // big Mars in the corner
+  ctx.fillStyle = '#d4582a'; ctx.strokeStyle = INK; ctx.lineWidth = 4; ell(W + pr * 0.25, H + pr * 0.15, pr, pr); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#a33c14'; ell(W - pr * 0.3, H - pr * 0.4, pr * 0.12, pr * 0.1); ctx.fill(); ell(W - pr * 0.05, H - pr * 0.6, pr * 0.08, pr * 0.06); ctx.fill();
+  for (const a of asts) {
+    if (!a.alive) continue;
+    const s = a.born > 0 ? 0 : Math.min(1, -a.born * 5), wob = a.wob > 0 ? Math.sin(a.wob * 40) * 0.12 : 0;
+    ctx.save(); ctx.translate(a.x, a.y); ctx.scale(s * (1 + wob), s * (1 - wob));
+    ctx.fillStyle = '#8d7a6c'; ctx.strokeStyle = INK; ctx.lineWidth = 4; ctx.beginPath();
+    for (let i = 0; i < 12; i++) { const an = i / 12 * TAU + a.rot, rr = a.r * (0.9 + hash(i + a.i * 13) * 0.14); ctx.lineTo(Math.cos(an) * rr, Math.sin(an) * rr); }
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#6f5e52'; for (let i = 0; i < 3; i++) { const an = a.rot * 1.0 + i * 2.1; ell(Math.cos(an) * a.r * 0.62, Math.sin(an) * a.r * 0.62, a.r * 0.13, a.r * 0.11); ctx.fill(); }
+    if (a.wob > 0) { ctx.strokeStyle = 'rgba(159,243,255,.9)'; ctx.lineWidth = 4; ell(0, 0, a.r * 1.12, a.r * 1.12); ctx.stroke(); }
+    emoji(ctx, a.icon, 0, -a.r * 0.25, a.r * 0.62);
+    const fs = Math.min(a.r * 0.38, a.r * 1.9 / Math.max(5, a.label.length) * 1.4);
+    inkText(ctx, a.label, 0, a.r * 0.42, fs, '#ffd23f');
+    ctx.restore();
+  }
+  // Captain Pup's bubble-blaster turret
+  const R = shipR(), sx = W / 2, sy = H - R * 1.5;
+  ctx.save(); ctx.translate(sx, sy); ctx.rotate(gunAim + Math.PI / 2);
+  ctx.fillStyle = '#4cc9f0'; ctx.strokeStyle = INK; ctx.lineWidth = 3; rrect(-R * 0.22, -R * 1.5, R * 0.44, R * 1.1, R * 0.12); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#ffd23f'; rrect(-R * 0.3, -R * 1.62, R * 0.6, R * 0.22, R * 0.08); ctx.fill(); ctx.stroke();
+  ctx.restore();
+  ctx.fillStyle = '#e8e8f0'; ctx.strokeStyle = INK; ctx.lineWidth = 3; ell(sx, sy + R * 0.55, R * 1.6, R * 0.5); ctx.fill(); ctx.stroke();
+  for (let k = -2; k <= 2; k++) { ctx.fillStyle = (Math.floor(T * 4) + k) % 2 ? '#ffd23f' : '#ff4d6d'; ell(sx + k * R * 0.55, sy + R * 0.6, R * 0.1, R * 0.1); ctx.fill(); }
+  drawPup(ctx, sx, sy + R * 0.5, R * 0.42, { t: T, pose: qDone ? 'cheer' : 'stand' }); ctx = mainCtx;
 }
-$('qNextBtn').onclick = () => { sfx.click(); qi++; if (qi < QUIZ.length) renderQ(); else finish(); };
 function finish() {
   const stars = Math.max(1, qScore);
   save.done = true; save.stars = Math.max(save.stars || 0, stars); persist();
-  hideOverlays(); phase = 'results'; setTracker(); updateTimerChip();
-  $('resStars').innerHTML = [0, 1, 2].map(i => i < stars ? '★' : '<span class="off">★</span>').join('');
-  $('resText').innerHTML = `You got <b>${qScore} of ${QUIZ.length}</b> right! Remember: Mars pulls about <b>38%</b> as hard as Earth, so you weigh less and jump way farther — but your mass stays the same.`;
-  $('resBadges').textContent = `Lab badges: ${badges.size} of ${BADGES.length}` + (badges.size < BADGES.length ? ' — replay the Experiment to collect them all!' : ' — all collected! 🏅');
-  show('results', true); confettiBurst(100); sfx.good();
+  hideOverlays(); show('qbar', false); show('qwhy', false); phase = 'results'; setTracker(); updateTimerChip();
+  $('resStars').innerHTML = [0, 1, 2].map(i => `<span style="animation-delay:${0.2 + i * 0.25}s" class="${i < stars ? '' : 'off'}">★</span>`).join('');
+  $('resLine').textContent = `🎯 ${qScore}/${QUIZ.length}   🏅 ${badges.size}/${BADGES.length}`;
+  show('results', true); confettiBurst(120); sfx.good();
+  for (let i = 0; i < stars; i++) setTimeout(() => sfx.ding(), 250 + i * 250);
 }
 $('replayBtn').onclick = () => { sfx.click(); notes = []; goto('challenge'); };
-$('resMapBtn').onclick = () => { sfx.click(); openMap(false); };
-
-/* ---------------- title ---------------- */
-function refreshTitle() {
-  $('titleStars').innerHTML = save.done ? 'Best: ' + [0, 1, 2].map(i => i < save.stars ? '★' : '<span class="off">★</span>').join('') : '';
-  show('titleMapBtn', !!save.region2);
-}
-$('startBtn').onclick = () => { sfx.click(); notes = []; goto('challenge'); };
-$('titleMapBtn').onclick = () => { sfx.click(); openMap(false); };
-$('homeBtn').onclick = () => { sfx.click(); goto('title'); };
+$('resMapBtn').onclick = () => { sfx.click(); goto('hub'); };
 
 /* ---------------- controls wiring ---------------- */
 $('angle').oninput = e => { aim.angle = +e.target.value; syncSliders(); };
@@ -1299,15 +1747,13 @@ document.querySelectorAll('.stepb').forEach(b => b.onclick = () => {
   else if (!aim.locked) aim.speed = Math.round(clamp(aim.speed + +b.dataset.d, 2, 7) * 10) / 10;
   syncSliders();
 });
-document.querySelectorAll('#planetSeg button').forEach(b => b.onclick = () => { if (flying) return; sfx.click(); setPlanet(b.dataset.pl); });
+document.querySelectorAll('#planetSeg button').forEach(b => b.onclick = () => { if (flying) return; sfx.click(); hideHand('planet'); setPlanet(b.dataset.pl); });
 $('jumpBtn').onclick = doJump;
-$('clearBtn').onclick = () => { sfx.click(); trails = []; world.flags.forEach(f => f.hit = false); };
-$('nextBtn').onclick = () => {
-  sfx.click();
-  if (phase === 'challenge') goto('discover');
-  else if (phase === 'experiment') goto('boss');
-};
+$('clearBtn').onclick = () => { sfx.click(); trails = []; world.flags.forEach(f => f.hit = false); resetCrates(); };
+$('nextBtn').onclick = () => { sfx.click(); if (phase === 'challenge') goto('discover'); else if (phase === 'experiment') goto('boss'); };
 window.addEventListener('keydown', e => {
+  keys.add(e.code);
+  if (phase === 'hub' && e.code.startsWith('Arrow')) e.preventDefault();
   if (!['challenge', 'experiment', 'boss'].includes(phase)) return;
   if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); doJump(); }
   if (e.code === 'ArrowUp') { aim.angle = clamp(aim.angle + 1, 10, 80); syncSliders(); }
@@ -1315,42 +1761,56 @@ window.addEventListener('keydown', e => {
   if (e.code === 'ArrowRight' && !aim.locked) { aim.speed = Math.round(clamp(aim.speed + 0.1, 2, 7) * 10) / 10; syncSliders(); }
   if (e.code === 'ArrowLeft' && !aim.locked) { aim.speed = Math.round(clamp(aim.speed - 0.1, 2, 7) * 10) / 10; syncSliders(); }
 });
-// drag on the scene to aim (angle from the pup; arrow length = strength)
+window.addEventListener('keyup', e => keys.delete(e.code));
+window.addEventListener('blur', () => keys.clear());
+// canvas input: hub = joystick / tap-to-fly; challenge + experiment = drag to aim; boss + quiz = tap to blast
 let dragging = false;
+function canvasPt(e) { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
 function aimFromPointer(e) {
-  const r = cv.getBoundingClientRect(), px = e.clientX - r.left, py = e.clientY - r.top;
-  const cx = SX(0), cy = SY(0) - pupR() * 2;
-  const dx = px - cx, dy = cy - py;
+  const [px, py] = canvasPt(e), cx = SX(0), cy = SY(0) - pupR() * 2, dx = px - cx, dy = cy - py;
   if (dx < 4) return;
   aim.angle = Math.round(clamp(Math.atan2(dy, dx) * 180 / Math.PI, 10, 80));
   if (!aim.locked) { const maxLen = Math.min(W, H) * 0.45; aim.speed = Math.round(clamp(2 + (Math.hypot(dx, dy) / maxLen) * 5, 2, 7) * 10) / 10; }
   syncSliders();
 }
 cv.addEventListener('pointerdown', e => {
-  if (!['challenge', 'experiment', 'boss'].includes(phase) || flying) return;
+  const [px, py] = canvasPt(e);
+  if (phase === 'hub') { hub.joy = { sx: px, sy: py, cx: px, cy: py, t0: performance.now() }; hub.target = null; hideHand('hub'); try { cv.setPointerCapture(e.pointerId); } catch (_) {} return; }
+  if (phase === 'boss' || (phase === 'quiz' && !qDone)) { if (phase === 'boss' && boss.won) return; shoot(px, py); return; }
+  if (!['challenge', 'experiment'].includes(phase) || flying) return;
   dragging = true; try { cv.setPointerCapture(e.pointerId); } catch (_) {} aimFromPointer(e);
 });
-cv.addEventListener('pointermove', e => { if (dragging && !flying) aimFromPointer(e); });
-cv.addEventListener('pointerup', () => { dragging = false; });
-cv.addEventListener('pointercancel', () => { dragging = false; });
+cv.addEventListener('pointermove', e => {
+  if (phase === 'hub' && hub.joy) { const [px, py] = canvasPt(e); hub.joy.cx = px; hub.joy.cy = py; return; }
+  if (dragging && !flying) aimFromPointer(e);
+});
+function endPointer() {
+  if (phase === 'hub' && hub.joy) {
+    const j = hub.joy; if (Math.hypot(j.cx - j.sx, j.cy - j.sy) < 12 && performance.now() - j.t0 < 350) { hub.target = { x: j.sx, y: j.sy }; hub.moved = true; }
+    hub.joy = null;
+  }
+  dragging = false;
+}
+cv.addEventListener('pointerup', endPointer);
+cv.addEventListener('pointercancel', endPointer);
 
 /* =====================================================================
    MAIN LOOP
    ===================================================================== */
 let last = performance.now(), T = 0;
 function frame(now) {
-  const dt = Math.min(0.05, (now - last) / 1000); last = now; T += dt;
-  const sw = Math.round(W * DPR), r = $('stage').getBoundingClientRect();
-  if (Math.abs(r.width - W) > 1 || Math.abs(r.height - H) > 1 || cv.width !== sw) resize();
+  const rdt = Math.min(0.05, (now - last) / 1000); last = now;
+  if (slowT > 0) { slowT -= rdt; if (slowT <= 0) timeScale = 1; }
+  const dt = rdt * timeScale; T += dt;
+  const r = $('stage').getBoundingClientRect();
+  if (Math.abs(r.width - W) > 1 || Math.abs(r.height - H) > 1 || cv.width !== Math.round(W * DPR)) resize();
 
-  // timer (gentle)
   if (phase in TIMES && phaseLeft > 0) {
-    phaseLeft -= dt; if (phaseLeft <= 0) { phaseLeft = 0; updateTimerChip(); onTimeUp(); }
-    updateTimerChip.acc = (updateTimerChip.acc || 0) + dt;
-    if (updateTimerChip.acc > 0.25) { updateTimerChip.acc = 0; updateTimerChip(); }
+    phaseLeft -= rdt; if (phaseLeft <= 0) { phaseLeft = 0; updateTimerChip(); onTimeUp(); }
+    frame.acc = (frame.acc || 0) + rdt; if (frame.acc > 0.25) { frame.acc = 0; updateTimerChip(); }
   }
 
-  // physics
+  if (phase === 'hub') updateHub(rdt);
   if (crouch > 0) { crouch -= dt; if (crouch <= 0 && pendingLaunch) launch(); }
   for (const j of jumpers) stepJumper(j, dt);
   const main = jumpers.find(j => !j.ghost);
@@ -1358,118 +1818,137 @@ function frame(now) {
     flying = false;
     if (!(phase === 'boss' && boss.won)) $('jumpBtn').disabled = false;
   }
-  if (main && !main.landed && phase !== 'boss') setReadout(`Distance: ${Math.max(0, main.x).toFixed(1)} m · Height: ${Math.max(0, main.y).toFixed(1)} m`);
-  if (main && !main.landed && phase === 'boss') setReadout(`Distance: ${Math.max(0, main.x).toFixed(1)} m (pad at ${boss.D.toFixed(1)} m)`);
+  if (main && !main.landed) {
+    setReadout(phase === 'boss' ? `🎯 ${boss.D.toFixed(1)} m · ➡ ${Math.max(0, main.x).toFixed(1)} m` : `➡ ${Math.max(0, main.x).toFixed(1)} m · ⬆ ${Math.max(0, main.y).toFixed(1)} m`);
+    if (phase === 'experiment') for (const c of world.crates) {
+      if (!c.broken && Math.hypot(main.x - c.x, main.y + 0.5 - c.y) < 0.55) {
+        c.broken = true; explode(SX(c.x), SY(c.y), 1.1, ['#d99a4e', '#8a5a2a', '#ffd23f', '#fff']); sfx.boom(); shake = Math.max(shake, 9);
+        addBurst('SMASH!', SX(c.x), SY(c.y) - 60, '#ff9f1c', 0.8);
+        if (world.crates.every(q => q.broken)) { earnBadge('crates'); setTimeout(() => { if (phase === 'experiment') resetCrates(); }, 2500); }
+      }
+    }
+    if (phase === 'boss' && slowT <= 0) {      // slow-mo when the winning jump is about to land
+      const p = world.pads[0], lx = predictLandX(main);
+      timeScale = main.vy < 0 && main.y < 1.0 && lx >= p.x0 && lx <= p.x1 ? 0.35 : 1;
+    }
+  }
+  if (phase === 'boss') { updateMeteors(dt, main && !main.landed ? main : null); }
+  if (phase === 'quiz') updateAsts(dt);
+  updateBolts(dt);
   if (pupState.squash > 0) pupState.squash = Math.max(0, pupState.squash - dt * 1.5);
+  if (shieldFlash > 0) shieldFlash -= dt;
 
-  // boss win animation: drone flies to the rover, sparkles, rover fixed
+  // boss win: drone flies to the rover, BIG explosion of the smoke, rover fixed, Region 2 unlocked
   if (drone) {
     drone.t += dt;
-    if (drone.t > 0.6 && drone.t < 2.2) {
-      const k = clamp((drone.t - 0.6) / 1.6, 0, 1);
-      drone.x = lerp(drone.from.x, drone.to.x, k); drone.y = lerp(drone.from.y, drone.to.y, k) + Math.sin(k * Math.PI) * 2;
-    }
+    if (drone.t > 0.6 && drone.t < 2.2) { const k = clamp((drone.t - 0.6) / 1.6, 0, 1); drone.x = lerp(drone.from.x, drone.to.x, k); drone.y = lerp(drone.from.y, drone.to.y, k) + Math.sin(k * Math.PI) * 2; }
     if (drone.t >= 2.2 && !roverFixed) {
-      roverFixed = true; roverHop = 2; sfx.good(); smoke = [];
-      for (let i = 0; i < 30; i++) sparkles.push({ x: SX(world.rover.x), y: SY(0) - cam.scale * 1, vx: (Math.random() - 0.5) * 300, vy: (Math.random() - 0.8) * 300, t: 0 });
-      addBurst('FIXED!', Math.max(SX(world.rover.x) + cam.scale, 120), Math.max(SY(0) - cam.scale * 3, H * 0.42), '#06d6a0');
-      setInfo('🔧 Rover repaired!', 'Great jumping, Captain! Region 1 is complete.');
+      roverFixed = true; roverHop = 2;
+      const rx = SX(world.rover.x), ry = SY(0) - cam.scale;
+      explode(rx, ry, 2.4); explode(rx, ry - cam.scale, 1.4, ['#06d6a0', '#4cc9f0', '#fff']); sfx.bigboom(); shake = 24;
+      addBurst('FIXED!', Math.max(rx + cam.scale, 120), Math.max(ry - cam.scale * 2, H * 0.42), '#06d6a0', 1.2);
+      setInfo('Rover fixed! 🎉 You did it, Captain!');
     }
-    if (drone.t > 4.2 && phase === 'boss') { drone = null; phase = 'map'; setTracker(); updateTimerChip(); openMap(true); }
+    if (drone.t > 3.4 && !drone.r2) { drone.r2 = true; addBurst('REGION 2 UNLOCKED!', W / 2, H * 0.32, '#ffd23f', 1.1); confettiBurst(100); sfx.good(); }
+    if (drone.t > 5.6 && phase === 'boss') { drone = null; goto('quiz'); }
   }
   if (roverHop > 0) roverHop -= dt;
 
-  updateCamera(dt, false);
-  render(dt);
-  if (!$('discover').hidden) drawDiscover(dt, T);
+  updateCamera(rdt, false);
+  render(rdt, dt);
+  if (!$('discover').hidden) drawDiscover(rdt, T);
+  if (!$('title').hidden) drawCardArt(rdt);
   requestAnimationFrame(frame);
 }
 
-function render(dt) {
+function render(rdt, dt) {
   ctx = mainCtx;
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   ctx.clearRect(0, 0, W, H);
+  if (shake > 0.3) { ctx.translate(rnd(-shake, shake), rnd(-shake, shake)); shake *= Math.exp(-rdt * 9); } else shake = 0;
+  if (phase === 'hub') drawHub(rdt);
+  else if (phase === 'quiz' || phase === 'results') { if (phase === 'quiz') updateAsts(0); drawQuiz(dt); }
+  else drawScene(dt);
+  drawBolts();
+  drawParts(dt);
+  drawPopups(rdt);
+  drawBursts(rdt);
+}
+function drawScene(dt) {
   drawSky(world.planet, T);
   drawGround(world.planet);
   drawRuler();
-  const u = cam.scale;
+  const u = cam.scale, R = pupR();
   if (world.station) drawStation(ctx, SX(world.station.x), SY(0), u, T);
-  if (world.rover) drawRover(ctx, SX(world.rover.x), SY(0), u, roverFixed, T);
+  if (world.rover) {
+    drawRover(ctx, SX(world.rover.x), SY(0), u, roverFixed, T);
+    if (!roverFixed && Math.random() < 0.3) addPart({ type: 'smoke', x: SX(world.rover.x) + rnd(-0.3, 0.3) * u, y: SY(0) - u * 1.3, vx: rnd(8, 22), vy: rnd(-45, -25), g: 0, r: u * 0.13, grow: u * 0.2, life: 2.2, max: 2.2, col: '90,80,90' });
+  }
+  ctx = mainCtx;
   for (const f of world.flags) drawFlag(f, T);
-  // pad target label (boss)
+  for (const c of world.crates) drawCrate(c);
   if (phase === 'boss' && world.pads[0]) {
-    const p = world.pads[0];
-    inkText(ctx, 'LANDING PAD', SX(boss.D), SY(0) + Math.min(u * 0.9, 40) + 46, clamp(u * 0.28, 11, 18), '#fff');
-    inkText(ctx, '⬇ ' + boss.D.toFixed(1) + ' m', SX(boss.D), SY(0) + Math.min(u * 0.9, 40) + 16, clamp(u * 0.4, 14, 26), '#ffd23f');
+    inkText(ctx, '🎯 ' + boss.D.toFixed(1) + ' m', SX(boss.D), SY(0) + Math.min(u * 0.9, 40) + 16, clamp(u * 0.4, 14, 26), '#ffd23f');
     ctx.setLineDash([8, 6]); ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(SX(0), SY(0) + 8); ctx.lineTo(SX(boss.D), SY(0) + 8); ctx.stroke(); ctx.setLineDash([]);
   }
-  // trails
   trails.forEach((tr, i) => {
     const alpha = phase === 'experiment' ? (i === trails.length - 1 ? 1 : 0.55) : tr.ghost ? 0.6 : 1;
     drawTrail(tr, alpha);
-    if (tr.label) {
-      const latest = i === trails.length - 1 && !tr.ghost && !jumpers.some(j => !j.ghost && !j.landed);
-      const lx = SX(tr.landX), ly = SY(groundY(tr.landX)) - 14 - (latest || tr.ghost ? pupR() * 4.8 : (i % 4) * 24);
-      ctx.globalAlpha = alpha;
-      inkText(ctx, tr.label, lx, ly, clamp(u * 0.32, 12, 20), tr.color === PCOL.mars ? '#ffd23f' : '#fff', 'center', 3);
-      ctx.globalAlpha = 1;
-    }
+    const latest = i === trails.length - 1 && !tr.ghost && !jumpers.some(j => !j.ghost && !j.landed);
+    const ly = SY(groundY(tr.landX)) - 14 - (latest || tr.ghost ? R * 4.8 : (i % 4) * 24);
+    ctx.globalAlpha = alpha; inkText(ctx, tr.label, SX(tr.landX), ly, clamp(u * 0.32, 12, 20), tr.ghost ? '#bfe3ff' : '#ffd23f', 'center', 3); ctx.globalAlpha = 1;
   });
   for (const j of jumpers) if (!j.landed) drawTrail({ pts: j.trail, color: j.ghost ? PCOL.earth : PCOL[j.planet] }, j.ghost ? 0.6 : 1);
-  // ghost Earth pup
-  const R = pupR();
-  for (const j of jumpers) if (j.ghost) {
-    drawPup(ctx, SX(j.x), SY(j.y), R, { t: T, pose: j.landed ? 'sad' : 'fly', ghost: true });
-    if (!j.landed || j.landT < 3) inkText(ctx, 'Earth jump', SX(j.x), SY(j.y) - R * 5.2, clamp(u * 0.26, 11, 16), '#bfe3ff', 'center', 3);
-  }
-  // aim arrow
-  if (['challenge', 'experiment', 'boss'].includes(phase) && !flying && !(phase === 'boss' && boss.won)) {
+  for (const j of jumpers) if (j.ghost) drawPup(ctx, SX(j.x), SY(j.y), R, { t: T, pose: j.landed ? 'sad' : 'fly', ghost: true });
+  for (const d of devils) if (d.alive) drawDevil(d);
+  const canAim = ['challenge', 'experiment', 'boss'].includes(phase) && !flying && !(phase === 'boss' && (boss.won || !boss.cleared));
+  if (canAim) {
     const a = aim.angle * Math.PI / 180, len = Math.min(W, H) * 0.45 * ((aim.speed - 2) / 5) * 0.8 + R * 2;
     const cx = SX(0), cy = SY(0) - R * 2, ex = cx + Math.cos(a) * len, ey = cy - Math.sin(a) * len;
     ctx.lineCap = 'round'; ctx.strokeStyle = INK; ctx.lineWidth = 11; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(ex, ey); ctx.stroke();
     ctx.strokeStyle = '#ffd23f'; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(ex, ey); ctx.stroke();
     ctx.fillStyle = '#ffd23f'; ctx.strokeStyle = INK; ctx.lineWidth = 3; ctx.beginPath();
-    ctx.moveTo(ex + Math.cos(a) * 16, ey - Math.sin(a) * 16);
-    ctx.lineTo(ex + Math.cos(a + 2.4) * 14, ey - Math.sin(a + 2.4) * 14);
-    ctx.lineTo(ex + Math.cos(a - 2.4) * 14, ey - Math.sin(a - 2.4) * 14); ctx.closePath(); ctx.fill(); ctx.stroke();
-    // angle arc
+    ctx.moveTo(ex + Math.cos(a) * 16, ey - Math.sin(a) * 16); ctx.lineTo(ex + Math.cos(a + 2.4) * 14, ey - Math.sin(a + 2.4) * 14); ctx.lineTo(ex + Math.cos(a - 2.4) * 14, ey - Math.sin(a - 2.4) * 14);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
     ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(cx, cy, R * 2.2, -a, 0); ctx.stroke();
     inkText(ctx, aim.angle + '°', cx + R * 2.9, cy - R * 0.6, clamp(R * 0.8, 12, 22), '#fff', 'left', 3);
   }
-  // Captain Pup
   const m = jumpers.find(j => !j.ghost);
   if (m) {
-    const pose = m.landed ? (pupState.pose) : 'fly';
-    const sq = m.landed ? pupState.squash : 0;
-    drawPup(ctx, SX(m.x), SY(m.y), R, { t: T, pose, squash: sq, tilt: m.landed ? 0 : clamp(-m.vy * 0.03, -0.3, 0.3) });
-    const top = SY(m.y) - R * 4.6;
-    if (top < 0) { inkText(ctx, '▲ ' + m.y.toFixed(1) + ' m high!', clamp(SX(m.x), 70, W - 70), 18, 16, '#ffd23f'); }
+    drawPup(ctx, SX(m.x), SY(m.y), R, { t: T, pose: m.landed ? pupState.pose : 'fly', squash: m.landed ? pupState.squash : 0, tilt: m.landed ? 0 : clamp(-m.vy * 0.03, -0.3, 0.3) });
+    if (SY(m.y) - R * 4.6 < 0) inkText(ctx, '⬆ ' + m.y.toFixed(1) + ' m', clamp(SX(m.x), 70, W - 70), 18, 16, '#ffd23f');
   } else {
-    const cr = crouch > 0 ? 0.18 : 0;
-    drawPup(ctx, SX(pupState.x), SY(pupState.y), R, { t: T, pose: phase === 'title' ? 'stand' : pupState.pose, squash: cr });
+    drawPup(ctx, SX(pupState.x), SY(pupState.y), R, { t: T, pose: pupState.pose, squash: crouch > 0 ? 0.18 : 0 });
   }
-  // repair drone
-  if (drone && drone.x !== undefined) {
+  if (phase === 'boss' && !boss.won) {         // bubble shield
+    const o = gunOrigin(); ctx.strokeStyle = `rgba(159,243,255,${shieldFlash > 0 ? 0.95 : 0.35})`; ctx.lineWidth = shieldFlash > 0 ? 6 : 3; ell(o.x, o.y, R * 1.6, R * 1.6); ctx.stroke();
+  }
+  for (const k of meteors) drawMeteor(k);
+  if (drone && drone.x !== undefined && !roverFixed) {
     const dx = SX(drone.x), dy = SY(drone.y), s = clamp(u * 0.35, 10, 26);
     ctx.fillStyle = '#9b5de5'; ctx.strokeStyle = INK; ctx.lineWidth = 3; rrect(dx - s, dy - s * 0.5, s * 2, s, s * 0.3); ctx.fill(); ctx.stroke();
-    ctx.strokeStyle = INK; ctx.beginPath(); ctx.moveTo(dx - s * 1.4, dy - s * 0.9 + Math.sin(T * 40) * 2); ctx.lineTo(dx - s * 0.4, dy - s * 0.9); ctx.moveTo(dx + s * 0.4, dy - s * 0.9); ctx.lineTo(dx + s * 1.4, dy - s * 0.9 - Math.sin(T * 40) * 2); ctx.stroke();
-    inkText(ctx, '🔧', dx, dy + s * 0.9, s, '#fff', 'center', 1);
-    if (Math.random() < 0.5) sparkles.push({ x: dx, y: dy, vx: (Math.random() - 0.5) * 60, vy: 40, t: 0.4 });
+    ctx.beginPath(); ctx.moveTo(dx - s * 1.4, dy - s * 0.9 + Math.sin(T * 40) * 2); ctx.lineTo(dx - s * 0.4, dy - s * 0.9); ctx.moveTo(dx + s * 0.4, dy - s * 0.9); ctx.lineTo(dx + s * 1.4, dy - s * 0.9 - Math.sin(T * 40) * 2); ctx.stroke();
+    emoji(ctx, '🔧', dx, dy + s * 0.9, s);
+    if (Math.random() < 0.5) sparks(dx, dy, 1, '#ffd23f');
   }
-  drawParticles(dt, T);
-  drawBursts(dt);
 }
+
+/* ---------------- avatar in the speech bubble ---------------- */
+(function () { const c = $('avatar'), x = c.getContext('2d'); x.fillStyle = '#ffe3c2'; x.fillRect(0, 0, 104, 104); drawPup(x, 52, 50 + 3.1 * 22, 22, { t: 0.5 }); ctx = mainCtx; })();
 
 /* ---------------- test hook ---------------- */
 window.__game = {
-  get phase() { return phase; }, setTimeLeft(s) { phaseLeft = s; }, goto, aim, jump: doJump, boss, get flying() { return flying; },
+  get phase() { return phase; }, setTimeLeft(s) { phaseLeft = s; }, goto, aim, jump: doJump, boss, hub, get flying() { return flying; },
   setAim(v, a) { if (!aim.locked) aim.speed = v; aim.angle = a; syncSliders(); },
-  setPlanet, answer, get badges() { return [...badges]; }, rangeOf, G, world,
+  setPlanet, get badges() { return [...badges]; }, rangeOf, G, world,
   solveBoss() { const v = Math.sqrt(boss.D * G.mars); aim.speed = Math.round(v * 10) / 10; aim.angle = 45; syncSliders(); },
+  devils() { return devils.filter(d => d.alive).map(d => { const p = devilPos(d); return [p.sx, p.sy]; }); },
+  asteroids() { return asts.filter(a => a.alive).map(a => ({ i: a.i, x: a.x, y: a.y, right: a.i === QUIZ[qi].a })); },
+  shoot, enterMission() { const p = hub.portals[0]; hub.x = p.x; hub.y = p.y; },
 };
 
-resize(); goto('title'); updateCamera(0, true);
+resize(); goto('hub'); updateCamera(0, true);
 requestAnimationFrame(frame);
 </script>
 </body>
