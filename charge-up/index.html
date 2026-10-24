@@ -1,0 +1,2202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Charge Up! Energy, Batteries &amp; Electric Cars</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root { --ink:#1d1b26; --paper:#fffaf0; --accent:#ff4d6d; --yellow:#ffd23f; --green:#06d6a0; --blue:#4cc9f0;
+    --purple:#9b5de5; --orange:#ff9f1c; --toon:"Luckiest Guy","Comic Sans MS","Chalkboard SE",system-ui,sans-serif; }
+  * { box-sizing:border-box; }
+  [hidden] { display:none !important; }
+  html,body { margin:0; height:100%; overflow:hidden; color:var(--ink);
+    font-family:Nunito,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; font-weight:800;
+    user-select:none; -webkit-user-select:none; -webkit-tap-highlight-color:transparent; }
+  body { background:#8fd9f5;
+    background-image:radial-gradient(circle at 20px 20px, rgba(255,255,255,.35) 3px, transparent 4px);
+    background-size:44px 44px; }
+  button { font:inherit; cursor:pointer; color:inherit; }
+  a { color:inherit; }
+  .toon { font-family:var(--toon); font-weight:400; letter-spacing:1px; }
+  .panel { background:var(--paper); border:3px solid var(--ink); border-radius:18px; box-shadow:4px 4px 0 var(--ink); }
+  .screen { position:fixed; inset:0; display:flex; flex-direction:column; }
+  .screen[hidden] { display:none; }
+  .scroll { overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; }
+
+  /* buttons */
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:60px;
+    background:var(--accent); color:#fff; font-family:var(--toon); font-weight:400; font-size:26px; letter-spacing:1px;
+    padding:10px 28px 6px; border-radius:999px; border:3px solid var(--ink); box-shadow:0 6px 0 var(--ink);
+    text-decoration:none; margin:6px 5px 10px; line-height:1; }
+  .btn:active, .btn.down { transform:translateY(4px); box-shadow:0 2px 0 var(--ink); }
+  .btn.alt { background:#fff; color:var(--ink); }
+  .btn.go { background:var(--green); color:var(--ink); }
+  .btn.blue { background:var(--blue); color:var(--ink); }
+  .btn.yel { background:var(--yellow); color:var(--ink); }
+  .btn.sm { font-size:20px; min-height:60px; padding:8px 18px 4px; }
+  .btn[disabled] { opacity:.45; pointer-events:none; }
+  .btn svg { flex:none; }
+  .tile { background:#fff; border:3px solid var(--ink); border-radius:16px; box-shadow:0 5px 0 var(--ink);
+    min-height:64px; padding:8px 12px; font-size:18px; display:flex; align-items:center; gap:8px; justify-content:center; line-height:1.15; }
+  .tile:active { transform:translateY(3px); box-shadow:0 2px 0 var(--ink); }
+  .tile.on { background:var(--yellow); }
+  .tile.good { background:#c7f9e5; }
+  .tile.bad { background:#ffd6dc; }
+  .tile.dim { opacity:.45; }
+  .row { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; align-items:center; }
+  .ic { display:inline-block; vertical-align:middle; flex:none; }
+
+  h1 { margin:0; font-family:var(--toon); font-weight:400; font-size:82px; line-height:1; color:var(--yellow);
+    -webkit-text-stroke:3px var(--ink); paint-order:stroke; text-shadow:5px 5px 0 var(--ink); transform:rotate(-2deg); letter-spacing:2px; }
+  h1 span { color:var(--accent); }
+  h2 { margin:0 0 6px; font-family:var(--toon); font-weight:400; font-size:40px; line-height:1.05; color:var(--accent);
+    -webkit-text-stroke:2px var(--ink); paint-order:stroke; text-shadow:3px 3px 0 var(--ink); letter-spacing:1px; }
+  h3 { margin:4px 0; font-family:var(--toon); font-weight:400; font-size:24px; letter-spacing:1px; }
+
+  /* title screen */
+  #title .wrap { width:min(1200px,100%); margin:0 auto; padding:16px 16px 30px; }
+  .tHead { display:flex; align-items:center; justify-content:center; gap:18px; flex-wrap:wrap; margin:6px 0 14px; text-align:center; }
+  .tHead img { width:150px; height:150px; animation:bob 2.4s ease-in-out infinite; }
+  .sub { font-family:var(--toon); font-size:26px; margin:14px 0 0; letter-spacing:1px; color:#fff;
+    -webkit-text-stroke:1.5px var(--ink); paint-order:stroke; text-shadow:3px 3px 0 var(--ink); }
+  .mapPanel { padding:8px; overflow:hidden; }
+  #map { display:block; width:100%; height:auto; }
+  #map .stop { cursor:pointer; }
+  #map .stop:active { transform:translateY(3px); }
+  #map text { font-family:var(--toon); }
+  .tBtns { display:flex; flex-wrap:wrap; justify-content:center; gap:4px; margin-top:16px; }
+  .intro { text-align:center; font-size:19px; margin:10px auto 0; max-width:820px; }
+  @keyframes bob { 50% { transform:translateY(-8px) rotate(2deg); } }
+
+  /* mission screen */
+  .mbar { display:flex; align-items:center; gap:10px; padding:8px 12px; background:var(--paper); border-bottom:3px solid var(--ink); flex-wrap:wrap; }
+  #mTitle { font-size:26px; flex:1 1 auto; min-width:150px; line-height:1.05; }
+  #steps { display:flex; gap:6px; list-style:none; margin:0; padding:0; flex-wrap:wrap; }
+  #steps li { border:3px solid var(--ink); border-radius:999px; padding:5px 12px 2px; font-family:var(--toon); font-size:17px; background:#fff; color:#8d8577; border-color:#bdb39f; }
+  #steps li.done { background:#c7f9e5; color:var(--ink); border-color:var(--ink); }
+  #steps li.now { background:var(--yellow); color:var(--ink); border-color:var(--ink); transform:rotate(-2deg) scale(1.08); }
+  .chip { display:inline-flex; align-items:center; gap:6px; border:3px solid var(--ink); border-radius:999px; padding:6px 14px 3px; background:#fff; font-family:var(--toon); font-size:20px; min-width:92px; justify-content:center; }
+  .chip.low { background:#ffe8a3; }
+  .chip[hidden] { display:none; }
+  .roundBtn { font-size:30px; color:var(--ink); width:60px; height:60px; border-radius:50%; border:3px solid var(--ink); background:#fff; box-shadow:0 5px 0 var(--ink); display:grid; place-items:center; padding:0; flex:none; }
+  .roundBtn:active { transform:translateY(3px); box-shadow:0 2px 0 var(--ink); }
+  #stage { flex:1; padding:14px 14px 40px; }
+  .phase { width:min(1180px,100%); margin:0 auto; }
+  .talk { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+  .talk img { width:96px; height:96px; flex:none; animation:bob 2.6s ease-in-out infinite; }
+  .bubble { position:relative; padding:12px 18px; font-size:21px; line-height:1.3; flex:1; }
+  .bubble::before { content:""; position:absolute; left:-15px; top:calc(50% - 10px); border:10px solid transparent; border-right:14px solid var(--ink); border-left:0; }
+  .bubble b { color:#d6204a; }
+  .play { margin:0 auto; }
+  .nav { display:flex; justify-content:center; flex-wrap:wrap; gap:6px; margin-top:14px; }
+  .nav .next { animation:wig 1.2s ease-in-out infinite; }
+  @keyframes wig { 0%,100% { transform:rotate(-2deg); } 50% { transform:rotate(2deg) scale(1.05); } }
+  canvas.sim { display:block; margin:0 auto; width:100%; border:3px solid var(--ink); border-radius:18px; box-shadow:4px 4px 0 var(--ink); background:#bde8fb; touch-action:none; }
+  .note { font-size:17px; background:#fff4c2; border:3px dashed var(--ink); border-radius:16px; padding:10px 14px; margin:12px auto 0; max-width:900px; line-height:1.3; }
+  .note:empty { display:none; }
+  .readout { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin:12px 0; }
+  .readout .rd { padding:8px 14px; min-width:130px; text-align:center; }
+  .rd small { display:block; font-size:14px; opacity:.7; }
+  .rd b { font-family:var(--toon); font-weight:400; font-size:28px; display:block; line-height:1.1; }
+  .goals { list-style:none; padding:0; margin:10px auto; display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
+  .goals li { border:3px solid var(--ink); border-radius:12px; padding:6px 12px; background:#fff; font-size:16px; }
+  .goals li.ok { background:#c7f9e5; }
+  .goals li.ok::before { content:"\2714  "; color:#078a63; }
+  .lbl { font-size:15px; opacity:.75; margin:8px 0 4px; text-align:center; }
+  input[type=range] { width:min(520px,90%); height:44px; accent-color:var(--accent); }
+  .shake { animation:shake .4s; }
+  @keyframes shake { 20% { transform:translateX(-8px); } 40% { transform:translateX(8px); } 60% { transform:translateX(-5px); } 80% { transform:translateX(5px); } }
+  .pop { animation:popin .35s cubic-bezier(.3,1.6,.6,1); }
+  @keyframes popin { from { transform:scale(.6); opacity:0; } }
+
+  /* discover cards */
+  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:14px; }
+  .dcard { padding:12px 14px 14px; cursor:pointer; text-align:center; min-height:250px; display:flex; flex-direction:column; align-items:center; transition:transform .15s; }
+  .dcard:active { transform:scale(.98); }
+  .dcard .art { min-height:84px; display:flex; align-items:center; justify-content:center; gap:4px; flex-wrap:wrap; }
+  .dcard .q { font-size:19px; margin:6px 0; }
+  .dcard .a { font-size:17px; line-height:1.3; margin:6px 0 0; text-align:left; display:none; }
+  .dcard .tap { margin-top:auto; font-family:var(--toon); font-size:18px; color:#fff; background:var(--blue); border:3px solid var(--ink); border-radius:999px; padding:6px 16px 2px; }
+  .dcard.open { background:#fff; }
+  .dcard.open .a { display:block; animation:popin .3s; }
+  .dcard.open .tap { display:none; }
+  .arrow { font-family:var(--toon); font-size:26px; color:var(--ink); }
+
+  /* chain builder */
+  .chain { display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:6px; }
+  .slot { width:132px; min-height:118px; border:3px dashed var(--ink); border-radius:16px; background:rgba(255,255,255,.6);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; padding:6px; font-size:15px; text-align:center; cursor:pointer; line-height:1.1; }
+  .slot.full { border-style:solid; background:#fff; box-shadow:0 4px 0 var(--ink); }
+  .slot.good { background:#c7f9e5; }
+  .slot.bad { background:#ffd6dc; }
+  .slot.fixed { background:var(--yellow); border-style:solid; cursor:default; }
+  .link { font-size:13px; max-width:92px; text-align:center; line-height:1.1; display:flex; flex-direction:column; align-items:center; }
+  .link b { font-family:var(--toon); font-weight:400; font-size:28px; line-height:1; }
+  .pool { margin-top:14px; }
+  .pool .tile { min-width:120px; flex-direction:column; gap:2px; font-size:15px; }
+  .pool .tile.used { visibility:hidden; }
+
+  /* quiz */
+  #qWrap { max-width:820px; margin:0 auto; text-align:center; }
+  .qTopic { display:inline-block; background:var(--blue); border:3px solid var(--ink); border-radius:999px; padding:4px 14px 0;
+    font-family:var(--toon); font-size:18px; letter-spacing:1px; color:#fff; -webkit-text-stroke:1px var(--ink); paint-order:stroke; }
+  .qText { font-size:26px; margin:14px 0; line-height:1.25; }
+  .qAns { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .qAns button { background:#fff; border:3px solid var(--ink); border-radius:16px; box-shadow:0 5px 0 var(--ink); font-size:20px; padding:12px 10px; min-height:70px; }
+  .qAns button:active { transform:translateY(3px); box-shadow:0 2px 0 var(--ink); }
+  .qAns button.right { background:#c7f9e5; }
+  .qAns button.wrong { background:#ffd6dc; }
+  .qWhy { font-size:19px; line-height:1.3; margin:14px auto 0; max-width:720px; }
+
+  /* overlays */
+  .overlay { position:fixed; inset:0; display:grid; place-items:center; background:rgba(30,20,60,.5); z-index:20; padding:12px; }
+  .overlay[hidden] { display:none; }
+  .card { padding:20px 26px 22px; text-align:center; max-width:min(860px,96vw); max-height:94vh; overflow:auto; border-radius:26px; box-shadow:6px 6px 0 var(--ink); }
+  .card p { font-size:19px; margin:8px 0; }
+  .stars { font-size:60px; color:#f4a100; letter-spacing:6px; line-height:1; -webkit-text-stroke:2px var(--ink); }
+  .stars .off { color:#e7e0cf; }
+  .badges { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin:12px 0; }
+  .badge { display:flex; flex-direction:column; align-items:center; font-size:16px; }
+  .badge.locked { opacity:.45; filter:grayscale(1); }
+  #toast { position:fixed; left:50%; bottom:20px; transform:translateX(-50%); z-index:25; padding:12px 16px; text-align:center; font-size:19px; }
+  #toast[hidden] { display:none; }
+
+  /* comic bursts */
+  #bursts { position:fixed; inset:0; pointer-events:none; z-index:30; overflow:hidden; }
+  .burst { position:absolute; width:250px; height:170px; margin:-85px 0 0 -125px; display:grid; place-items:center; animation:burst 1s ease-out forwards; }
+  .burst svg { position:absolute; inset:0; }
+  .burst span { position:relative; font-family:var(--toon); font-size:40px; color:#fff; -webkit-text-stroke:2px var(--ink); paint-order:stroke; text-shadow:3px 3px 0 var(--ink); transform:rotate(-6deg); white-space:nowrap; }
+  @keyframes burst { 0% { transform:scale(.2) rotate(-15deg); opacity:0; } 18% { transform:scale(1.15) rotate(3deg); opacity:1; } 30% { transform:scale(1); } 80% { opacity:1; } 100% { transform:scale(1.05) translateY(-30px); opacity:0; } }
+
+  /* sims shared */
+  .ctrls { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; align-items:center; margin-top:12px; }
+  .seg { display:inline-flex; border:3px solid var(--ink); border-radius:999px; overflow:hidden; box-shadow:0 4px 0 var(--ink); background:#fff; }
+  .seg button { border:0; background:#fff; min-height:56px; padding:6px 16px; font-size:17px; border-right:3px solid var(--ink); }
+  .seg button:last-child { border-right:0; }
+  .seg button.on { background:var(--yellow); }
+  .bigpedal { min-width:160px; min-height:90px; font-size:30px; touch-action:none; }
+  .meter { height:22px; border:3px solid var(--ink); border-radius:12px; background:#e9e2cf; overflow:hidden; position:relative; }
+  .meter i { position:absolute; left:0; top:0; bottom:0; background:var(--green); }
+  .tf { min-width:170px; font-size:28px; }
+
+  @media (max-width:760px) {
+    h1 { font-size:56px; } .sub { font-size:20px; }
+    .tHead img { width:110px; height:110px; }
+    .qAns { grid-template-columns:1fr; } .qText { font-size:21px; }
+    .bubble { font-size:18px; padding:10px 12px; } .talk img { width:70px; height:70px; }
+    .mbar { gap:6px; padding:6px 8px; }
+    #toMap { order:1; font-size:18px; padding:6px 12px 2px; }
+    #mTitle { order:2; font-size:17px; flex:1 1 0; min-width:0; }
+    #clock { order:3; min-width:0; font-size:17px; padding:4px 8px 1px; }
+    .mbar .muteBtn { order:4; width:52px; height:52px; }
+    #steps { order:5; width:100%; justify-content:center; flex-wrap:nowrap; }
+    #steps li { font-size:14px; padding:4px 9px 1px; }
+    #steps li span { display:none; } #steps li.now span { display:inline; }
+    #stage { padding:10px 10px 40px; }
+    .btn { font-size:22px; padding:10px 20px 6px; }
+    .slot { width:104px; min-height:100px; font-size:13px; }
+    .badges { grid-template-columns:repeat(2,1fr); }
+    .cards { grid-template-columns:1fr; } .dcard { min-height:0; }
+    .card { padding:16px 14px; }
+  }
+  /* ---- kid-friendly layer ---- */
+  .bubble { display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:24px; }
+  .bubble .say { flex:1 1 220px; }
+  .say b { color:#d6204a; }
+  .readBtn { flex:none; width:60px; height:60px; border-radius:50%; border:3px solid var(--ink); background:var(--yellow); box-shadow:0 4px 0 var(--ink); display:grid; place-items:center; padding:0; }
+  .readBtn:active { transform:translateY(3px); box-shadow:0 1px 0 var(--ink); }
+  .readBtn.talking { animation:wig .3s 2; }
+  .moreBtn { flex:none; display:inline-flex; align-items:center; gap:4px; min-height:48px; border:3px solid var(--ink); border-radius:999px; background:#fff; padding:4px 14px; font-size:16px; box-shadow:0 3px 0 var(--ink); }
+  .moreBtn.on { background:#c7f9e5; }
+  .moreTxt { flex:1 1 100%; font-size:17px; line-height:1.35; background:#fff; border:3px dashed var(--ink); border-radius:14px; padding:8px 12px; text-align:left; animation:popin .25s; }
+  .dcard .q { font-size:26px; color:var(--accent); -webkit-text-stroke:1px var(--ink); paint-order:stroke; }
+  .dcard .a { font-size:20px; text-align:center; }
+  .dcard .a .say { margin-bottom:8px; }
+  .dcard .a .readBtn, .dcard .a .moreBtn { display:inline-grid; vertical-align:middle; margin:0 4px; }
+  .dcard .a .moreBtn { display:inline-flex; }
+  .dcard .art { min-height:110px; }
+  .dcard .tap { display:inline-flex; align-items:center; gap:6px; font-size:22px; padding:6px 18px 2px; animation:wig 1.4s infinite; }
+  .qHead { display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap; }
+  .qHead .qText { margin:10px 0; }
+  .qArt { flex:none; }
+  .qAns.pics { grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); }
+  .qAns.pics button { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; min-height:130px; font-size:19px; line-height:1.15; }
+  .qWhy { font-size:21px; }
+  .qWhy .say { display:inline; }
+  .qWhy .readBtn, .qWhy .moreBtn { display:inline-grid; vertical-align:middle; margin:6px 4px 0; }
+  .qWhy .moreBtn { display:inline-flex; }
+  .qTopic { font-size:24px; letter-spacing:4px; color:var(--yellow); }
+  .hand { position:fixed; width:64px; height:64px; margin:-6px 0 0 -18px; z-index:31; pointer-events:none; animation:handTap 1.1s ease-in-out infinite; filter:drop-shadow(3px 3px 0 rgba(29,27,38,.35)); }
+  .hand .ripple { position:absolute; left:4px; top:-2px; width:28px; height:28px; border:4px solid var(--accent); border-radius:50%; animation:ripple 1.1s ease-out infinite; }
+  @keyframes handTap { 0%,100% { transform:translate(14px,22px); } 45% { transform:translate(0,0) scale(.92); } 60% { transform:translate(0,0) scale(.92); } }
+  @keyframes ripple { 0%,40% { transform:scale(.2); opacity:0; } 50% { opacity:1; } 100% { transform:scale(1.8); opacity:0; } }
+  .conf { position:absolute; width:12px; height:16px; border:2px solid var(--ink); border-radius:3px; animation:conf 1.4s cubic-bezier(.2,.6,.4,1) forwards; }
+  @keyframes conf { from { transform:translate(0,0) rotate(0); opacity:1; } to { transform:translate(var(--dx),var(--dy)) rotate(var(--r)); opacity:0; } }
+  .flow { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:2px; }
+  .fnode { display:flex; flex-direction:column; align-items:center; font-size:13px; animation:bob 2.4s ease-in-out infinite; }
+  .fnode:nth-child(4n+3) { animation-delay:-.6s; }
+  .pipe { position:relative; width:30px; height:10px; border-radius:6px; background:#3c3a55; border:2px solid var(--ink); overflow:hidden; }
+  .pipe i { position:absolute; top:0; width:8px; height:6px; border-radius:50%; background:var(--yellow); box-shadow:0 0 6px 2px #ffe066; animation:spark 1.2s linear infinite; }
+  .pipe i:nth-child(2) { animation-delay:-.4s; } .pipe i:nth-child(3) { animation-delay:-.8s; }
+  @keyframes spark { from { left:-8px; } to { left:30px; } }
+  .minibars { display:flex; flex-direction:column; gap:6px; width:100%; max-width:260px; }
+  .mb { display:grid; grid-template-columns:36px 1fr 52px; align-items:center; gap:6px; font-size:15px; }
+  .mb .meter { height:20px; }
+  .mb .meter i { animation:grow 1.4s ease-out; }
+  @keyframes grow { from { width:0; } }
+  .bigTiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:12px; }
+  .bigTiles .tile { flex-direction:column; min-height:120px; font-size:18px; }
+  .legBox { display:flex; align-items:center; justify-content:center; gap:16px; flex-wrap:wrap; margin:6px 0 10px; }
+  .badgeWin { animation:spinIn .9s cubic-bezier(.3,1.5,.5,1); }
+  @keyframes spinIn { from { transform:scale(.2) rotate(-200deg); } }
+  .say small { font-size:.8em; opacity:.8; }
+  .tile.wrongWig { animation:shake .4s; background:#ffe8a3; }
+  @media (max-width:760px) {
+    .bubble { font-size:19px; } .readBtn { width:52px; height:52px; }
+    .qAns.pics { grid-template-columns:1fr 1fr; } .qAns.pics button { min-height:116px; font-size:16px; }
+    .dcard .q { font-size:22px; } .dcard .a { font-size:18px; }
+  }
+</style>
+</head>
+<body>
+<section id="title" class="screen scroll">
+  <div class="wrap">
+    <header class="tHead">
+      <img id="tPup" alt="Captain Pup">
+      <div><h1>Charge <span>Up!</span></h1><p class="sub">Energy, Batteries &amp; Electric Cars</p></div>
+    </header>
+    <div class="panel mapPanel"><svg id="map" role="img" aria-label="Road trip map"></svg></div>
+    <p class="intro panel" style="padding:10px 14px;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap" id="introP"><span>Road trip with <b>Captain Pup</b>! Tap a stop &#10140; win <b>Battery Badges</b>!</span></p>
+    <div class="tBtns">
+      <a class="btn alt" href="../" id="gamesLink">&#11013; Games</a>
+      <button class="btn yel" id="badgesBtn"></button>
+      <button class="btn alt muteBtn" aria-label="Sound on or off"></button>
+    </div>
+  </div>
+</section>
+
+<section id="mission" class="screen" hidden>
+  <div class="mbar">
+    <button class="btn sm alt" id="toMap" style="margin:0 0 4px">Map</button>
+    <div id="mTitle" class="toon"></div>
+    <ol id="steps"><li><b>1</b><span> Challenge</span></li><li><b>2</b><span> Discover</span></li><li><b>3</b><span> Experiment</span></li><li><b>4</b><span> Boss</span></li><li><b>&#10004;</b><span> Check</span></li></ol>
+    <span id="clock" class="chip"></span>
+    <button class="roundBtn muteBtn" aria-label="Sound on or off"></button>
+  </div>
+  <div id="stage" class="scroll"></div>
+</section>
+
+<div id="ov" class="overlay" hidden><div class="card panel" id="ovCard"></div></div>
+<div id="toast" class="panel" hidden></div>
+<div id="bursts"></div>
+<script>
+'use strict';
+/* ================= basics ================= */
+const INK = '#1d1b26', PAPER = '#fffaf0';
+const C = { accent:'#ff4d6d', yellow:'#ffd23f', green:'#06d6a0', blue:'#4cc9f0', purple:'#9b5de5', orange:'#ff9f1c' };
+const TAU = Math.PI * 2;
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+function el(html) { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild; }
+function fmt(n, d = 0) { return Number(n).toFixed(d); }
+function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+/* ================= save ================= */
+const KEY = 'chargeUp.v1';
+let save = { done:{}, stars:{}, mute:false };
+try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && typeof s === 'object') save = Object.assign(save, s); } catch (e) {}
+function persist() { try { localStorage.setItem(KEY, JSON.stringify(save)); } catch (e) {} }
+function unlocked(id) { return id === 1 || !!save.done[id - 1]; }
+
+/* ================= sound ================= */
+let AC = null;
+function initAudio() {
+  if (AC) { if (AC.state === 'suspended') AC.resume().catch(() => {}); return; }
+  try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { AC = null; }
+}
+document.addEventListener('pointerdown', initAudio);
+document.addEventListener('keydown', initAudio);
+function tone(f, dur, type = 'square', vol = .07, when = 0, slide = 0) {
+  if (!AC || save.mute) return;
+  try {
+    const t = AC.currentTime + when, o = AC.createOscillator(), g = AC.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t);
+    if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(30, f + slide), t + dur);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    o.connect(g).connect(AC.destination); o.start(t); o.stop(t + dur + .03);
+  } catch (e) {}
+}
+const sfx = {
+  blip: () => tone(660, .07, 'square', .045),
+  tap: () => tone(440, .05, 'triangle', .06),
+  good: () => [523, 659, 784].forEach((f, i) => tone(f, .14, 'triangle', .08, i * .07)),
+  win: () => [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, .2, 'triangle', .09, i * .09)),
+  bad: () => tone(220, .25, 'sawtooth', .05, 0, -100),
+  whoosh: () => tone(250, .35, 'sine', .07, 0, 700),
+  zap: () => tone(1200, .14, 'square', .035, 0, -900),
+};
+function syncMute() { $$('.muteBtn').forEach(b => { b.innerHTML = icon(save.mute ? 'mute' : 'speaker', 34); }); }
+
+/* ================= icons (inline SVG, 64x64) ================= */
+const ICONS = (() => {
+  const rays = (cx, cy, r1, r2, n) => { let d = ''; for (let i = 0; i < n; i++) { const a = i / n * TAU; d += `M${(cx + Math.cos(a) * r1).toFixed(1)} ${(cy + Math.sin(a) * r1).toFixed(1)}L${(cx + Math.cos(a) * r2).toFixed(1)} ${(cy + Math.sin(a) * r2).toFixed(1)}`; } return `<path d="${d}" fill="none"/>`; };
+  const factory = top => `<path d="M6 58V34l14-8v8l14-8v8h14V14h8v44z" fill="#b8c0cc"/>${top}<path d="M12 44h6M24 44h6M36 44h6" fill="none"/>`;
+  return {
+    sun: `${rays(32, 32, 19, 28, 8)}<circle cx="32" cy="32" r="13" fill="#ffd23f"/>`,
+    panel: `<path d="M33 40v14M23 56h20" fill="none"/><path d="M8 40l12-26h36L44 40z" fill="#3a6ea5"/><path d="M14 27h36M32 14l-6 26M44 14l-6 26" fill="none" stroke="#9fd3ff" stroke-width="2.5"/>`,
+    bolt: `<path d="M38 4L14 36h16l-5 24 25-34H34z" fill="#ffd23f"/>`,
+    battery: `<rect x="6" y="18" width="46" height="28" rx="6" fill="#fff"/><rect x="52" y="26" width="6" height="12" rx="2" fill="#1d1b26"/><rect x="11" y="23" width="28" height="18" rx="3" fill="#06d6a0" stroke="none"/><path d="M20 27v10M15 32h10M40 32h6" fill="none" stroke-width="3"/>`,
+    motor: `<path d="M14 48l-4 8h38l-4-8z" fill="#8d96a3"/><rect x="8" y="16" width="38" height="32" rx="9" fill="#b8c0cc"/><circle cx="27" cy="32" r="10" fill="#ff9f1c"/><circle cx="27" cy="32" r="3" fill="#1d1b26"/><path d="M46 32h12" fill="none" stroke-width="6"/>`,
+    motion: `<path d="M2 24h12M0 32h9M4 40h8" fill="none"/><path d="M16 42q0-12 10-12l6-10h16l8 10q6 1 6 12z" fill="#ff4d6d"/><circle cx="26" cy="44" r="6" fill="#1d1b26"/><circle cx="52" cy="44" r="6" fill="#1d1b26"/>`,
+    heat: `<path d="M32 4c8 12 18 18 16 34-2 14-12 20-16 20-8 0-18-6-16-20 2-10 10-12 8-24 6 4 6 8 8-10z" fill="#ff9f1c"/><path d="M32 30c4 8 8 12 6 18-2 6-10 6-11 0-1-6 4-8 5-18z" fill="#ffd23f"/>`,
+    light: `${rays(32, 26, 25, 31, 7).replace('fill="none"', 'fill="none" stroke-width="3"')}<path d="M32 6c-14 0-20 12-18 22 2 8 8 10 9 18h18c1-8 7-10 9-18 2-10-4-22-18-22z" fill="#ffd23f"/><rect x="23" y="46" width="18" height="11" rx="3" fill="#b8c0cc"/>`,
+    sound: `<path d="M6 24h10l14-12v40L16 40H6z" fill="#9b5de5"/><path d="M38 22q6 10 0 20M45 15q11 17 0 34" fill="none"/>`,
+    chem: `<path d="M27 6v18L12 52q-3 6 6 6h28q9 0 6-6L37 24V6z" fill="#fff"/><path d="M16 44h32l4 8q1 4-4 4H16q-5 0-4-4z" fill="#06d6a0" stroke="none"/><path d="M27 6v18L12 52q-3 6 6 6h28q9 0 6-6L37 24V6M23 6h18" fill="none"/><circle cx="28" cy="48" r="2.5" fill="#fff" stroke="none"/><circle cx="36" cy="44" r="2" fill="#fff" stroke="none"/>`,
+    food: `<path d="M32 18c-12-8-24 0-22 16 2 16 12 24 22 20 10 4 20-4 22-20 2-16-10-24-22-16z" fill="#ff4d6d"/><path d="M32 18q0-8 6-12" fill="none"/><path d="M34 12q10-6 12 2-8 4-12-2z" fill="#06d6a0"/>`,
+    wind: `<path d="M30 28l-4 32h12l-4-32z" fill="#fff"/><g fill="#fff"><path d="M32 24l-4-20q4-3 8 0z"/><path d="M32 24l-4-20q4-3 8 0z" transform="rotate(120 32 24)"/><path d="M32 24l-4-20q4-3 8 0z" transform="rotate(240 32 24)"/></g><circle cx="32" cy="24" r="4" fill="#ff4d6d"/>`,
+    hydro: `<path d="M4 20h22v38H4z" fill="#4cc9f0"/><path d="M26 10h8l10 48H26z" fill="#b8c0cc"/><path d="M44 46q8 0 16 6v6H44z" fill="#4cc9f0"/>`,
+    nuclear: `<path d="M14 58q8-22 2-44h32q-6 22 2 44z" fill="#e7e0cf"/><circle cx="26" cy="9" r="6" fill="#fff"/><circle cx="37" cy="7" r="7" fill="#fff"/><path d="M18 30h28" fill="none" stroke-width="2.5"/>`,
+    gasplant: factory(`<path d="M52 12c-5-4-1-8 0-11 5 4 6 7 0 11z" fill="#4cc9f0"/>`),
+    coal: factory(`<circle cx="50" cy="8" r="6" fill="#6b6570"/><circle cx="58" cy="5" r="4" fill="#6b6570"/>`),
+    plug: `<path d="M26 22V8M38 22V8" fill="none" stroke-width="5"/><rect x="16" y="20" width="32" height="22" rx="7" fill="#fff"/><path d="M32 42v16" fill="none" stroke-width="5"/>`,
+    house: `<rect x="14" y="30" width="36" height="26" fill="#fff"/><path d="M6 32L32 8l26 24z" fill="#ff4d6d"/><rect x="27" y="40" width="10" height="16" fill="#ff9f1c"/>`,
+    homes: `<rect x="6" y="34" width="24" height="22" fill="#fff"/><path d="M2 36l16-14 16 14z" fill="#9b5de5"/><rect x="34" y="30" width="24" height="26" fill="#fff"/><path d="M30 32l16-14 16 14z" fill="#ff9f1c"/><rect x="42" y="42" width="8" height="14" fill="#4cc9f0"/>`,
+    pylon: `<path d="M22 58L30 8h4l8 50M26 34h12M24 46h16M10 18h44M14 28h36M22 58l15-24M42 58L27 34" fill="none"/>`,
+    stepup: `<rect x="10" y="12" width="44" height="44" rx="6" fill="#9fe2bf"/><path d="M32 48V22M22 31l10-10 10 10" fill="none" stroke-width="5"/>`,
+    stepdown: `<rect x="10" y="12" width="44" height="44" rx="6" fill="#ffc6a8"/><path d="M32 20v26M22 37l10 10 10-10" fill="none" stroke-width="5"/>`,
+    substation: `<path d="M4 56h56" fill="none"/><rect x="8" y="30" width="20" height="26" fill="#b8c0cc"/><rect x="34" y="24" width="22" height="32" fill="#ffc6a8"/><path d="M18 30V14M45 24V10M10 14h16M36 10h18" fill="none"/>`,
+    toaster: `<path d="M20 24v-12h10v12M34 24v-12h10v12" fill="#e6a157"/><rect x="6" y="22" width="52" height="32" rx="11" fill="#b8c0cc"/><path d="M58 36h4" fill="none"/>`,
+    fan: `<circle cx="32" cy="28" r="22" fill="#fff"/><g fill="#4cc9f0"><ellipse cx="32" cy="17" rx="5" ry="10"/><ellipse cx="32" cy="17" rx="5" ry="10" transform="rotate(120 32 28)"/><ellipse cx="32" cy="17" rx="5" ry="10" transform="rotate(240 32 28)"/></g><circle cx="32" cy="28" r="3" fill="#1d1b26"/><path d="M32 50v8M22 60h20" fill="none"/>`,
+    phone: `<rect x="18" y="4" width="28" height="56" rx="6" fill="#1d1b26"/><rect x="22" y="10" width="20" height="40" rx="2" fill="#4cc9f0" stroke="none"/><path d="M33 18l-6 12h6l-2 10 7-13h-6z" fill="#ffd23f" stroke="none"/>`,
+    campfire: `<path d="M8 54l48-12M8 42l48 12" fill="none" stroke="#8a5a3a" stroke-width="8"/><path d="M8 54l48-12M8 42l48 12" fill="none" stroke="none"/><path d="M32 6c6 10 14 14 12 26-2 10-8 12-12 12s-12-2-12-12c0-8 6-10 6-18 4 2 4 4 6-8z" fill="#ff9f1c"/><path d="M32 22c3 6 6 9 4 14-2 5-8 5-8 0 0-5 3-6 4-14z" fill="#ffd23f"/>`,
+    star: `<path d="M32 4l8 18 20 2-15 13 5 20-18-11-18 11 5-20L4 24l20-2z" fill="#ffd23f"/>`,
+    lock: `<path d="M22 28v-8q0-12 10-12t10 12v8" fill="none" stroke-width="6"/><rect x="12" y="28" width="40" height="28" rx="6" fill="#ffd23f"/><circle cx="32" cy="41" r="4" fill="#1d1b26"/>`,
+    clock: `<circle cx="32" cy="32" r="25" fill="#fff"/><path d="M32 16v16l10 8" fill="none" stroke-width="5"/>`,
+    oil: `<path d="M8 30h30l14-8 4 4-12 18H8z" fill="#ffd23f"/><path d="M20 30v-6h8v6" fill="#ffd23f"/><path d="M58 30q3 6 0 8q-3-2 0-8z" fill="#1d1b26"/>`,
+    magnet: `<path d="M12 10v24q0 22 20 22t20-22V10H40v24q0 9-8 9t-8-9V10z" fill="#ff4d6d"/><path d="M12 10h12v9H12zM40 10h12v9H40z" fill="#fff"/>`,
+    smoke: `<circle cx="20" cy="40" r="12" fill="#a8a3ad"/><circle cx="36" cy="30" r="14" fill="#a8a3ad"/><circle cx="48" cy="44" r="10" fill="#a8a3ad"/>`,
+    pump: `<path d="M38 20h8v24q0 6 4 6t4-6V24l-6-8" fill="none"/><rect x="10" y="8" width="28" height="50" rx="5" fill="#ff4d6d"/><rect x="15" y="14" width="18" height="12" rx="2" fill="#fff"/><path d="M6 58h36" fill="none"/>`,
+    snow: `<path d="M32 4v56M8 18l48 28M8 46l48-28M26 8l6 6 6-6M26 56l6-6 6 6" fill="none" stroke="#2a7fc4" stroke-width="5"/>`,
+    regen: `<path d="M50 30a19 19 0 1 1-6-14" fill="none" stroke-width="6"/><path d="M38 6l8 10-12 4z" fill="#1d1b26"/><path d="M34 18l-9 14h7l-3 12 10-15h-7z" fill="#ffd23f"/>`,
+    cells: `<g fill="#06d6a0"><rect x="6" y="14" width="14" height="40" rx="4"/><rect x="25" y="14" width="14" height="40" rx="4"/><rect x="44" y="14" width="14" height="40" rx="4"/></g><path d="M10 10h6M29 10h6M48 10h6" fill="none" stroke-width="4"/>`,
+    speaker: `<path d="M8 24h10l14-12v40L18 40H8z" fill="#fff"/><path d="M40 22q6 10 0 20M47 15q11 17 0 34" fill="none"/>`,
+    mute: `<path d="M8 24h10l14-12v40L18 40H8z" fill="#fff"/><path d="M40 24l16 16M56 24L40 40" fill="none" stroke="#ff4d6d" stroke-width="5"/>`,
+    car: `<path d="M4 46q0-14 12-14l8-12h20l10 12q8 2 8 14z" fill="#4cc9f0"/><path d="M27 23h8v9H22zM39 23h4l7 9H39z" fill="#fff" stroke-width="2.5"/><circle cx="18" cy="48" r="7" fill="#1d1b26"/><circle cx="48" cy="48" r="7" fill="#1d1b26"/>`,
+    gascar: `<path d="M8 42l-6-2" fill="none"/><path d="M6 46q0-14 12-14l8-12h18l10 12q8 2 8 14z" fill="#ff9f1c"/><circle cx="20" cy="48" r="7" fill="#1d1b26"/><circle cx="48" cy="48" r="7" fill="#1d1b26"/><circle cx="4" cy="36" r="4" fill="#a8a3ad"/>`,
+    washer: `<rect x="10" y="6" width="44" height="52" rx="5" fill="#fff"/><circle cx="32" cy="36" r="14" fill="#4cc9f0"/><path d="M16 14h10" fill="none"/>`,
+    dish: `<rect x="10" y="6" width="44" height="52" rx="5" fill="#b8c0cc"/><path d="M10 18h44M22 12h20" fill="none"/><path d="M18 30h28v20H18z" fill="#fff"/>`,
+    snowman: `<circle cx="32" cy="44" r="14" fill="#fff"/><circle cx="32" cy="20" r="10" fill="#fff"/>`,
+    homebatt: `<rect x="16" y="6" width="32" height="52" rx="8" fill="#fff"/><path d="M34 16l-8 16h7l-3 14 10-18h-7z" fill="#06d6a0"/>`,
+    grid: `<path d="M22 58L30 8h4l8 50M10 18h44M14 28h36M22 58l15-24M42 58L27 34" fill="none"/><circle cx="10" cy="18" r="3" fill="#ffd23f"/><circle cx="54" cy="18" r="3" fill="#ffd23f"/>`,
+  };
+})();
+function icon(name, size = 48, extra = '') {
+  return `<svg class="ic" width="${size}" height="${size}" viewBox="0 0 64 64" aria-hidden="true" ${extra}><g stroke="${INK}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">${ICONS[name] || ''}</g></svg>`;
+}
+
+/* ================= canvas drawing: Captain Pup & cars ================= */
+function ell(g, x, y, rx, ry, rot = 0) { g.beginPath(); g.ellipse(x, y, Math.max(.1, rx), Math.max(.1, ry), rot, 0, TAU); }
+function rr(g, x, y, w, hh, r) { r = Math.min(r, w / 2, hh / 2); g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + hh, r); g.arcTo(x + w, y + hh, x, y + hh, r); g.arcTo(x, y + hh, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
+
+// Captain Pup's head: Japanese-Chin-style pup with an engineer cap. r = head radius
+function drawPupHead(g, x, y, r, o = {}) {
+  g.save();
+  g.lineJoin = 'round'; g.lineCap = 'round'; g.strokeStyle = INK;
+  const lw = Math.max(1.5, r * 0.085); g.lineWidth = lw;
+  // floppy black ears
+  g.fillStyle = '#1f1d22';
+  for (const sd of [-1, 1]) { ell(g, x + sd * r * 0.9, y + r * 0.08, r * 0.34, r * 0.62, sd * 0.32); g.fill(); g.stroke(); }
+  // fluffy white head
+  g.fillStyle = '#fff'; ell(g, x, y, r, r * 0.92); g.fill(); g.stroke();
+  // black eye patches with the white blaze between them
+  g.fillStyle = '#1f1d22';
+  for (const sd of [-1, 1]) { ell(g, x + sd * r * 0.43, y - r * 0.1, r * 0.33, r * 0.4, sd * 0.45); g.fill(); }
+  // big round brown eyes
+  for (const sd of [-1, 1]) {
+    const ex = x + sd * r * 0.41, ey = y - r * 0.08, er = r * 0.2;
+    if (o.blink) { g.strokeStyle = '#fff'; g.lineWidth = lw * 0.8; g.beginPath(); g.moveTo(ex - er, ey); g.quadraticCurveTo(ex, ey + er * 0.7, ex + er, ey); g.stroke(); g.strokeStyle = INK; g.lineWidth = lw; continue; }
+    g.fillStyle = '#7a4526'; ell(g, ex, ey, er, er); g.fill();
+    g.fillStyle = '#120a08'; ell(g, ex + sd * er * 0.05, ey + er * 0.08, er * 0.58, er * 0.58); g.fill();
+    g.fillStyle = '#fff'; ell(g, ex + er * 0.32, ey - er * 0.34, er * 0.24, er * 0.24); g.fill();
+    ell(g, ex - er * 0.3, ey + er * 0.3, er * 0.1, er * 0.1); g.fill();
+  }
+  // button nose
+  g.fillStyle = '#2b2426'; ell(g, x, y + r * 0.23, r * 0.13, r * 0.09); g.fill();
+  g.fillStyle = 'rgba(255,255,255,.6)'; ell(g, x - r * 0.04, y + r * 0.2, r * 0.04, r * 0.025); g.fill();
+  // happy open mouth + pink tongue
+  g.lineWidth = lw * 0.8;
+  g.beginPath(); g.moveTo(x, y + r * 0.3); g.lineTo(x, y + r * 0.38); g.stroke();
+  g.fillStyle = '#5a1a2a';
+  g.beginPath(); g.moveTo(x - r * 0.25, y + r * 0.38); g.quadraticCurveTo(x, y + r * 0.78, x + r * 0.25, y + r * 0.38); g.quadraticCurveTo(x, y + r * 0.46, x - r * 0.25, y + r * 0.38); g.fill(); g.stroke();
+  g.fillStyle = '#ff8fb1';
+  g.beginPath(); g.moveTo(x - r * 0.12, y + r * 0.5); g.lineTo(x - r * 0.12, y + r * 0.68); g.quadraticCurveTo(x, y + r * 0.86, x + r * 0.12, y + r * 0.68); g.lineTo(x + r * 0.12, y + r * 0.5); g.closePath(); g.fill(); g.stroke();
+  g.strokeStyle = '#e0607f'; g.lineWidth = lw * 0.4; g.beginPath(); g.moveTo(x, y + r * 0.55); g.lineTo(x, y + r * 0.72); g.stroke();
+  // whiskers
+  g.strokeStyle = 'rgba(40,30,30,.5)'; g.lineWidth = Math.max(1, r * 0.025); g.beginPath();
+  for (const sd of [-1, 1]) for (const k of [-1, 1]) { g.moveTo(x + sd * r * 0.22, y + r * 0.3 + k * r * 0.04); g.lineTo(x + sd * r * 0.7, y + r * 0.26 + k * r * 0.13); }
+  g.stroke();
+  g.strokeStyle = INK; g.lineWidth = lw;
+  // engineer cap with a lightning bolt badge
+  if (o.hat !== false) {
+    g.fillStyle = '#2f80ed';
+    g.beginPath(); g.ellipse(x - r * 0.05, y - r * 0.55, r * 0.78, r * 0.52, -0.08, Math.PI * 1.02, Math.PI * 1.98 + 0.02); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = '#1b5fbf';
+    g.beginPath(); g.ellipse(x + r * 0.42, y - r * 0.56, r * 0.5, r * 0.12, -0.12, 0, TAU); g.fill(); g.stroke();
+    g.fillStyle = C.yellow; g.lineWidth = lw * 0.6;
+    const bx = x - r * 0.08, by = y - r * 0.82, s = r * 0.22;
+    g.beginPath(); g.moveTo(bx + s * 0.2, by - s); g.lineTo(bx - s * 0.5, by + s * 0.15); g.lineTo(bx, by + s * 0.15); g.lineTo(bx - s * 0.2, by + s); g.lineTo(bx + s * 0.55, by - s * 0.2); g.lineTo(bx + s * 0.05, by - s * 0.2); g.closePath(); g.fill(); g.stroke();
+  }
+  g.restore();
+}
+
+function drawPupFull(g, x, y, r, o = {}) {
+  g.save(); g.lineJoin = 'round'; g.strokeStyle = INK; g.lineWidth = Math.max(1.5, r * 0.085);
+  // body
+  g.fillStyle = '#fff'; ell(g, x, y + r * 1.25, r * 0.85, r * 0.75); g.fill(); g.stroke();
+  // orange safety vest with reflective stripe
+  g.fillStyle = C.orange;
+  g.beginPath(); g.moveTo(x - r * 0.72, y + r * 0.85); g.quadraticCurveTo(x - r * 0.95, y + r * 1.6, x - r * 0.55, y + r * 1.9);
+  g.lineTo(x + r * 0.55, y + r * 1.9); g.quadraticCurveTo(x + r * 0.95, y + r * 1.6, x + r * 0.72, y + r * 0.85);
+  g.lineTo(x + r * 0.25, y + r * 0.95); g.lineTo(x, y + r * 1.35); g.lineTo(x - r * 0.25, y + r * 0.95); g.closePath(); g.fill(); g.stroke();
+  g.fillStyle = C.yellow; g.lineWidth *= 0.6; rr(g, x - r * 0.82, y + r * 1.45, r * 1.64, r * 0.16, r * 0.05); g.fill(); g.stroke();
+  // paws
+  g.fillStyle = '#fff'; g.lineWidth = Math.max(1.5, r * 0.085);
+  for (const sd of [-1, 1]) { ell(g, x + sd * r * 0.45, y + r * 1.88, r * 0.24, r * 0.16); g.fill(); g.stroke(); }
+  g.restore();
+  drawPupHead(g, x, y, r, o);
+}
+
+// original generic cartoon car (side view). x = centre, y = ground. s = scale (car is ~200*s long)
+function drawCar(g, x, y, s, o = {}) {
+  const col = o.color || C.blue, gas = !!o.gas;
+  g.save(); g.translate(x, y); g.scale(s * (o.flip ? -1 : 1), s);
+  g.lineJoin = 'round'; g.lineCap = 'round'; g.strokeStyle = INK; g.lineWidth = 4.5;
+  // shadow
+  g.fillStyle = 'rgba(20,10,40,.18)'; ell(g, 0, 2, 100, 7); g.fill();
+  // cabin
+  g.fillStyle = col;
+  g.beginPath(); g.moveTo(-72, -52); g.quadraticCurveTo(-56, -92, -18, -94); g.lineTo(22, -94); g.quadraticCurveTo(52, -92, 74, -52); g.closePath(); g.fill(); g.stroke();
+  // windows
+  g.fillStyle = '#d6f3ff';
+  g.beginPath(); g.moveTo(-60, -54); g.quadraticCurveTo(-48, -84, -18, -85); g.lineTo(-6, -85); g.lineTo(-6, -54); g.closePath(); g.fill();
+  g.beginPath(); g.moveTo(4, -54); g.lineTo(4, -85); g.lineTo(20, -85); g.quadraticCurveTo(46, -84, 62, -54); g.closePath(); g.fill();
+  if (o.pup !== false) {
+    g.save(); g.beginPath(); g.moveTo(4, -54); g.lineTo(4, -85); g.lineTo(20, -85); g.quadraticCurveTo(46, -84, 62, -54); g.closePath(); g.clip();
+    drawPupHead(g, 28, -62, 17, { blink: o.blink }); g.restore();
+  }
+  g.lineWidth = 3.5;
+  g.beginPath(); g.moveTo(-60, -54); g.quadraticCurveTo(-48, -84, -18, -85); g.lineTo(-6, -85); g.lineTo(-6, -54); g.closePath(); g.stroke();
+  g.beginPath(); g.moveTo(4, -54); g.lineTo(4, -85); g.lineTo(20, -85); g.quadraticCurveTo(46, -84, 62, -54); g.closePath(); g.stroke();
+  g.lineWidth = 4.5;
+  // body
+  g.fillStyle = col; rr(g, -102, -58, 204, 42, 16); g.fill(); g.stroke();
+  g.fillStyle = 'rgba(255,255,255,.35)'; rr(g, -92, -52, 120, 7, 4); g.fill();
+  // lights
+  g.fillStyle = '#fff6b0'; ell(g, 94, -44, 7, 6); g.fill(); g.stroke();
+  g.fillStyle = '#ff5a5a'; rr(g, -102, -50, 9, 12, 3); g.fill(); g.stroke();
+  // door line + handle
+  g.lineWidth = 3; g.beginPath(); g.moveTo(-2, -56); g.lineTo(-2, -22); g.stroke();
+  g.beginPath(); g.moveTo(10, -46); g.lineTo(22, -46); g.stroke();
+  if (gas) {
+    // fuel door + exhaust pipe
+    g.fillStyle = '#444'; rr(g, -78, -48, 12, 12, 3); g.fill(); g.stroke();
+    g.fillStyle = '#8d96a3'; rr(g, -114, -24, 18, 7, 3); g.fill(); g.stroke();
+  } else {
+    // charge port with a bolt
+    g.fillStyle = '#2b2a4a'; ell(g, -78, -42, 8, 8); g.fill(); g.stroke();
+    g.fillStyle = C.yellow; g.lineWidth = 1.5; g.beginPath(); g.moveTo(-76, -48); g.lineTo(-82, -41); g.lineTo(-78, -41); g.lineTo(-80, -36); g.lineTo(-74, -43); g.lineTo(-78, -43); g.closePath(); g.fill(); g.stroke();
+    g.lineWidth = 4.5;
+  }
+  if (o.plug) { // charging cable
+    g.strokeStyle = '#1d1b26'; g.lineWidth = 6; g.beginPath(); g.moveTo(-84, -40); g.quadraticCurveTo(-120, -10, -150, -30); g.stroke(); g.strokeStyle = INK; g.lineWidth = 4.5;
+  }
+  // wheels
+  const rot = o.rot || 0;
+  for (const wx of [-58, 60]) {
+    g.fillStyle = '#26232e'; ell(g, wx, -16, 19, 19); g.fill(); g.stroke();
+    g.fillStyle = '#c9ced6'; ell(g, wx, -16, 9, 9); g.fill(); g.lineWidth = 3; g.stroke();
+    g.beginPath(); for (let k = 0; k < 3; k++) { const a = rot + k * TAU / 3; g.moveTo(wx, -16); g.lineTo(wx + Math.cos(a) * 9, -16 + Math.sin(a) * 9); } g.stroke();
+    g.lineWidth = 4.5;
+  }
+  g.restore();
+}
+
+// render art once to images for <img> use
+function artURL(w, hgt, fn) { const c = document.createElement('canvas'); c.width = w; c.height = hgt; const g = c.getContext('2d'); fn(g); try { return c.toDataURL(); } catch (e) { return ''; } }
+const PUP_URL = artURL(240, 240, g => drawPupFull(g, 120, 92, 66));
+const PUP_BLINK_URL = artURL(240, 240, g => drawPupFull(g, 120, 92, 66, { blink: true }));
+const CAR_URL = artURL(260, 130, g => drawCar(g, 132, 118, 1.15, { color: C.blue }));
+
+/* ================= comic bursts + toast ================= */
+function starPoly(color) {
+  const p = []; const n = 13;
+  for (let i = 0; i < n * 2; i++) { const a = i / (n * 2) * TAU, r = i % 2 ? 0.66 : 1; p.push((125 + Math.cos(a) * 118 * r).toFixed(1) + ',' + (85 + Math.sin(a) * 80 * r).toFixed(1)); }
+  return `<polygon points="${p.join(' ')}" fill="${color}" stroke="${INK}" stroke-width="5" stroke-linejoin="round"/>`;
+}
+function burst(text, color = C.yellow, x, y) {
+  const b = el(`<div class="burst"><svg viewBox="0 0 250 170">${starPoly(color)}</svg><span>${text}</span></div>`);
+  b.style.left = (x ?? innerWidth / 2) + 'px'; b.style.top = (y ?? innerHeight * 0.38) + 'px';
+  $('#bursts').append(b); setTimeout(() => b.remove(), 1000);
+}
+const YAY = ['WOW!', 'YES!', 'ZAP!', 'NICE!', 'BOOM!', 'GREAT!'];
+function yay(e) { burst(YAY[Math.random() * YAY.length | 0], C.yellow, e?.clientX, e?.clientY); if (typeof confetti === 'function') confetti(14, e?.clientX, e?.clientY); }
+function oops(e) { burst('TRY AGAIN!', C.orange, e?.clientX, e?.clientY); }
+let toastT = 0;
+function toast(html, ms = 2600) {
+  const t = $('#toast'); t.innerHTML = html; t.hidden = false; clearTimeout(toastT);
+  if (ms) toastT = setTimeout(() => { t.hidden = true; }, ms);
+  return t;
+}
+function hideToast() { $('#toast').hidden = true; clearTimeout(toastT); }
+
+/* ================= overlays ================= */
+function showOverlay(html) { const ov = $('#ov'); $('#ovCard').innerHTML = html; ov.hidden = false; $('#ovCard').scrollTop = 0; return $('#ovCard'); }
+function hideOverlay() { $('#ov').hidden = true; }
+
+/* ================= badges ================= */
+function badgeSVG(m, size = 96, on = true) {
+  return `<svg width="${size}" height="${size}" viewBox="0 0 100 100" aria-hidden="true">
+    <g stroke="${INK}" stroke-width="4" stroke-linejoin="round">
+      <rect x="40" y="6" width="20" height="12" rx="4" fill="${INK}"/>
+      <rect x="18" y="14" width="64" height="80" rx="16" fill="${on ? m.color : '#d8d0bd'}"/>
+      <rect x="26" y="22" width="48" height="64" rx="10" fill="#fffaf0"/>
+    </g>
+    <g transform="translate(26 30) scale(.75)">${icon(m.icon, 64)}</g>
+  </svg>`;
+}
+function showBadges() {
+  const got = MISSIONS.filter(m => save.done[m.id]).length;
+  const c = showOverlay(`<h2>Battery Badges</h2><p>${got} of ${MISSIONS.length} collected. Beat a mission's boss to earn its badge!</p>
+    <div class="badges">${MISSIONS.map(m => `<div class="badge ${save.done[m.id] ? '' : 'locked'}">${badgeSVG(m, 92, !!save.done[m.id])}<b class="toon" style="font-size:19px">${m.badge}</b><span>${save.done[m.id] ? starStr(save.stars[m.id] || 0) : 'Not yet'}</span></div>`).join('')}</div>
+    <button class="btn" id="bClose">Close</button>`);
+  $('#bClose', c).onclick = () => { sfx.tap(); hideOverlay(); };
+}
+function starStr(n) { return `<span style="color:#f4a100;font-size:20px;letter-spacing:2px">${'&#9733;'.repeat(n)}<span style="color:#d8d0bd">${'&#9733;'.repeat(3 - n)}</span></span>`; }
+
+/* ================= title / road-trip map ================= */
+function renderTitle() {
+  $('#tPup').src = PUP_URL;
+  const got = MISSIONS.filter(m => save.done[m.id]).length;
+  $('#badgesBtn').innerHTML = `${icon('battery', 34)} Badges ${got}/${MISSIONS.length}`;
+  drawMap();
+}
+function drawMap() {
+  const svg = $('#map');
+  const narrow = (svg.parentElement.clientWidth || innerWidth) < 640;
+  const W = narrow ? 400 : 1000, H = narrow ? 900 : 430;
+  const P = narrow
+    ? [[110, 90], [290, 230], [110, 370], [290, 510], [110, 650], [290, 800]]
+    : [[95, 300], [265, 140], [440, 300], [610, 140], [780, 300], [925, 135]];
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  let road = `M${P[0][0]} ${P[0][1]}`;
+  for (let i = 1; i < P.length; i++) {
+    const [ax, ay] = P[i - 1], [bx, by] = P[i];
+    road += narrow ? ` C${ax} ${(ay + by) / 2 + 10} ${bx} ${(ay + by) / 2 - 10} ${bx} ${by}` : ` C${(ax + bx) / 2 + 10} ${ay} ${(ax + bx) / 2 - 10} ${by} ${bx} ${by}`;
+  }
+  let scen = '';
+  // scenery: hills, trees, clouds, sun
+  scen += `<rect width="${W}" height="${H}" fill="#c9f2d8"/>`;
+  scen += narrow
+    ? `<path d="M0 0H400V60Q300 30 200 70T0 50Z" fill="#bde8fb"/>`
+    : `<path d="M0 0H1000V90Q860 40 720 95T420 80T150 100T0 70Z" fill="#bde8fb"/>`;
+  scen += `<g transform="translate(${W - 70} 40)">${icon('sun', 70, 'x="-35" y="-35"')}</g>`;
+  const trees = narrow ? [[40, 200], [360, 120], [40, 520], [360, 660], [200, 440], [30, 820], [370, 380]] : [[180, 380], [350, 70], [520, 390], [700, 380], [860, 400], [40, 180], [470, 160], [960, 300], [690, 60]];
+  for (const [tx, ty] of trees) scen += `<g stroke="${INK}" stroke-width="3"><rect x="${tx - 4}" y="${ty}" width="8" height="18" fill="#8a5a3a"/><circle cx="${tx}" cy="${ty - 8}" r="16" fill="#06d6a0"/></g>`;
+  const turb = narrow ? [[200, 150], [200, 590]] : [[370, 230], [880, 230], [180, 200]];
+  for (const [tx, ty] of turb) scen += `<g transform="translate(${tx - 28} ${ty - 40})">${icon('wind', 56)}</g>`;
+  let stops = '';
+  const nextId = (MISSIONS.find(m => unlocked(m.id) && !save.done[m.id]) || {}).id;
+  MISSIONS.forEach((m, i) => {
+    const [x, y] = P[i], open = unlocked(m.id), done = !!save.done[m.id], st = save.stars[m.id] || 0;
+    const r = 48;
+    stops += `<g class="stop" data-id="${m.id}" role="button" aria-label="${m.name}${open ? '' : ' (locked)'}" tabindex="0">
+      <circle cx="${x + 4}" cy="${y + 5}" r="${r}" fill="${INK}"/>
+      <circle cx="${x}" cy="${y}" r="${r}" fill="${open ? (done ? '#c7f9e5' : '#fff') : '#e7e0cf'}" stroke="${INK}" stroke-width="4"/>
+      <g transform="translate(${x - 30} ${y - 32})" opacity="${open ? 1 : .35}">${icon(m.icon, 60)}</g>
+      ${open ? '' : `<g transform="translate(${x + 14} ${y + 8})">${icon('lock', 34)}</g>`}
+      <circle cx="${x - r + 8}" cy="${y - r + 8}" r="17" fill="${m.color}" stroke="${INK}" stroke-width="3.5"/>
+      <text x="${x - r + 8}" y="${y - r + 16}" text-anchor="middle" font-size="22" fill="${INK}">${m.id === 6 ? '&#9733;' : m.id}</text>
+      <g transform="translate(${x} ${y + r + 26})">
+        <rect x="-82" y="-22" width="164" height="${done ? 52 : 32}" rx="12" fill="#fffaf0" stroke="${INK}" stroke-width="3"/>
+        <text y="2" text-anchor="middle" font-size="19" fill="${INK}">${m.stop}</text>
+        ${done ? `<text y="25" text-anchor="middle" font-size="20" fill="#f4a100" stroke="${INK}" stroke-width="1">${'&#9733;'.repeat(st)}<tspan fill="#d8d0bd">${'&#9733;'.repeat(3 - st)}</tspan></text>` : ''}
+      </g>
+    </g>`;
+  });
+  let ring = '';
+  if (nextId) { const [x, y] = P[nextId - 1]; ring = `<circle cx="${x}" cy="${y}" r="58" fill="none" stroke="${C.accent}" stroke-width="6" stroke-dasharray="12 8" pointer-events="none"><animateTransform attributeName="transform" type="rotate" from="0 ${x} ${y}" to="360 ${x} ${y}" dur="8s" repeatCount="indefinite"/></circle>`; }
+  let car = '';
+  if (nextId) { const [x, y] = P[nextId - 1]; car = `<image pointer-events="none" href="${CAR_URL}" x="${x - (narrow ? -40 : 140)}" y="${y - (narrow ? 70 : 108)}" width="130" height="65"><animateTransform attributeName="transform" type="translate" values="0 0;0 -5;0 0" dur="0.9s" repeatCount="indefinite"/></image>`; }
+  svg.innerHTML = `${scen}<path d="${road}" fill="none" stroke="${INK}" stroke-width="40" stroke-linecap="round"/><path d="${road}" fill="none" stroke="#5c5a6b" stroke-width="32" stroke-linecap="round"/><path d="${road}" fill="none" stroke="${C.yellow}" stroke-width="4" stroke-dasharray="16 14"/>${ring}${stops}${car}`;
+  $$('.stop', svg).forEach(s => {
+    const go = e => {
+      const id = +s.dataset.id;
+      if (!unlocked(id)) { sfx.bad(); toast(`${icon('lock', 26)} Finish <b>${MISSIONS[id - 2].name}</b> first to unlock this stop!`); s.classList.add('shake'); setTimeout(() => s.classList.remove('shake'), 400); return; }
+      sfx.whoosh(); openMission(id);
+    };
+    s.addEventListener('click', go);
+    s.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') go(e); });
+  });
+}
+
+/* ================= mission runner ================= */
+const PHASES = ['challenge', 'discover', 'experiment', 'boss', 'quiz'];
+const PHASE_TIME = [30, 60, 120, 90, 0];
+let cur = null;
+function showScreen(id) { $('#title').hidden = id !== 'title'; $('#mission').hidden = id !== 'mission'; }
+function openMission(id) {
+  hideOverlay(); hideToast();
+  cur = { m: MISSIONS[id - 1], phase: -1, bossWon: false, quizFirst: 0, cleanups: [] };
+  $('#mTitle').innerHTML = `${cur.m.id === 6 ? 'Bonus' : 'Mission ' + cur.m.id}: ${cur.m.name}`;
+  showScreen('mission');
+  runPhase(0);
+}
+function cleanupPhase() {
+  if (!cur) return;
+  for (const f of cur.cleanups.splice(0)) { try { f(); } catch (e) {} }
+  hideToast(); stopSpeak();
+}
+function backToMap() { stopSpeak(); cleanupPhase(); cur = null; hideOverlay(); showScreen('title'); renderTitle(); }
+function runPhase(i) {
+  cleanupPhase();
+  cur.phase = i;
+  $$('#steps li').forEach((li, k) => { li.className = k < i ? 'done' : k === i ? 'now' : ''; });
+  const stage = $('#stage'); stage.innerHTML = ''; stage.scrollTop = 0;
+  const box = el(`<div class="phase pop"><div class="talk"><img alt="Captain Pup" src="${PUP_URL}"><div class="bubble panel"></div></div><div class="play"></div><div class="nav"></div></div>`);
+  stage.append(box);
+  const P = makeP(box, i);
+  const m = cur.m;
+  if (i === 1) runDiscover(P, m.discover);
+  else if (i === 4) runQuiz(P, m.quiz);
+  else m[PHASES[i]](P);
+  if (PHASE_TIME[i] && !P._chipSet) P.chip(PHASE_TIME[i]);
+  else if (!PHASE_TIME[i] && !P._chipSet) P.chip(0);
+}
+function makeP(box, idx) {
+  const talk = $('.bubble', box), area = $('.play', box), nav = $('.nav', box);
+  const pupImg = $('.talk img', box);
+  let blinkT = setInterval(() => { pupImg.src = PUP_BLINK_URL; setTimeout(() => { pupImg.src = PUP_URL; }, 140); }, 3600);
+  cur.cleanups.push(() => clearInterval(blinkT));
+  const P = {
+    area, idx, _chipSet: false,
+    talk(html, more) { stopSpeak(); talk.innerHTML = `<div class="say">${html}</div>${readBtn(html)}${moreHTML(more)}`; talk.classList.remove('pop'); void talk.offsetWidth; talk.classList.add('pop'); },
+    demo(target, fx, fy, ms) { demoTap(target, fx, fy, ms); },
+    add(html) { const e = el(html); area.append(e); return e; },
+    clearNav() { nav.innerHTML = ''; },
+    button(label, cls, fn) { const b = el(`<button class="btn ${cls || ''}">${label}</button>`); b.onclick = e => { sfx.tap(); fn(e); }; nav.append(b); return b; },
+    next(label) {
+      if ($('.next', nav)) return;
+      const labels = ['Discover &#9654;', 'Experiment &#9654;', 'Boss &#9654;', 'Quiz &#9654;'];
+      const b = P.button(label || labels[idx] || 'Next &#9654;', 'go next', () => runPhase(idx + 1));
+      b.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+      return b;
+    },
+    later(fn, ms) { const t = setTimeout(fn, ms); cur.cleanups.push(() => clearTimeout(t)); return t; },
+    every(fn, ms) { const t = setInterval(fn, ms); cur.cleanups.push(() => clearInterval(t)); return t; },
+    on(target, ev, fn, opt) { target.addEventListener(ev, fn, opt); cur.cleanups.push(() => target.removeEventListener(ev, fn, opt)); },
+    loop(fn) {
+      let alive = true, last = performance.now();
+      const step = now => { if (!alive) return; const dt = Math.min(0.05, (now - last) / 1000); last = now; try { fn(dt, now); } catch (e) { alive = false; throw e; } requestAnimationFrame(step); };
+      requestAnimationFrame(step); cur.cleanups.push(() => { alive = false; });
+    },
+    canvas(W, H, maxVh) { return makeSim(area, W, H, maxVh, P); },
+    chip(sec, onEnd) {
+      P._chipSet = true;
+      const chip = $('#clock');
+      if (!sec) { chip.hidden = true; return; }
+      chip.hidden = false; chip.classList.remove('low');
+      let left = sec, paused = false;
+      const draw = () => { chip.innerHTML = `${icon('clock', 24)} ${Math.floor(left / 60)}:${String(Math.floor(left % 60)).padStart(2, '0')}`; };
+      draw();
+      const t = setInterval(() => {
+        if (paused || !$('#ov').hidden) return;
+        left = Math.max(0, left - 1); draw(); chip.classList.toggle('low', left <= 10);
+        if (left <= 0) {
+          paused = true;
+          if (onEnd) { onEnd(); return; }
+          const tt = toast(`${icon('clock', 30)} <b>Time's up!</b> No worries. <div class="row" style="margin-top:6px"><button class="btn sm go" id="tKeep">Keep going</button><button class="btn sm alt" id="tMove">Move on &#9654;</button></div>`, 0);
+          $('#tKeep', tt).onclick = () => { sfx.tap(); hideToast(); left = 60; paused = false; draw(); chip.classList.remove('low'); };
+          $('#tMove', tt).onclick = () => { sfx.tap(); hideToast(); runPhase(Math.min(4, idx + 1)); };
+        }
+      }, 1000);
+      P.stopChip = () => { clearInterval(t); chip.classList.remove('low'); };
+      P.addTime = s => { left += s; paused = false; draw(); };
+      cur.cleanups.push(() => clearInterval(t));
+    },
+    stopChip() {},
+    bossWin(msg, more) {
+      if (cur.bossWon && P._won) return; P._won = true;
+      cur.bossWon = true; P.stopChip(); sfx.win(); burst('BOSS BEATEN!', C.green); confetti(60);
+      P.talk(msg || 'You did it! Road open!', more);
+      P.clearNav(); P.next('Quiz &#9654;');
+    },
+    bossLose(msg, more, retry) {
+      if (typeof more === 'function') { retry = more; more = ''; }
+      sfx.bad(); burst('TRY AGAIN!', C.orange);
+      P.talk(msg + ' <b>You\'ve got this!</b>', more);
+      P.clearNav();
+      P.button('&#8635; Retry', 'yel', retry || (() => runPhase(idx)));
+      P.button('Skip to Check &#9654;', 'alt', () => runPhase(4));
+    },
+  };
+  if (idx === 1) P.button('Skip &#9654;', 'alt', () => runPhase(2));
+  return P;
+}
+
+// canvas helper: fixed logical size W x H, scaled crisp to the element width
+function makeSim(parent, W, H, maxVh = 0.62, P) {
+  const cv = el(`<canvas class="sim"></canvas>`);
+  parent.append(cv);
+  const g = cv.getContext('2d');
+  const S = { cv, g, W, H, k: 1 };
+  const fit = () => {
+    const maxH = Math.max(220, innerHeight * maxVh);
+    cv.style.maxWidth = Math.floor(maxH * W / H) + 'px';
+    const cw = cv.clientWidth || parent.clientWidth || 600;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    cv.width = Math.round(cw * dpr); cv.height = Math.round(cw * dpr * H / W);
+    S.k = cv.width / W; g.setTransform(S.k, 0, 0, S.k, 0, 0);
+  };
+  S.fit = fit;
+  S.pt = e => { const r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left) / r.width * W, y: (e.clientY - r.top) / r.height * H }; };
+  S.clear = (col = '#bde8fb') => { g.setTransform(S.k, 0, 0, S.k, 0, 0); g.fillStyle = col; g.fillRect(0, 0, W, H); };
+  requestAnimationFrame(fit); fit();
+  if (P) P.on(window, 'resize', fit);
+  return S;
+}
+// common canvas text helper (toon font)
+function ctext(g, txt, x, y, size, color = INK, align = 'center', stroke = 0) {
+  g.font = `${size}px "Luckiest Guy","Comic Sans MS",system-ui,sans-serif`; g.textAlign = align; g.textBaseline = 'middle';
+  if (stroke) { g.lineWidth = stroke; g.strokeStyle = INK; g.lineJoin = 'round'; g.strokeText(txt, x, y); }
+  g.fillStyle = color; g.fillText(txt, x, y);
+}
+function btext(g, txt, x, y, size, color = INK, align = 'center') {
+  g.font = `800 ${size}px Nunito,system-ui,sans-serif`; g.textAlign = align; g.textBaseline = 'middle'; g.fillStyle = color; g.fillText(txt, x, y);
+}
+function cpanel(g, x, y, w, hh, fill = PAPER, r = 14) { g.fillStyle = INK; rr(g, x + 4, y + 4, w, hh, r); g.fill(); g.fillStyle = fill; rr(g, x, y, w, hh, r); g.fill(); g.lineWidth = 3; g.strokeStyle = INK; g.stroke(); }
+// draw an inline-SVG icon onto a canvas (cached as images)
+const ICON_IMG = {};
+function cicon(g, name, x, y, size) {
+  let im = ICON_IMG[name];
+  if (!im) { im = new Image(); im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(icon(name, 64).replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" ')); ICON_IMG[name] = im; }
+  if (im.complete && im.naturalWidth) g.drawImage(im, x - size / 2, y - size / 2, size, size);
+}
+
+/* ================= discover ================= */
+function runDiscover(P, d) {
+  P.talk(d.talk);
+  const wrap = P.add(`<div class="cards"></div>`);
+  let opened = 0;
+  d.cards.forEach(c => {
+    const card = el(`<div class="dcard panel" role="button" tabindex="0"><div class="art">${c.art}</div><div class="q toon">${c.q}</div><div class="a"><div class="say">${c.a}</div>${readBtn(c.q + '. ' + c.a)}${moreHTML(c.more)}</div><span class="tap">${icon('hand', 30)} Tap!</span></div>`);
+    const open = e => {
+      if (card.classList.contains('open')) return;
+      card.classList.add('open'); sfx.good(); opened++; confetti(10, e && e.clientX, e && e.clientY);
+      if (opened === d.cards.length) { P.talk(d.done || 'You found them all! Experiment time!'); P.next(); }
+    };
+    card.onclick = open; card.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') open(e); };
+    wrap.append(card);
+  });
+  demoTap($('.dcard', wrap), 0.5, 0.75);
+}
+
+/* ================= knowledge check ================= */
+function runQuiz(P, qs) {
+  let i = 0, first = 0;
+  P.talk('Quiz time! Tap a picture to answer.');
+  const box = P.add(`<div id="qWrap" class="panel" style="padding:16px"></div>`);
+  const show = () => {
+    const q = qs[i]; let tried = false, done = false;
+    const order = shuffle(q.a.map((t, k) => ({ t, k })));
+    const ics = q.ic || [];
+    box.innerHTML = `<span class="qTopic">${qs.map((_, j) => j < i ? '&#9733;' : j === i ? '&#9679;' : '&#9675;').join(' ')}</span><div class="qHead">${q.art ? `<div class="qArt">${q.art}</div>` : ''}<p class="qText">${q.q}</p>${readBtn(q.q + ' ' + q.a.join('? '))}</div>
+      <div class="qAns pics">${order.map(o => `<button data-k="${o.k}">${ics[o.k] ? icon(ics[o.k], 56) : ''}<span>${o.t}</span></button>`).join('')}</div><div class="qWhy"></div><div class="row qNext"></div>`;
+    $$('.qAns button', box).forEach(b => b.onclick = e => {
+      if (done) return;
+      const k = +b.dataset.k, why = $('.qWhy', box);
+      if (k === q.c) {
+        done = true; b.classList.add('right'); if (!tried) first++; sfx.good(); yay(e); confetti(24, e.clientX, e.clientY);
+        why.innerHTML = `<div class="say"><b style="color:#078a63">Yes!</b> ${q.why}</div>${readBtn(q.why)}${moreHTML(q.more)}`;
+        const nb = el(`<button class="btn go">${i + 1 < qs.length ? 'Next question &#9654;' : 'See my stars &#9654;'}</button>`);
+        nb.onclick = () => { sfx.tap(); i++; if (i < qs.length) show(); else finish(); };
+        $('.qNext', box).append(nb); nb.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+      } else {
+        tried = true; b.classList.add('wrong', 'shake'); b.disabled = true; sfx.bad();
+        why.innerHTML = `<div class="say"><b style="color:#c25a00">Try again!</b> ${q.hint || ''}</div>`;
+      }
+    });
+  };
+  const finish = () => {
+    const m = cur.m;
+    let stars = 0;
+    if (cur.bossWon) stars = 1 + (first >= qs.length - 1 ? 1 : 0) + (first === qs.length ? 1 : 0);
+    if (cur.bossWon) {
+      const wasDone = !!save.done[m.id];
+      save.done[m.id] = true; save.stars[m.id] = Math.max(save.stars[m.id] || 0, stars); persist();
+      sfx.win(); burst('BADGE!', C.green); confetti(80);
+      const nextM = MISSIONS[m.id];
+      const c = showOverlay(`<h2>Mission Complete!</h2><div class="stars">${'&#9733;'.repeat(stars)}<span class="off">${'&#9733;'.repeat(3 - stars)}</span></div>
+        <div class="badgeWin">${badgeSVG(m, 130)}</div><p><b class="toon" style="font-size:28px">${m.badge}</b><br>${m.badgeText}</p>
+        ${!wasDone && nextM ? `<p style="color:#078a63">${icon('lock', 26)} &#10140; <b>${nextM.stop}</b> unlocked!</p>` : ''}
+        <div class="row">${nextM ? `<button class="btn go" id="rNext">Next: ${nextM.stop} &#9654;</button>` : ''}<button class="btn yel" id="rAgain">&#8635; Replay</button><button class="btn alt" id="rMap">Map</button></div>`);
+      $('#rNext', c) && ($('#rNext', c).onclick = () => { sfx.whoosh(); openMission(nextM.id); });
+      $('#rAgain', c).onclick = () => { sfx.tap(); openMission(m.id); };
+      $('#rMap', c).onclick = () => { sfx.tap(); backToMap(); };
+    } else {
+      const c = showOverlay(`<h2>Almost There!</h2><div>${badgeSVG(m, 100, false)}</div>
+        <p>Beat the <b>Boss</b> to win this badge!</p>
+        <div class="row"><button class="btn yel" id="rBoss">Try the Boss &#9654;</button><button class="btn alt" id="rMap">Map</button></div>`);
+      $('#rBoss', c).onclick = () => { sfx.tap(); hideOverlay(); runPhase(3); };
+      $('#rMap', c).onclick = () => { sfx.tap(); backToMap(); };
+    }
+  };
+  show();
+}
+
+/* ================= chain/slot helper used by several missions ================= */
+// order puzzle: fixed first/last, fill slots from a pool. items: {id,name,icon,sub}
+function orderPuzzle(P, { first, last, answer, pool, onWin, onWrong, checkLabel = 'Check it!' }) {
+  const wrap = P.add(`<div class="panel" style="padding:12px"><div class="chain"></div><div class="lbl">${icon('hand', 26)} Tap pieces in order &#10140;</div><div class="row pool"></div><div class="row" style="margin-top:6px"><button class="btn go" disabled>${checkLabel}</button></div></div>`);
+  const chainEl = $('.chain', wrap), poolEl = $('.pool', wrap), checkBtn = $('.btn', wrap);
+  const slots = answer.map(() => null);
+  const byId = Object.fromEntries(pool.map(p => [p.id, p]));
+  const tileHTML = it => `${icon(it.icon, 44)}<span>${it.name}</span>${it.sub ? `<small style="opacity:.7">${it.sub}</small>` : ''}`;
+  const render = () => {
+    let h = `<div class="slot fixed">${tileHTML(first)}</div>`;
+    slots.forEach((s, k) => { h += `<div class="arrow">&#10140;</div><div class="slot ${s ? 'full' : ''}" data-k="${k}">${s ? tileHTML(byId[s]) : `<span class="toon" style="opacity:.5;font-size:34px">?</span>`}</div>`; });
+    h += `<div class="arrow">&#10140;</div><div class="slot fixed">${tileHTML(last)}</div>`;
+    chainEl.innerHTML = h;
+    $$('.slot[data-k]', chainEl).forEach(s => s.onclick = () => { const k = +s.dataset.k; if (slots[k]) { slots[k] = null; sfx.blip(); render(); } });
+    $$('.tile', poolEl).forEach(t => t.classList.toggle('used', slots.includes(t.dataset.id)));
+    checkBtn.disabled = slots.includes(null);
+  };
+  poolEl.innerHTML = shuffle(pool).map(p => `<button class="tile" data-id="${p.id}">${tileHTML(p)}</button>`).join('');
+  $$('.tile', poolEl).forEach(t => t.onclick = () => { const k = slots.indexOf(null); if (k < 0 || slots.includes(t.dataset.id)) return; slots[k] = t.dataset.id; sfx.blip(); render(); });
+  checkBtn.onclick = e => {
+    const wrong = slots.map((s, k) => s !== answer[k]);
+    $$('.slot[data-k]', chainEl).forEach((s, k) => s.classList.add(wrong[k] ? 'bad' : 'good'));
+    if (wrong.some(Boolean)) {
+      sfx.bad(); oops(e);
+      const n = wrong.filter(Boolean).length;
+      onWrong && onWrong(n, slots.slice());
+      setTimeout(() => { wrong.forEach((w, k) => { if (w) slots[k] = null; }); render(); }, 1300);
+    } else { sfx.good(); yay(e); onWin && onWin(); checkBtn.disabled = true; }
+  };
+  render();
+  demoTap($('.tile', poolEl), 0.5, 0.6);
+  return { wrap };
+}
+/* ================= kid-friendly layer: read-aloud, More, demo hand, confetti, visuals ================= */
+// extra icons
+Object.assign(ICONS, {
+  none: `<circle cx="32" cy="32" r="24" fill="#fff"/><path d="M15 15l34 34" fill="none" stroke="#ff4d6d" stroke-width="6"/>`,
+  moon: `<path d="M40 6a26 26 0 1 0 18 40A22 22 0 0 1 40 6z" fill="#ffe9a8"/>`,
+  book: `<path d="M6 12q13-4 26 4v40q-13-8-26-4z" fill="#fff"/><path d="M58 12q-13-4-26 4v40q13-8 26-4z" fill="#4cc9f0"/>`,
+  cloud: `<path d="M16 48h34a11 11 0 0 0 0-22 15 15 0 0 0-28-4 13 13 0 0 0-6 26z" fill="#e7eef5"/>`,
+  storm: `<path d="M16 40h34a11 11 0 0 0 0-22 15 15 0 0 0-28-4 13 13 0 0 0-6 26z" fill="#8d96a3"/><path d="M34 40l-6 10h6l-3 10 9-13h-6z" fill="#ffd23f"/>`,
+  hand: `<path d="M24 8q5-4 9 0v20l3-1q4 0 5 3l2-1q4 0 5 4l2-1q5 0 5 5v10q0 13-13 13H33q-6 0-10-6L12 40q-3-5 1-7t8 3l3 4z" fill="#fff"/>`,
+});
+const LVL_COL = { 1: '#b8c0cc', 2: '#4cc9f0', 3: '#ffd23f' };
+for (const n of [1, 2, 3]) {
+  ICONS['lvl' + n] = `<g transform="translate(-4 6) scale(.82)">${ICONS.plug}</g>` +
+    `<circle cx="47" cy="17" r="14" fill="${LVL_COL[n]}"/>` +
+    `<text x="47" y="23.5" text-anchor="middle" font-family="Luckiest Guy,Comic Sans MS,sans-serif" font-size="19" fill="#1d1b26" stroke="none">${n}</text>` +
+    [...Array(n)].map((_, k) => `<path d="M${38 + k * 9} 44l-4 7h4l-2 7 6-9h-4l2-5z" fill="#ffd23f" stroke-width="1.6"/>`).join('');
+}
+
+// speech
+const canSpeak = 'speechSynthesis' in window && typeof window.SpeechSynthesisUtterance === 'function';
+function plain(html) { const d = document.createElement('div'); d.innerHTML = html; $$('.noread,.moreTxt,.moreBtn,.readBtn', d).forEach(x => x.remove()); return d.textContent.replace(/[→➜]/g, ' to ').replace(/\s+/g, ' ').trim(); }
+function speak(text) {
+  if (!canSpeak || !text) return;
+  try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.rate = 0.95; u.pitch = 1.1; u.lang = 'en-US'; speechSynthesis.speak(u); } catch (e) {}
+}
+function stopSpeak() { if (canSpeak) try { speechSynthesis.cancel(); } catch (e) {} }
+const escAttr = s => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+function readBtn(html) { return canSpeak ? `<button class="readBtn" data-say="${escAttr(plain(html))}" aria-label="Read aloud">${icon('speaker', 30)}</button>` : ''; }
+function moreHTML(html) { return html ? `<button class="moreBtn">${icon('book', 26)} More</button><div class="moreTxt" hidden>${html}</div>` : ''; }
+document.addEventListener('click', e => {
+  const r = e.target.closest && e.target.closest('.readBtn');
+  if (r) { e.stopPropagation(); initAudio(); speak(r.dataset.say); r.classList.add('talking'); setTimeout(() => r.classList.remove('talking'), 600); return; }
+  const m = e.target.closest && e.target.closest('.moreBtn');
+  if (m) { e.stopPropagation(); const t = m.nextElementSibling; if (t) { t.hidden = !t.hidden; m.classList.toggle('on', !t.hidden); sfx.tap(); } }
+}, true);
+
+// pointing-hand demo
+function demoTap(target, fx = 0.5, fy = 0.5, ms = 3600) {
+  if (!target || !cur) return;
+  const h = el(`<div class="hand">${icon('hand', 64)}<span class="ripple"></span></div>`);
+  const place = () => {
+    const r = target.getBoundingClientRect();
+    if (!r.width) { h.remove(); return; }
+    h.style.left = (r.left + r.width * fx) + 'px'; h.style.top = (r.top + r.height * fy) + 'px';
+  };
+  const t0 = setTimeout(() => { place(); $('#bursts').append(h); }, 450);
+  const t1 = setTimeout(() => h.remove(), 450 + ms);
+  const kill = () => { clearTimeout(t0); clearTimeout(t1); h.remove(); };
+  document.addEventListener('pointerdown', kill, { once: true });
+  $('#stage').addEventListener('scroll', place, { passive: true });
+  cur.cleanups.push(() => { kill(); $('#stage').removeEventListener('scroll', place); });
+}
+
+// confetti
+function confetti(n = 36, x, y) {
+  const cols = [C.yellow, C.accent, C.green, C.blue, C.purple, C.orange];
+  for (let i = 0; i < n; i++) {
+    const p = document.createElement('i'); p.className = 'conf';
+    const sx = x ?? innerWidth * (0.2 + Math.random() * 0.6), sy = y ?? innerHeight * 0.25;
+    p.style.left = sx + 'px'; p.style.top = sy + 'px'; p.style.background = cols[i % cols.length];
+    p.style.setProperty('--dx', ((Math.random() - 0.5) * 360) + 'px'); p.style.setProperty('--dy', (180 + Math.random() * 320) + 'px');
+    p.style.setProperty('--r', (Math.random() * 900 - 450) + 'deg'); p.style.animationDelay = (Math.random() * 0.15) + 's';
+    $('#bursts').append(p); setTimeout(() => p.remove(), 1600);
+  }
+}
+
+// glowing energy-flow row: icons joined by pipes with moving glowing particles
+function flowArt(names, size = 40, labels) {
+  return `<div class="flow">${names.map((n, i) => (i ? `<span class="pipe"><i></i><i></i><i></i></span>` : '') +
+    `<span class="fnode">${icon(n, size)}${labels ? `<small>${labels[i]}</small>` : ''}</span>`).join('')}</div>`;
+}
+// battery cross-section with ions drifting through the electrolyte
+function batteryDiagram() {
+  let ions = '';
+  for (let k = 0; k < 5; k++) ions += `<circle r="5" fill="#ffd23f" stroke="#1d1b26" stroke-width="2" cy="${36 + (k % 3) * 14}"><animate attributeName="cx" values="62;158;62" dur="${2.4 + k * 0.3}s" begin="${k * 0.4}s" repeatCount="indefinite"/></circle>`;
+  return `<svg viewBox="0 0 220 100" width="210" height="96" aria-hidden="true"><g stroke="#1d1b26" stroke-width="3" stroke-linejoin="round">
+    <rect x="8" y="14" width="44" height="72" rx="8" fill="#5c5a6b"/><rect x="168" y="14" width="44" height="72" rx="8" fill="#ff4d6d"/>
+    <rect x="52" y="20" width="116" height="60" fill="#c7f9e5"/></g>${ions}
+    <text x="30" y="58" text-anchor="middle" font-size="30" fill="#fff" font-family="Luckiest Guy,sans-serif">&#8722;</text>
+    <text x="190" y="60" text-anchor="middle" font-size="30" fill="#fff" font-family="Luckiest Guy,sans-serif">+</text>
+    <text x="110" y="96" text-anchor="middle" font-size="12" fill="#1d1b26" font-family="Nunito,sans-serif" font-weight="800">electrolyte</text></svg>`;
+}
+// AC wiggle vs DC straight, animated
+function acdcArt() {
+  return `<svg viewBox="0 0 220 96" width="210" height="92" aria-hidden="true"><g fill="none" stroke-width="5" stroke-linecap="round">
+    <path d="M10 28q12-20 24 0t24 0 24 0 24 0" stroke="#ff9f1c"><animate attributeName="stroke-dashoffset" values="0;-48" dur="1s" repeatCount="indefinite"/></path>
+    <path d="M10 72h96" stroke="#2f80ed" stroke-dasharray="14 8"><animate attributeName="stroke-dashoffset" values="0;-22" dur=".6s" repeatCount="indefinite"/></path></g>
+    <g font-family="Luckiest Guy,sans-serif" font-size="20"><text x="118" y="35" fill="#c06a00">AC</text><text x="118" y="79" fill="#2f80ed">DC</text></g>
+    <g transform="translate(160 26) scale(.8)">${ICONS.battery.replace(/<rect/, '<rect stroke="#1d1b26" stroke-width="3"')}</g></svg>`;
+}
+// small bar comparison (value 0..100)
+function barsArt(rows) {
+  return `<div class="minibars">${rows.map(r => `<div class="mb">${icon(r.icon, 34)}<div class="meter"><i style="width:${r.v}%;background:${r.col || C.green}"></i></div><b>${r.label}</b></div>`).join('')}</div>`;
+}
+// tiny demand curve with a highlighted evening peak
+function peakArt() {
+  let d = 'M6 70'; for (let h = 0; h <= 24; h += 1) { const v = 40 + 10 * Math.exp(-(((h - 8) / 1.6) ** 2)) + 26 * Math.exp(-(((h - 18.7) / 2.1) ** 2)) - 8 * Math.exp(-(((h - 3.5) / 2.5) ** 2)); d += ` L${(6 + h * 8.5).toFixed(1)} ${(80 - v).toFixed(1)}`; }
+  return `<svg viewBox="0 0 220 96" width="210" height="92" aria-hidden="true"><rect x="142" y="6" width="44" height="76" fill="#ff9f1c" opacity=".25"/>
+    <path d="${d}" fill="none" stroke="#1d1b26" stroke-width="4" stroke-linejoin="round"/>
+    <circle r="7" fill="#ff4d6d" stroke="#1d1b26" stroke-width="2"><animateMotion dur="4s" repeatCount="indefinite" path="${d.replace('M6 70 L', 'M')}"/></circle>
+    <g font-family="Nunito,sans-serif" font-weight="800" font-size="12" fill="#1d1b26"><text x="6" y="94">night</text><text x="96" y="94">noon</text><text x="144" y="94">PEAK</text></g></svg>`;
+}
+/* ================= MISSION 1: What is energy? ================= */
+const FORMS = {
+  chemical: { name: 'Chemical', icon: 'chem' },
+  electrical: { name: 'Electrical', icon: 'bolt' },
+  motion: { name: 'Motion (kinetic)', icon: 'motion' },
+  heat: { name: 'Heat', icon: 'heat' },
+  light: { name: 'Light', icon: 'light' },
+  sound: { name: 'Sound', icon: 'sound' },
+};
+const M1 = {
+  id: 1, name: 'What Is Energy?', stop: 'Energy Town', icon: 'sun', color: C.yellow,
+  badge: 'Spark Starter', badgeText: 'You know energy is never made or destroyed — it just changes form!',
+  challenge(P) {
+    P.talk('My <b>Forever Wheel</b>! One spin. Will it spin forever?');
+    const S = P.canvas(800, 360, .48);
+    const row = P.add(`<div class="row" style="margin-top:12px"><button class="btn yel">&#8635; SPIN IT!</button></div>`);
+    const btn = $('button', row);
+    let w = 0, ang = 0, spun = false, asked = false;
+    btn.onclick = () => { if (spun) return; spun = true; w = 13; sfx.whoosh(); btn.disabled = true; };
+    P.loop((dt, now) => {
+      if (w > 0) { w = Math.max(0, w - (0.75 + w * 0.1) * dt); if (Math.random() < w * dt * 0.6) tone(1800 + Math.random() * 400, .03, 'square', .012); }
+      ang += w * dt;
+      const g = S.g; S.clear('#ffe9c7');
+      // floor + stand
+      g.fillStyle = '#e0c49a'; g.fillRect(0, 300, 800, 60);
+      g.lineWidth = 4; g.strokeStyle = INK; g.beginPath(); g.moveTo(0, 300); g.lineTo(800, 300); g.stroke();
+      g.fillStyle = '#8d96a3'; g.beginPath(); g.moveTo(230, 300); g.lineTo(270, 170); g.lineTo(290, 170); g.lineTo(330, 300); g.closePath(); g.fill(); g.stroke();
+      // wheel
+      const cx = 280, cy = 170, R = 115;
+      g.save(); g.translate(cx, cy); g.rotate(ang);
+      g.fillStyle = C.accent; ell(g, 0, 0, R, R); g.fill(); g.stroke();
+      g.fillStyle = PAPER; ell(g, 0, 0, R - 20, R - 20); g.fill(); g.stroke();
+      g.lineWidth = 6; g.beginPath(); for (let k = 0; k < 6; k++) { const a = k * TAU / 6; g.moveTo(0, 0); g.lineTo(Math.cos(a) * (R - 20), Math.sin(a) * (R - 20)); } g.stroke();
+      g.fillStyle = C.yellow; g.lineWidth = 4; ell(g, R - 10, 0, 12, 12); g.fill(); g.stroke();
+      g.restore();
+      // axle glows with heat while spinning (friction)
+      const motion = (w / 13) ** 2, used = spun ? 1 - motion : 0;
+      g.fillStyle = `rgba(255,${Math.round(200 - 140 * Math.min(1, w / 6))},40,${spun ? .35 + .65 * Math.min(1, w / 5) : 0})`;
+      ell(g, cx, cy, 26, 26); g.fill();
+      g.fillStyle = INK; ell(g, cx, cy, 12, 12); g.fill();
+      if (w > 1) { g.strokeStyle = 'rgba(29,27,38,.5)'; g.lineWidth = 3; for (let k = 0; k < 3; k++) { g.beginPath(); g.arc(cx, cy, R + 14 + k * 9, ang * 0.3 + k, ang * 0.3 + k + Math.min(1.4, w * 0.12)); g.stroke(); } }
+      if (w > 0.3) ctext(g, 'squeak', cx + 40, cy - 10 - 6 * Math.sin(now / 90), 18, '#8a5a3a');
+      // energy bars
+      cpanel(g, 470, 30, 300, 250);
+      ctext(g, 'WHERE IS THE ENERGY?', 620, 58, 20);
+      const bar = (y, label, v, col) => {
+        btext(g, label, 490, y, 17, INK, 'left');
+        g.fillStyle = '#e9e2cf'; rr(g, 490, y + 14, 260, 26, 10); g.fill(); g.lineWidth = 3; g.strokeStyle = INK; g.stroke();
+        if (v > 0.005) { g.fillStyle = col; rr(g, 490, y + 14, 260 * v, 26, 10); g.fill(); g.stroke(); }
+        ctext(g, Math.round(v * 100) + '%', 620, y + 28, 18);
+      };
+      bar(90, 'Motion energy (spinning)', spun ? motion : 0, C.blue);
+      bar(150, 'Heat + sound (friction)', used, C.orange);
+      btext(g, spun ? 'Total: always 100%!' : 'Tap SPIN to start', 620, 238, 19, spun ? '#078a63' : INK);
+      if (spun && w === 0 && !asked) { asked = true; ask(); }
+    });
+    function ask() {
+      P.talk('It stopped! Where did the energy go?');
+      const box = P.add(`<div class="panel" style="padding:12px;margin-top:12px;text-align:center"><div class="qAns pics"><button data-k="0">${icon('none', 56)}<span>Gone forever</span></button><button data-k="1">${icon('heat', 56)}<span>Heat + sound</span></button></div><p class="qWhy"></p></div>`);
+      $$('button', box).forEach(b => b.onclick = e => {
+        const ok = b.dataset.k === '1';
+        b.classList.add(ok ? 'right' : 'wrong'); ok ? (sfx.good(), yay(e)) : sfx.bad();
+        $('.qWhy', box).innerHTML = (ok ? '<b style="color:#078a63">Yes!</b> ' : '<b style="color:#c25a00">Nope!</b> ') + 'Rubbing turned motion into <b>heat</b> and <b>sound</b>. Total: still 100%!';
+        $$('button', box).forEach(x => x.disabled = true);
+        P.talk('Energy never vanishes. It only <b>changes form</b>!', 'Friction at the axle turned the motion energy into heat (and a little sound). No machine can spin forever unless more energy is put in.');
+        P.next();
+      });
+    }
+  },
+  discover: {
+    talk: 'Tap each card to discover <b>energy</b>!',
+    cards: [
+      { art: flowArt(['regen', 'heat', 'light'], 56), q: 'The Big Rule', a: 'Energy is never made or destroyed. It only <b>changes form</b>!', more: 'Scientists call this the <b>conservation of energy</b>. The total amount of energy stays the same; it just moves around and changes form.' },
+      { art: `<div class="bigTiles" style="grid-template-columns:repeat(3,1fr);gap:4px">${['chem', 'bolt', 'motion', 'heat', 'light', 'sound'].map((n, i) => `<span style="font-size:12px;display:flex;flex-direction:column;align-items:center">${icon(n, 40)}${['chemical', 'electric', 'motion', 'heat', 'light', 'sound'][i]}</span>`).join('')}</div>`, q: '6 Forms', a: 'Chemical, electrical, motion, heat, light and sound!', more: '<b>Chemical</b> energy is stored in food, fuel and batteries. <b>Electrical</b> energy is moving charges in wires. <b>Motion</b> energy is also called <b>kinetic</b> energy.' },
+      { art: flowArt(['sun', 'panel', 'bolt', 'battery', 'motor', 'motion'], 34), q: 'Energy Chain', a: 'Sun &#10140; panel &#10140; electricity &#10140; battery &#10140; motor &#10140; GO!', more: 'Sunlight hits a <b>solar panel</b>, which makes <b>electricity</b>. A battery stores it as <b>chemical energy</b>. The <b>electric motor</b> turns it back into electricity and then <b>motion</b>.' },
+      { art: icon('phone', 70) + icon('heat', 56), q: 'Sneaky Heat', a: 'Every change makes a little heat. That\'s why chargers get warm!', more: 'The heat isn\'t gone from the universe. It just isn\'t useful to us anymore.' },
+    ],
+    done: 'You found them all! Let\'s play with energy!',
+  },
+  experiment(P) {
+    P.talk('Tap a gadget. What energy comes <b>OUT</b>?');
+    const items = [
+      { id: 'toaster', name: 'Toaster', icon: 'toaster', in: 'electrical', out: ['heat'], why: 'Electric &#10140; <b>heat</b>. The wires glow red-hot!' },
+      { id: 'lamp', name: 'Lamp', icon: 'light', in: 'electrical', out: ['light'], why: 'Electric &#10140; <b>light</b> (plus a little heat).' },
+      { id: 'speaker', name: 'Speaker', icon: 'sound', in: 'electrical', out: ['sound'], why: 'A magnet wiggles a cone &#10140; <b>sound</b>!' },
+      { id: 'fan', name: 'Fan', icon: 'fan', in: 'electrical', out: ['motion'], why: 'Its motor makes <b>motion</b>, like an electric car!' },
+      { id: 'panel', name: 'Solar panel', icon: 'panel', in: 'light', out: ['electrical'], why: 'Light &#10140; <b>electricity</b>. No moving parts!' },
+      { id: 'fire', name: 'Campfire', icon: 'campfire', in: 'chemical', out: ['heat', 'light'], why: 'Wood\'s chemical energy &#10140; <b>heat</b> and <b>light</b>.' },
+      { id: 'phone', name: 'Phone charging', icon: 'phone', in: 'electrical', out: ['chemical'], why: 'Stored as <b>chemical</b> energy for later!' },
+      { id: 'food', name: 'You, running', icon: 'food', in: 'chemical', out: ['motion', 'heat'], why: 'Food &#10140; <b>motion</b> (and heat. You get warm!)' },
+    ];
+    const solved = new Set();
+    const box = P.add(`<div class="panel" style="padding:12px"><div class="row items"></div><div class="detail" style="margin-top:12px;text-align:center"></div></div>`);
+    const itemsEl = $('.items', box), det = $('.detail', box);
+    const renderItems = () => {
+      itemsEl.innerHTML = items.map(it => `<button class="tile ${solved.has(it.id) ? 'good' : ''}" data-id="${it.id}" style="flex-direction:column;min-width:112px">${icon(it.icon, 48)}<span>${it.name}</span></button>`).join('');
+      $$('.tile', itemsEl).forEach(t => t.onclick = () => { sfx.tap(); pick(items.find(i => i.id === t.dataset.id)); });
+    };
+    const pick = it => {
+      $$('.tile', itemsEl).forEach(t => t.classList.toggle('on', t.dataset.id === it.id && !solved.has(it.id)));
+      det.innerHTML = `<div class="flow" style="margin-bottom:10px">${icon(FORMS[it.in].icon, 56)}<span class="pipe"><i></i><i></i><i></i></span>${icon(it.icon, 72)}<span class="pipe"><i></i><i></i><i></i></span><span class="toon" style="font-size:56px;color:var(--accent)">?</span></div>
+        <div class="bigTiles">${Object.entries(FORMS).map(([k, f]) => `<button class="tile" data-f="${k}">${icon(f.icon, 48)}<span>${f.name.replace(' (kinetic)', '')}</span></button>`).join('')}</div><p class="qWhy"></p>`;
+      det.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+      $$('[data-f]', det).forEach(b => b.onclick = e => {
+        const ok = it.out.includes(b.dataset.f);
+        if (ok) {
+          b.classList.add('good'); sfx.good(); yay(e); solved.add(it.id);
+          $('.qWhy', det).innerHTML = `<b style="color:#078a63">Yes!</b> ${it.why} ${readBtn(it.why)}`;
+          $$('[data-f]', det).forEach(x => x.disabled = true);
+          renderItems();
+          if (solved.size === items.length) { P.talk('All matched! Energy keeps <b>changing form</b>!'); P.next(); }
+          else if (solved.size >= 5) P.next();
+        } else {
+          b.classList.add('wrongWig'); b.disabled = true; sfx.bad();
+          $('.qWhy', det).innerHTML = `<b style="color:#c25a00">Try again!</b> What does it <i>do</i>?`;
+        }
+      });
+    };
+    renderItems();
+    demoTap($('.tile', itemsEl), 0.5, 0.6);
+  },
+  boss(P) {
+    P.talk('<b>BOSS!</b> Build a chain from the <b>sun</b> to a <b>moving car</b>!', 'Some pieces don\'t belong. Think: what catches sunlight? What carries it? What stores it? What turns the wheels?');
+    const it = (id, name, ic, sub) => ({ id, name, icon: ic, sub });
+    orderPuzzle(P, {
+      first: it('sun', 'Sunlight', 'sun', 'light energy'),
+      last: it('car', 'Car moves!', 'car', 'motion energy'),
+      answer: ['panel', 'elec', 'batt', 'motor'],
+      pool: [it('panel', 'Solar panel', 'panel', 'light → electrical'), it('elec', 'Electricity in wires', 'bolt', 'electrical'),
+        it('batt', 'Car battery', 'battery', 'stores chemical'), it('motor', 'Electric motor', 'motor', 'electrical → motion'),
+        it('fire', 'Campfire', 'campfire', 'chemical → heat'), it('spk', 'Speaker', 'sound', 'electrical → sound'), it('pump', 'Gas pump', 'pump', 'fuel')],
+      checkLabel: 'Power it up!',
+      onWrong: n => P.talk(`${n} piece${n > 1 ? 's' : ''} in the wrong spot. Try again!`, 'What catches sunlight? What stores energy? What makes wheels turn?'),
+      onWin: () => P.bossWin(`${flowArt(['sun', 'panel', 'bolt', 'battery', 'motor', 'motion'], 34)} Sunshine drives the car!`, 'Light &#10140; electrical &#10140; chemical (in the battery) &#10140; electrical &#10140; motion. Energy changed form again and again, and was never destroyed!'),
+    });
+  },
+  quiz: [
+    { q: 'Which is TRUE about energy?', a: ['It only changes form', 'It can vanish', 'Batteries make new energy', 'Only electricity counts'], ic: ['regen', 'none', 'battery', 'bolt'], c: 0, why: 'Energy is never made or destroyed. It only changes form!', more: 'This is the <b>conservation of energy</b>. Batteries only store energy. When things stop, motion turns into heat.', hint: 'Remember the Forever Wheel!' },
+    { art: icon('panel', 76), q: 'A solar panel turns light into…', a: ['Electricity', 'Sound', 'Food', 'Nothing'], ic: ['bolt', 'sound', 'food', 'none'], c: 0, why: 'Light in, <b>electricity</b> out!', hint: 'What flows in the wires?' },
+    { art: icon('motion', 70), q: 'Brakes stop a bike. The motion becomes…', a: ['Heat', 'Light', 'Chemical', 'Nothing'], ic: ['heat', 'light', 'chem', 'none'], c: 0, why: 'Rubbing makes <b>heat</b>. Brakes get warm!', more: 'Electric cars can save some of that energy with <b>regenerative braking</b>. You\'ll see how next!', hint: 'Rub your hands together fast!' },
+  ],
+};
+
+/* ================= MISSION 2: Batteries ================= */
+const M2 = {
+  id: 2, name: 'Battery Power', stop: 'Battery Lab', icon: 'battery', color: C.green,
+  badge: 'Cell Builder', badgeText: 'Volts, amps, watts and kilowatt-hours — you speak battery now!',
+  challenge(P) {
+    P.talk('My flashlight is dark! Tap a battery to <b>flip</b> it.');
+    const S = P.canvas(800, 300, .45);
+    const flip = [false, true]; // true = + points left (wrong)
+    let lit = false, done = false, glowT = 0;
+    const cellX = [250, 420], cy = 150, cw = 160, ch = 70;
+    P.on(S.cv, 'pointerdown', e => {
+      if (done) return;
+      const p = S.pt(e);
+      cellX.forEach((x, k) => { if (p.x > x && p.x < x + cw && Math.abs(p.y - cy) < 60) { flip[k] = !flip[k]; sfx.blip(); } });
+      lit = !flip[0] && !flip[1];
+      if (lit) {
+        done = true; sfx.win(); burst('LIGHT!', C.yellow);
+        P.talk('It shines! <b>+</b> to <b>&#8722;</b>: 1.5 V + 1.5 V = <b>3 V</b>!', 'Each battery has a positive (+) and negative (&#8722;) end. Lined up + to &#8722;, their pushes add up. This LED bulb only works when electricity flows the right way.'); confetti(30);
+        P.next();
+      }
+    });
+    P.loop(dt => {
+      glowT = lit ? Math.min(1, glowT + dt * 2) : 0;
+      const g = S.g; S.clear('#2b2a4a');
+      // beam
+      if (glowT > 0) {
+        const gr = g.createLinearGradient(700, 0, 800, 0); gr.addColorStop(0, `rgba(255,240,150,${.8 * glowT})`); gr.addColorStop(1, 'rgba(255,240,150,0)');
+        g.fillStyle = gr; g.beginPath(); g.moveTo(690, cy - 40); g.lineTo(800, cy - 140); g.lineTo(800, cy + 140); g.lineTo(690, cy + 40); g.closePath(); g.fill();
+      }
+      // body
+      g.lineWidth = 5; g.strokeStyle = INK; g.lineJoin = 'round';
+      g.fillStyle = '#9b5de5'; rr(g, 200, cy - 55, 450, 110, 26); g.fill(); g.stroke();
+      g.fillStyle = '#c7c0d6'; g.beginPath(); g.moveTo(640, cy - 55); g.lineTo(700, cy - 80); g.lineTo(700, cy + 80); g.lineTo(640, cy + 55); g.closePath(); g.fill(); g.stroke();
+      g.fillStyle = lit ? '#fff3a0' : '#e7e0cf'; ell(g, 702, cy, 14, 72); g.fill(); g.stroke();
+      // window to see cells
+      g.fillStyle = '#3c3a55'; rr(g, 235, cy - 42, 370, 84, 14); g.fill(); g.stroke();
+      cellX.forEach((x, k) => {
+        const wrong = flip[k];
+        g.fillStyle = '#ffd23f'; rr(g, x, cy - ch / 2, cw - 14, ch, 10); g.fill(); g.lineWidth = 4; g.stroke();
+        g.fillStyle = INK; rr(g, wrong ? x + 24 : x, cy - ch / 2, (cw - 14) * 0.3, ch, 8); g.fill();
+        // nub on + end
+        g.fillStyle = '#c9ced6';
+        if (wrong) { rr(g, x - 12, cy - 14, 14, 28, 4); } else { rr(g, x + cw - 16, cy - 14, 14, 28, 4); }
+        g.fill(); g.stroke();
+        ctext(g, '+', wrong ? x + 18 : x + cw - 34, cy, 34, INK);
+        ctext(g, '−', wrong ? x + cw - 30 : x + 22, cy, 34, '#fff');
+        ctext(g, '1.5 V', x + (cw - 14) / 2 + (wrong ? 12 : -10), cy, 18, INK);
+      });
+      // labels
+      ctext(g, lit ? '3 VOLTS — ON!' : 'TAP A BATTERY TO FLIP IT', 400, 40, 30, lit ? C.yellow : '#fff', 'center', 6);
+      btext(g, 'bulb →', 660, 260, 18, '#fff');
+    });
+  },
+  discover: {
+    talk: 'Batteries are energy boxes! Tap each card.',
+    cards: [
+      { art: batteryDiagram(), q: 'Inside a Battery', a: '<b>+</b> end, <b>&#8722;</b> end, and <b>electrolyte</b> between. Stores chemical energy!', more: 'Connect a wire and chemical reactions push electricity through it. In a <b>lithium-ion</b> battery (phones, laptops, EVs), lithium ions move through the electrolyte. Charging pushes them back.' },
+      { art: `<span class="toon" style="font-size:30px">${icon('bolt', 44)}5 V <span style="color:var(--accent)">&times;</span> 2 A <span style="color:var(--accent)">=</span> 10 W</span>`, q: 'Volts &times; Amps', a: '<b>Volts</b> = push. <b>Amps</b> = flow. <b>Watts</b> = power!', more: '<b>Watts = volts &times; amps.</b> A phone charger pushes about 5 volts at 2 amps = about 10 watts.' },
+      { art: barsArt([{ icon: 'phone', v: 3, label: 'tiny' }, { icon: 'homebatt', v: 15, label: '~13' }, { icon: 'car', v: 80, label: '50–100' }]), q: 'kWh = Energy', a: 'An EV pack holds about <b>50–100 kWh</b>, from many cells!', more: 'Using 1,000 watts for 1 hour = <b>1 kilowatt-hour (kWh)</b>. A phone battery holds only about 0.015 kWh. An EV pack is made of hundreds or thousands of cells wired together. Some Tesla packs use thousands of small round cells.' },
+      { art: barsArt([{ icon: 'sun', v: 85, label: 'warm' }, { icon: 'snow', v: 65, label: 'cold', col: C.blue }]) + icon('regen', 50), q: 'Range, Cold &amp; Regen', a: 'Cold cuts range. <b>Regen braking</b> puts energy back!', more: '<b>Range</b> is how far you can go on a charge. In the cold, battery chemistry slows and heating the cabin uses energy. With <b>regenerative braking</b>, the motor works like a generator while slowing down and sends a little energy back to the battery.' },
+    ],
+    done: 'Battery boss! Now build a pack!',
+  },
+  experiment(P) {
+    P.talk('Build a pack! Longer rows = more <b>volts</b>. More rows = more <b>energy</b>.', 'Each cell gives about 3.7 volts and stores about 18.5 watt-hours. Cells in a row (series) add their volts. Rows side by side (parallel) add energy.');
+    const S = P.canvas(800, 300, .3);
+    const ui = P.add(`<div class="panel" style="padding:10px 12px;margin-top:12px">
+      <div class="lbl">${icon('cells', 26)} &#10140; long row = more VOLTS: <b class="sv"></b></div><div class="row"><button class="roundBtn toon" data-d="s-">−</button><input type="range" class="s" min="1" max="120" value="4"><button class="roundBtn toon" data-d="s+">+</button></div>
+      <div class="lbl">${icon('battery', 26)} &#10140; more rows = more ENERGY: <b class="pv"></b></div><div class="row"><button class="roundBtn toon" data-d="p-">−</button><input type="range" class="p" min="1" max="40" value="1"><button class="roundBtn toon" data-d="p+">+</button></div>
+      <div class="readout"></div>
+      <div class="row"><button class="tile cold">${icon('snow', 30)} Cold day</button></div>
+      <ul class="goals"></ul></div>`);
+    const sIn = $('.s', ui), pIn = $('.p', ui), out = $('.readout', ui), goalsEl = $('.goals', ui), coldB = $('.cold', ui);
+    let cold = false;
+    const goals = [
+      { t: `${icon('motion', 28)} E-bike: ~36–40 V, 0.5+ kWh`, f: (v, kwh) => v >= 35 && v <= 41 && kwh >= 0.5, done: false },
+      { t: `${icon('car', 28)} Car: ~350–420 V, 60+ kWh`, f: (v, kwh) => v >= 350 && v <= 420 && kwh >= 60, done: false },
+      { t: `${icon('snow', 28)} Try a cold day`, f: () => cold, done: false },
+    ];
+    const update = () => {
+      const s = +sIn.value, p = +pIn.value, v = s * 3.7, kwh = s * p * 18.5 / 1000, amps = 200, kw = v * amps / 1000;
+      const rng = kwh * (cold ? 2.7 : 3.5);
+      $('.sv', ui).textContent = s; $('.pv', ui).textContent = p;
+      out.innerHTML = `<div class="rd panel"><small>Cells</small><b>${s * p}</b></div><div class="rd panel"><small>Voltage</small><b>${fmt(v, v < 100 ? 1 : 0)} V</b></div><div class="rd panel"><small>Energy</small><b>${fmt(kwh, kwh < 10 ? 2 : 1)} kWh</b></div><div class="rd panel"><small>Power at 200 amps</small><b>${fmt(kw, kw < 10 ? 1 : 0)} kW</b><small>${fmt(v, 0)} V × 200 A</small></div><div class="rd panel" style="background:${cold ? '#d6efff' : ''}"><small>Car range (about)</small><b>${fmt(rng, 0)} mi</b><small>${cold ? 'cold: ~2.7 mi per kWh' : '~3.5 mi per kWh'}</small></div>`;
+      goals.forEach(gl => { if (!gl.done && gl.f(v, kwh)) { gl.done = true; sfx.good(); yay(); } });
+      goalsEl.innerHTML = goals.map(gl => `<li class="${gl.done ? 'ok' : ''}">${gl.t}</li>`).join('');
+      coldB.innerHTML = `${icon('snow', 30)} Cold day ${cold ? 'ON' : 'off'}`; coldB.classList.toggle('on', cold);
+      if (goals.filter(x => x.done).length >= 2) P.next();
+      if (goals.every(x => x.done)) P.talk('Super builder! Real EV packs work just like this!', 'Lots of cells, a few hundred volts, and tens of kWh. Cold days really do cut range.');
+      last = [s, p];
+    };
+    let last = [4, 1];
+    P.loop(() => draw(...last));
+    const draw = (s, p) => {
+      const g = S.g; S.clear('#e8f7ff');
+      const W = 720, H = 220, x0 = 40, y0 = 50;
+      const cw = Math.min(46, W / s), ch = Math.min(70, H / p);
+      const ox = x0 + (W - cw * s) / 2, oy = y0 + (H - ch * p) / 2;
+      g.lineWidth = Math.max(0.5, Math.min(3, cw / 10)); g.strokeStyle = INK;
+      for (let j = 0; j < p; j++) for (let i = 0; i < s; i++) {
+        const x = ox + i * cw, y = oy + j * ch;
+        g.fillStyle = (i + j) % 2 ? '#06d6a0' : '#2fe0b5'; rr(g, x + cw * .08, y + ch * .1, cw * .84, ch * .8, Math.min(8, cw * .25)); g.fill(); if (cw > 5) g.stroke();
+      }
+      g.lineWidth = 4; g.strokeStyle = INK; rr(g, ox - 8, oy - 8, cw * s + 16, ch * p + 16, 12); g.stroke();
+      ctext(g, '−', ox - 22, oy + ch * p / 2, 34, INK); ctext(g, '+', ox + cw * s + 22, oy + ch * p / 2, 34, INK);
+      ctext(g, `${s} in a row × ${p} row${p > 1 ? 's' : ''}`, 400, 26, 24, C.accent, 'center', 5);
+    };
+    [sIn, pIn].forEach(i => i.addEventListener('input', () => { sfx.blip(); update(); }));
+    $$('[data-d]', ui).forEach(b => b.onclick = () => {
+      const d = b.dataset.d, inp = d[0] === 's' ? sIn : pIn, step = d[0] === 's' && +sIn.value >= 20 ? 5 : 1;
+      inp.value = clamp(+inp.value + (d[1] === '+' ? step : -step), +inp.min, +inp.max); sfx.blip(); update();
+    });
+    coldB.onclick = () => { cold = !cold; sfx.tap(); update(); };
+    P.on(window, 'resize', () => setTimeout(update, 30));
+    setTimeout(update, 0);
+  },
+  boss(P) {
+    P.talk('<b>BOSS!</b> Reach the charger. Stop at each sign with <b>REGEN</b>!', 'Hold GO to drive. Hold REGEN BRAKE early to slow down: the motor sends energy back to the battery. If you zoom past a stop line too fast, the friction brakes turn all that motion into heat instead.'); setTimeout(() => cur && cur.phase === 3 && demoTap(goB, 0.5, 0.5, 2600), 50);
+    P.chip(90);
+    const S = P.canvas(900, 400, .46);
+    const ctr = P.add(`<div class="ctrls"><button class="btn bigpedal" style="background:#ffd6dc;color:${INK}">${icon('regen', 40)} REGEN BRAKE</button><button class="btn bigpedal go">GO &#9654;</button></div>`);
+    const [brakeB, goB] = $$('button', ctr);
+    const input = { go: false, brake: false };
+    const hold = (b, k) => {
+      const on = e => { e.preventDefault(); input[k] = true; b.classList.add('down'); try { b.setPointerCapture(e.pointerId); } catch (x) {} };
+      const off = () => { input[k] = false; b.classList.remove('down'); };
+      b.addEventListener('pointerdown', on); b.addEventListener('pointerup', off); b.addEventListener('pointercancel', off); b.addEventListener('lostpointercapture', off);
+      b.addEventListener('contextmenu', e => e.preventDefault());
+    };
+    hold(goB, 'go'); hold(brakeB, 'brake');
+    const kd = e => { if (['ArrowRight', 'ArrowUp', 'KeyD', 'KeyW'].includes(e.code)) input.go = true; if (['ArrowLeft', 'ArrowDown', 'Space', 'KeyA', 'KeyS'].includes(e.code)) { input.brake = true; e.preventDefault(); } };
+    const ku = e => { if (['ArrowRight', 'ArrowUp', 'KeyD', 'KeyW'].includes(e.code)) input.go = false; if (['ArrowLeft', 'ArrowDown', 'Space', 'KeyA', 'KeyS'].includes(e.code)) input.brake = false; };
+    P.on(window, 'keydown', kd); P.on(window, 'keyup', ku);
+    const END = 820, B = 1000, VMAX = 20;
+    const signs = [200, 410, 620].map(x => ({ x, ok: false, skid: false }));
+    const st = { signs, x: 0, v: 0, E: B, regen: 0, used: 0, skids: 0, over: false, msg: '', msgT: 0, rot: 0, spark: [] };
+    if (window.__game) window.__game.drive = st;
+    const say = m => { st.msg = m; st.msgT = 2.6; };
+    P.loop((dt, now) => {
+      if (!st.over) {
+        const drag = 0.0006 * st.v * st.v + (st.v > 0 ? 0.1 : 0);
+        let a = -drag;
+        if (input.brake && st.v > 0) {
+          const b = Math.min(5, st.v / dt); a -= b;
+          const back = 0.6 * b * st.v * dt; st.E = Math.min(B, st.E + back); st.regen += back;
+          if (Math.random() < 0.5) st.spark.push({ x: 0, t: 0 });
+        } else if (input.go && st.E > 0) {
+          if (st.v < VMAX) a += 3.5; else a = 0;
+          const use = (Math.max(0, a + drag) * Math.max(st.v, 0.3)) * dt / 0.9;
+          st.E = Math.max(0, st.E - use); st.used += use;
+          if (st.E <= 0) say('Battery empty!');
+        }
+        st.v = Math.max(0, st.v + a * dt);
+        const nx = st.x + st.v * dt;
+        for (const s of signs) {
+          if (!s.ok && st.x <= s.x && st.v < 0.6 && s.x - st.x < 45) { s.ok = true; sfx.good(); say('Nice stop! +energy back!'); }
+          if (!s.ok && nx >= s.x) {
+            s.ok = true;
+            if (st.v > 0.6) { s.skid = true; st.skids++; st.v = 0; st.x = s.x; sfx.bad(); burst('SKREEECH!', C.accent); say('Too fast! Friction brakes = wasted HEAT.'); }
+          }
+        }
+        if (st.v > 0 || nx < st.x) st.x = Math.min(st.x + st.v * dt, END + 20);
+        if (st.x > END + 15) { st.x = END + 15; st.v = 0; }
+        st.rot += st.v * dt / 2.2;
+        if (st.x >= END - 25 && st.v < 0.6) { st.over = true; win(); }
+        else if (st.E <= 0 && st.v === 0) { st.over = true; P.bossLose('Battery empty! Brake earlier with <b>REGEN</b>.', 'Skidding through stop lines wastes energy as heat. Regen braking sends some of it back to the battery.'); }
+      }
+      st.msgT -= dt;
+      draw(now);
+    });
+    function win() {
+      const pct = Math.round(st.E / B * 100), back = Math.round(st.regen / B * 100);
+      P.bossWin(`${barsArt([{ icon: 'battery', v: pct, label: pct + '%' }, { icon: 'regen', v: Math.min(100, back), label: '+' + back + '%', col: C.yellow }])} Made it! Regen gave back <b>${back}%</b>!`, 'Real EVs do this every time they slow down. It helps a lot in stop-and-go traffic.');
+    }
+    function draw(now) {
+      const g = S.g, W = 900, H = 400, ppm = 10, camX = st.x - 38;
+      S.clear('#bde8fb');
+      // hills
+      g.fillStyle = '#9fe2bf'; g.strokeStyle = INK; g.lineWidth = 3;
+      g.beginPath(); g.moveTo(0, 260);
+      for (let sx = 0; sx <= W; sx += 20) g.lineTo(sx, 240 - 30 * Math.sin((sx + camX * 2) / 140) - 20 * Math.sin((sx + camX * 2) / 61));
+      g.lineTo(W, 300); g.lineTo(0, 300); g.closePath(); g.fill(); g.stroke();
+      // road
+      g.fillStyle = '#5c5a6b'; g.fillRect(0, 280, W, 80); g.beginPath(); g.moveTo(0, 280); g.lineTo(W, 280); g.moveTo(0, 360); g.lineTo(W, 360); g.stroke();
+      g.fillStyle = '#7bd389'; g.fillRect(0, 361, W, 40);
+      g.strokeStyle = C.yellow; g.lineWidth = 5; g.setLineDash([30, 26]); g.lineDashOffset = camX * ppm; g.beginPath(); g.moveTo(0, 322); g.lineTo(W, 322); g.stroke(); g.setLineDash([]);
+      const sx = wx => (wx - camX) * ppm;
+      // stop signs
+      for (const s of signs) {
+        const x = sx(s.x); if (x < -80 || x > W + 80) continue;
+        g.fillStyle = '#fff'; g.fillRect(x - 4, 282, 8, 76); g.strokeStyle = INK; g.lineWidth = 2; g.strokeRect(x - 4, 282, 8, 76);
+        g.lineWidth = 3; g.fillStyle = '#8d96a3'; g.fillRect(x + 20, 190, 7, 92); g.strokeRect(x + 20, 190, 7, 92);
+        g.save(); g.translate(x + 23, 180); g.fillStyle = s.ok ? (s.skid ? '#ff8fa3' : C.green) : '#e5383b'; g.beginPath();
+        for (let k = 0; k < 8; k++) { const a = Math.PI / 8 + k * Math.PI / 4; g.lineTo(Math.cos(a) * 34, Math.sin(a) * 34); }
+        g.closePath(); g.fill(); g.lineWidth = 4; g.stroke(); ctext(g, s.ok ? (s.skid ? 'OOPS' : 'OK!') : 'STOP', 0, 2, 17, '#fff'); g.restore();
+      }
+      // town + charger
+      const tx = sx(END);
+      if (tx < W + 300) {
+        g.save(); g.translate(tx, 0);
+        g.fillStyle = '#ffc6a8'; g.fillRect(40, 130, 120, 150); g.fillStyle = '#c7c0f0'; g.fillRect(170, 100, 90, 180);
+        g.lineWidth = 3; g.strokeStyle = INK; g.strokeRect(40, 130, 120, 150); g.strokeRect(170, 100, 90, 180);
+        g.fillStyle = '#fff'; rr(g, -20, 200, 34, 80, 8); g.fill(); g.stroke(); cicon(g, 'bolt', -3, 228, 30);
+        g.fillStyle = 'rgba(6,214,160,.3)'; g.fillRect(-250, 284, 260, 74);
+        ctext(g, 'CHARGER', -120, 300, 18, '#fff', 'center', 4);
+        g.restore();
+      }
+      // regen sparks
+      st.spark = st.spark.filter(p => (p.t += 1 / 60) < 0.6);
+      // car
+      drawCar(g, 318, 330, 0.62, { color: C.blue, rot: st.rot, blink: (now / 1000) % 4 < 0.12 });
+      for (const p of st.spark) { g.fillStyle = C.yellow; g.strokeStyle = INK; g.lineWidth = 2; const px = 320 - p.t * 120, py = 300 - p.t * 150; ell(g, px, py, 7, 7); g.fill(); g.stroke(); }
+      // HUD
+      cpanel(g, 14, 12, 250, 92);
+      btext(g, 'BATTERY', 30, 32, 15, INK, 'left');
+      const pct = st.E / B;
+      g.fillStyle = '#e9e2cf'; rr(g, 30, 46, 200, 40, 8); g.fill(); g.lineWidth = 3; g.stroke();
+      g.fillStyle = pct > .35 ? C.green : pct > .15 ? C.yellow : C.accent; if (pct > 0.01) { rr(g, 30, 46, 200 * pct, 40, 8); g.fill(); g.stroke(); }
+      g.fillStyle = INK; g.fillRect(232, 58, 8, 16);
+      ctext(g, Math.round(pct * 100) + '%', 130, 68, 24, INK);
+      cpanel(g, 282, 12, 150, 92);
+      btext(g, 'SPEED', 298, 32, 15, INK, 'left');
+      ctext(g, Math.round(st.v * 2.237) + ' mph', 357, 70, 28, INK);
+      cpanel(g, 450, 12, 436, 46);
+      g.fillStyle = '#e9e2cf'; rr(g, 466, 28, 400, 14, 6); g.fill(); g.lineWidth = 2; g.stroke();
+      g.fillStyle = C.blue; rr(g, 466, 28, 400 * Math.min(1, st.x / END), 14, 6); g.fill(); g.stroke();
+      for (const s of signs) { g.fillStyle = s.ok ? (s.skid ? C.accent : C.green) : '#e5383b'; ell(g, 466 + 400 * s.x / END, 35, 8, 8); g.fill(); g.stroke(); }
+      cicon(g, 'bolt', 870, 35, 26);
+      if (input.brake && st.v > 0) ctext(g, '+ REGEN', 330, 200, 26, C.yellow, 'center', 6);
+      if (st.msgT > 0) { cpanel(g, 450, 66, 436, 40, '#fff4c2', 12); btext(g, st.msg, 668, 87, 15); }
+      if (st.x < 1 && st.v === 0 && !st.over) ctext(g, 'HOLD GO TO DRIVE!', 450, 160, 34, '#fff', 'center', 7);
+    }
+  },
+  quiz: [
+    { art: batteryDiagram(), q: 'What sits between + and &#8722;?', a: ['Electrolyte', 'Spark plug', 'Gasoline', 'Magnet'], ic: ['chem', 'bolt', 'pump', 'magnet'], c: 0, why: 'The <b>electrolyte</b> lets charged bits move inside.', more: 'In lithium-ion batteries, lithium ions travel through the electrolyte between the terminals.', hint: 'It starts with "electro…"' },
+    { art: `<span class="toon" style="font-size:34px">5 V &times; 2 A = ?</span>`, q: 'How many watts?', a: ['10 watts', '7 watts', '3 watts', '52 watts'], ic: ['bolt', 'bolt', 'bolt', 'bolt'], c: 0, why: 'Volts &times; amps = watts. 5 &times; 2 = <b>10</b>!', hint: 'Multiply!' },
+    { art: icon('regen', 76), q: 'What does regen braking do?', a: ['Refills a little', 'Goes faster', 'Fills to 100%', 'Turns on lights'], ic: ['battery', 'motion', 'star', 'light'], c: 0, why: 'Slowing down sends <b>some</b> energy back to the battery.', more: 'The motor acts as a generator, turning motion back into electricity. It recovers some energy, not all.', hint: 'Remember the yellow sparks!' },
+  ],
+};
+/* ================= MISSION 3: The Grid ================= */
+// simple "balance scale" readout drawn on canvas
+function drawBalance(g, x, y, sup, dem, tol) {
+  const diff = sup - dem, tilt = clamp(diff / 40, -1, 1) * 0.35;
+  g.save(); g.translate(x, y);
+  g.lineWidth = 4; g.strokeStyle = INK; g.lineJoin = 'round';
+  g.fillStyle = '#8d96a3'; g.beginPath(); g.moveTo(-26, 70); g.lineTo(0, 0); g.lineTo(26, 70); g.closePath(); g.fill(); g.stroke();
+  g.rotate(-tilt);
+  g.fillStyle = '#5c5a6b'; rr(g, -120, -6, 240, 12, 6); g.fill(); g.stroke();
+  for (const [sd, label, v, col] of [[-1, 'SUPPLY', sup, C.green], [1, 'DEMAND', dem, C.orange]]) {
+    g.save(); g.translate(sd * 110, 0); g.rotate(tilt);
+    g.beginPath(); g.moveTo(0, 0); g.lineTo(-30, 40); g.moveTo(0, 0); g.lineTo(30, 40); g.stroke();
+    g.fillStyle = col; g.beginPath(); g.moveTo(-46, 40); g.lineTo(46, 40); g.quadraticCurveTo(40, 66, 0, 66); g.quadraticCurveTo(-40, 66, -46, 40); g.closePath(); g.fill(); g.stroke();
+    ctext(g, label, 0, 84, 15, INK); ctext(g, Math.round(v), 0, 52, 20, INK);
+    g.restore();
+  }
+  g.restore();
+  g.fillStyle = INK; ell(g, x, y, 8, 8); g.fill();
+  const ok = Math.abs(diff) <= tol;
+  ctext(g, ok ? 'BALANCED!' : diff > 0 ? 'TOO MUCH POWER!' : 'NOT ENOUGH POWER!', x, y - 34, 22, ok ? C.green : C.accent, 'center', 5);
+}
+function drawHouseC(g, x, y, s, lit, col = '#ffc6a8') {
+  g.save(); g.translate(x, y); g.scale(s, s); g.lineWidth = 3.5; g.strokeStyle = INK; g.lineJoin = 'round';
+  g.fillStyle = col; g.fillRect(-30, -40, 60, 40); g.strokeRect(-30, -40, 60, 40);
+  g.fillStyle = C.accent; g.beginPath(); g.moveTo(-38, -38); g.lineTo(0, -70); g.lineTo(38, -38); g.closePath(); g.fill(); g.stroke();
+  g.fillStyle = lit ? '#fff3a0' : '#3c3a55'; g.fillRect(-20, -30, 16, 14); g.strokeRect(-20, -30, 16, 14); g.fillRect(6, -30, 16, 14); g.strokeRect(6, -30, 16, 14);
+  g.fillStyle = '#8a5a3a'; g.fillRect(-6, -16, 12, 16); g.strokeRect(-6, -16, 12, 16);
+  g.restore();
+}
+const M3 = {
+  id: 3, name: 'The Power Grid', stop: 'Grid City', icon: 'pylon', color: C.blue,
+  badge: 'Grid Guardian', badgeText: 'You kept supply and demand balanced — every single moment!',
+  challenge(P) {
+    P.talk('6 PM! Everyone\'s home. Keep the scale <b>balanced</b>!', 'You run the power plant. Slide it up or down so the power made (supply) matches the power used (demand).'); setTimeout(() => cur && demoTap($('[data-d="+"]', ui), .5, .5, 2600), 60);
+    const S = P.canvas(820, 340, .44);
+    const ui = P.add(`<div class="panel" style="padding:8px 12px;margin-top:12px;text-align:center"><div class="lbl">${icon('gasplant', 30)} Power plant</div><div class="row"><button class="roundBtn toon" data-d="-">−</button><input type="range" min="0" max="120" value="40"><button class="roundBtn toon" data-d="+">+</button></div></div>`);
+    const rng = $('input', ui);
+    $$('[data-d]', ui).forEach(b => b.onclick = () => { rng.value = +rng.value + (b.dataset.d === '+' ? 6 : -6); sfx.blip(); });
+    let t = 0, bad = 0, black = 0, blackouts = 0, ended = false, okTime = 0;
+    const houses = [...Array(8)].map((_, i) => ({ x: 400 + (i % 4) * 100, y: 200 + (i / 4 | 0) * 110, on: 0, at: 1 + i * 2.1 + Math.random() }));
+    P.loop((dt, now) => {
+      t += dt;
+      let dem = 30; houses.forEach(h => { h.on = t > h.at ? 1 : 0; dem += h.on * 10; });
+      if (t > 19) dem += 8 * Math.sin(t * 1.7);
+      const sup = +rng.value, diff = sup - dem;
+      if (black > 0) black -= dt;
+      else if (Math.abs(diff) > 15) { bad += dt; if (bad > 1.2) { black = 1.4; bad = 0; blackouts++; sfx.bad(); burst('BLACKOUT!', C.accent); } }
+      else { bad = Math.max(0, bad - dt); okTime += dt; }
+      const g = S.g; S.clear(black > 0 ? '#1a1830' : '#ffb98a');
+      if (black <= 0) { const gr = g.createLinearGradient(0, 0, 0, 340); gr.addColorStop(0, '#ff8fa3'); gr.addColorStop(1, '#ffd6a0'); g.fillStyle = gr; g.fillRect(0, 0, 820, 340); }
+      g.fillStyle = '#7bd389'; g.fillRect(0, 300, 820, 40); g.lineWidth = 3; g.strokeStyle = INK; g.beginPath(); g.moveTo(0, 300); g.lineTo(820, 300); g.stroke();
+      // plant
+      cicon(g, 'gasplant', 90, 250, 110);
+      for (const h of houses) drawHouseC(g, h.x, h.y, 1, h.on && black <= 0);
+      g.strokeStyle = INK; g.lineWidth = 3; g.beginPath(); g.moveTo(140, 210); g.quadraticCurveTo(260, 240, 360, 150); g.stroke();
+      drawBalance(g, 200, 70, sup, dem, 15);
+      ctext(g, black > 0 ? 'LIGHTS OUT!' : `6:${String(Math.min(59, Math.floor(t * 2))).padStart(2, '0')} PM`, 610, 34, 26, '#fff', 'center', 6);
+      if (!ended && t > 26) { ended = true; finish(); }
+    });
+    function finish() {
+      P.talk(`${blackouts ? `Phew! ${blackouts} blackout${blackouts > 1 ? 's' : ''}.` : 'No blackouts!'} Power made must <b>match</b> power used!`, 'This is the grid\'s number one rule. It has to match every single moment. Too little or too much power and things go wrong.');
+      sfx.good(); P.next();
+    }
+  },
+  discover: {
+    talk: 'How does power reach your plug? Tap to see!',
+    cards: [
+      { art: ['panel', 'wind', 'hydro', 'nuclear', 'gasplant', 'coal'].map(n => icon(n, 44)).join(''), q: 'Power Plants', a: 'Sun, wind, water, nuclear, gas and coal make electricity.', more: 'Most power plants spin a <b>generator</b>. Solar panels make electricity directly from light.' },
+      { art: flowArt(['nuclear', 'stepup', 'pylon', 'substation', 'stepdown', 'house'], 30, ['plant', 'UP', 'lines', 'sub', 'down', 'home']), q: 'The Long Trip', a: 'Voltage goes <b>UP</b> for the trip, then <b>DOWN</b> for homes.', more: 'A <b>step-up transformer</b> raises the voltage way up (often hundreds of thousands of volts), so less energy is lost as heat. <b>Transmission lines</b> carry it far. A <b>substation</b> lowers it, neighborhood lines carry it, and a <b>step-down transformer</b> near your street brings it to about 120/240 volts.' },
+      { art: peakArt(), q: 'Peak Hours', a: 'Supply must match demand every moment. Evenings are busiest!', more: 'The <b>peak</b> usually comes in the late afternoon and evening, when people get home, cook, and use lights and air conditioning. Late at night, demand is low.' },
+      { art: flowArt(['sun', 'homebatt', 'moon'], 52), q: 'Save It for Later', a: 'Batteries save sunshine for night. EVs can charge at quiet night hours.', more: '<b>Grid batteries</b> and <b>home batteries</b> store extra solar power for the evening. Charging EVs at night uses less-busy hours, and some power companies charge less then.' },
+    ],
+  },
+  experiment(P) {
+    P.talk('Wire up Grid City! Plant &#10140; ? &#10140; house.');
+    const it = (id, name, ic, sub) => ({ id, name, icon: ic, sub });
+    let solved = false;
+    orderPuzzle(P, {
+      first: it('plant', 'Power plant', 'nuclear', 'makes electricity'),
+      last: it('home', 'Home', 'house', 'about 120/240 V'),
+      answer: ['up', 'lines', 'sub', 'hood', 'down'],
+      pool: [it('up', 'Step-up transformer', 'stepup', 'voltage way UP'), it('lines', 'Transmission lines', 'pylon', 'very high voltage'),
+        it('sub', 'Substation', 'substation', 'steps voltage down'), it('hood', 'Neighborhood lines', 'grid', 'medium voltage'),
+        it('down', 'Step-down transformer', 'stepdown', 'on a pole or box near home')],
+      checkLabel: 'Send power!',
+      onWrong: n => P.talk(`${n} out of order. Voltage goes <b>UP</b> first, then <b>down</b>.`),
+      onWin: () => { solved = true; confetti(40); P.talk('Power delivered! Now tap the power plants.', 'High voltage is used for the long trip because it wastes less energy as heat.'); plants(); },
+    });
+    function plants() {
+      const list = [
+        { n: 'Solar', ic: 'panel', a: 'Sunlight &#10140; electricity. No smoke. Only when sunny.', good: 1 },
+        { n: 'Wind', ic: 'wind', a: 'Wind spins blades. No smoke. Only when windy.', good: 1 },
+        { n: 'Hydro', ic: 'hydro', a: 'Falling water spins turbines. No smoke. Needs rivers.', good: 1 },
+        { n: 'Nuclear', ic: 'nuclear', a: 'Splitting atoms boils water. Day and night. No smoke, but waste.', good: 1, more: 'Splitting uranium atoms makes heat, which boils water into steam to spin a turbine. That cloud is water vapor! The radioactive waste must be stored carefully.' },
+        { n: 'Natural gas', ic: 'gasplant', a: 'Burns gas. Easy to turn up or down. Makes CO&#8322;.', more: 'Carbon dioxide (CO&#8322;) traps heat and warms the planet.' },
+        { n: 'Coal', ic: 'coal', a: 'Burns coal. Makes the most CO&#8322; and smoke.', more: 'Many coal plants are being closed.' },
+      ];
+      let seen = 0;
+      const box = P.add(`<div class="panel" style="padding:12px;margin-top:14px;text-align:center"><div class="bigTiles pl"></div><div class="qWhy"></div></div>`);
+      box.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+      list.forEach(p => {
+        const b = el(`<button class="tile">${icon(p.ic, 56)}<span>${p.n}</span><small>${p.good ? '&#127793; no smoke' : '&#128168; smoke'}</small></button>`);
+        b.onclick = () => {
+          sfx.tap(); $$('.tile', box).forEach(x => x.classList.remove('on')); b.classList.add('on');
+          if (!b.dataset.seen) { b.dataset.seen = 1; seen++; }
+          $('.qWhy', box).innerHTML = `<div class="say"><b>${p.n}:</b> ${p.a}</div>${readBtn(p.n + '. ' + p.a)}${moreHTML(p.more)}`;
+          if (seen >= 3) P.next();
+        };
+        $('.pl', box).append(b);
+      });
+    }
+  },
+  boss(P) {
+    P.talk('<b>BOSS!</b> Keep the scale balanced for a whole day!', 'Solar, wind and nuclear run on their own. You control the gas plant (it changes slowly, so plan ahead!) and the grid battery. Store extra solar at midday, release it at the evening peak. Moving EV charging overnight makes the peak smaller.');
+    P.chip(100);
+    const S = P.canvas(900, 400, .44);
+    const ui = P.add(`<div class="panel" style="padding:8px 12px;margin-top:12px">
+      <div class="ctrls" style="margin-top:0">
+        <div style="text-align:center"><div class="lbl" style="margin-top:0">${icon('gasplant', 30)} Gas (slow)</div><div class="row"><button class="roundBtn toon" data-g="-">−</button><b class="toon gv" style="font-size:24px;min-width:60px">0</b><button class="roundBtn toon" data-g="+">+</button></div></div>
+        <div style="text-align:center"><div class="lbl" style="margin-top:0">${icon('homebatt', 30)} Battery</div><div class="seg bm"><button data-m="charge">&#11015; Store</button><button data-m="off" class="on">Off</button><button data-m="dis">&#11014; Use</button></div></div>
+        <div style="text-align:center"><div class="lbl" style="margin-top:0">${icon('car', 30)} EV charging</div><div class="seg ev"><button data-e="eve" class="on">6 PM</button><button data-e="night">${icon('moon', 26)} Night</button></div></div>
+      </div>
+      <div class="row" style="margin-top:6px"><button class="btn sm go startB">Start the day &#9654;</button></div></div>`);
+    const st = { t: 0, gasT: 10, gas: 10, mode: 'off', ev: 'eve', store: 30, cap: 120, stab: 100, run: false, over: false, hist: [], clean: 0, total: 0, wind: 12, windT: 0 };
+    if (window.__game) window.__game.grid = st;
+    $$('[data-g]', ui).forEach(b => b.onclick = () => { st.gasT = clamp(st.gasT + (b.dataset.g === '+' ? 10 : -10), 0, 70); sfx.blip(); });
+    $$('[data-m]', ui).forEach(b => b.onclick = () => { st.mode = b.dataset.m; $$('[data-m]', ui).forEach(x => x.classList.toggle('on', x === b)); sfx.blip(); });
+    $$('[data-e]', ui).forEach(b => b.onclick = () => { st.ev = b.dataset.e; $$('[data-e]', ui).forEach(x => x.classList.toggle('on', x === b)); sfx.blip(); });
+    const startB = $('.startB', ui);
+    startB.onclick = () => { st.run = true; startB.remove(); sfx.whoosh(); };
+    const HRS = 24, DUR = 80; // whole day in ~80 s
+    const solar = h => Math.max(0, 40 * Math.sin(Math.PI * (h - 6.5) / 13));
+    const demand = (h, ev) => 52 + 16 * Math.exp(-(((h - 8) / 1.6) ** 2)) + 10 * (h > 9 && h < 17 ? 1 : 0) + 34 * Math.exp(-(((h - 18.7) / 2.1) ** 2)) - 10 * Math.exp(-(((h - 3.5) / 2.5) ** 2))
+      + (ev === 'eve' ? (h >= 18 && h < 22 ? 16 : 0) : ((h >= 23 || h < 5) ? 11 : 0));
+    const NUC = 30, TOL = 10;
+    const flows = () => {
+      const h = st.t, sol = solar(h), wind = st.wind, dem = demand(h, st.ev);
+      let batt = 0;
+      if (st.mode === 'charge' && st.store < st.cap) batt = -20;
+      if (st.mode === 'dis' && st.store > 0) batt = 20;
+      return { h, sol, wind, dem, batt, sup: NUC + sol + wind + st.gas + batt };
+    };
+    const gvEl = $('.gv', ui);
+    P.loop(dt => {
+      gvEl.textContent = st.gasT;
+      if (st.run && !st.over) {
+        const dh = dt * HRS / DUR;
+        st.t += dh;
+        st.windT += dt; if (st.windT > 1.2) { st.windT = 0; st.wind = clamp(st.wind + (Math.random() - .5) * 5, 6, 16); }
+        st.gas += clamp(st.gasT - st.gas, -14 * dh, 14 * dh);
+        const f = flows(); st.f = f;
+        st.store = clamp(st.store - f.batt * dh, 0, st.cap);
+        if ((st.mode === 'charge' && st.store >= st.cap) || (st.mode === 'dis' && st.store <= 0)) { st.mode = 'off'; $$('[data-m]', ui).forEach(x => x.classList.toggle('on', x.dataset.m === 'off')); toast(st.store <= 0 ? 'Grid battery is empty!' : 'Grid battery is full!', 1800); }
+        const diff = f.sup - f.dem;
+        if (Math.abs(diff) > TOL) st.stab -= (Math.abs(diff) - TOL) * 0.9 * dt + 6 * dt;
+        else st.stab = Math.min(100, st.stab + 3 * dt);
+        st.clean += (NUC + f.sol + f.wind) * dh; st.total += (NUC + f.sol + f.wind + st.gas) * dh;
+        if (!st.hist.length || st.t - st.hist[st.hist.length - 1].h > 0.15) st.hist.push({ h: st.t, sup: f.sup, dem: f.dem });
+        if (st.stab <= 0) { st.stab = 0; st.over = true; P.bossLose(`Blackout at ${clockStr(st.t)}!`, 'The gas plant changes slowly, so turn it up before the evening peak. Store extra solar at midday and use it in the evening.'); }
+        else if (st.t >= HRS) { st.over = true; const cleanPct = Math.round(st.clean / st.total * 100); P.bossWin(`${barsArt([{ icon: 'panel', v: cleanPct, label: cleanPct + '%' }, { icon: 'smoke', v: 100 - cleanPct, label: (100 - cleanPct) + '%', col: '#a8a3ad' }])} Lights on all day!`, `About ${cleanPct}% of the power came from sources with no smoke (nuclear, solar and wind). ${st.ev === 'night' ? 'Moving EV charging overnight made the evening peak smaller. Smart!' : 'Tip: moving EV charging overnight makes the evening peak smaller.'}`); }
+      }
+      draw();
+    });
+    const clockStr = h => { h = ((h % 24) + 24) % 24; const hh = Math.floor(h), mm = Math.floor((h - hh) * 60 / 15) * 15; return `${(hh + 11) % 12 + 1}:${String(mm).padStart(2, '0')} ${hh < 12 ? 'AM' : 'PM'}`; };
+    function draw() {
+      const g = S.g, f = flows();
+      const day = f.sol > 1;
+      S.clear(day ? '#bde8fb' : '#2b2a4a');
+      // chart area
+      cpanel(g, 14, 14, 520, 250);
+      const cx = 40, cy = 40, cw = 480, ch = 200, maxV = 150;
+      const X = h => cx + h / 24 * cw, Y = v => cy + ch - v / maxV * ch;
+      g.fillStyle = 'rgba(255,159,28,.18)'; g.fillRect(X(16), cy, X(21) - X(16), ch);
+      btext(g, 'evening peak', X(18.5), cy + 12, 13, '#b35c00');
+      // preview of demand (dashed)
+      g.setLineDash([6, 6]); g.strokeStyle = '#b8b0a0'; g.lineWidth = 3; g.beginPath();
+      for (let h = 0; h <= 24; h += 0.25) { const v = demand(h, st.ev); h ? g.lineTo(X(h), Y(v)) : g.moveTo(X(h), Y(v)); } g.stroke(); g.setLineDash([]);
+      // solar preview
+      g.fillStyle = 'rgba(255,210,63,.35)'; g.beginPath(); g.moveTo(X(0), Y(0)); for (let h = 0; h <= 24; h += 0.25) g.lineTo(X(h), Y(solar(h))); g.lineTo(X(24), Y(0)); g.closePath(); g.fill();
+      // history
+      const line = (k, col) => { g.strokeStyle = col; g.lineWidth = 4; g.beginPath(); st.hist.forEach((p, i) => i ? g.lineTo(X(p.h), Y(p[k])) : g.moveTo(X(p.h), Y(p[k]))); g.stroke(); };
+      line('dem', C.orange); line('sup', '#06a77d');
+      g.strokeStyle = INK; g.lineWidth = 2; g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx, cy + ch); g.lineTo(cx + cw, cy + ch); g.stroke();
+      for (const h of [0, 6, 12, 18, 24]) btext(g, h === 0 || h === 24 ? '12AM' : h === 12 ? 'noon' : h === 6 ? '6AM' : '6PM', X(h), cy + ch + 12, 12);
+      g.strokeStyle = C.accent; g.lineWidth = 3; g.beginPath(); g.moveTo(X(st.t), cy); g.lineTo(X(st.t), cy + ch); g.stroke();
+      btext(g, '— supply', 110, cy - 10, 13, '#06a77d'); btext(g, '— demand', 200, cy - 10, 13, '#c06a00'); btext(g, '■ solar', 280, cy - 10, 13, '#b88a00');
+      // scale
+      drawBalance(g, 720, 120, f.sup, f.dem, TOL);
+      // clock
+      ctext(g, clockStr(st.t), 720, 32, 30, day ? INK : '#fff', 'center');
+      // sources breakdown
+      cpanel(g, 14, 284, 872, 100);
+      const items = [['nuclear', 'Nuclear', NUC], ['panel', 'Solar', f.sol], ['wind', 'Wind', f.wind], ['gasplant', 'Gas', st.gas], ['homebatt', f.batt < 0 ? 'Battery IN' : 'Battery', f.batt]];
+      items.forEach(([ic, n, v], i) => { const x = 40 + i * 130; cicon(g, ic, x + 10, 324, 44); btext(g, n, x + 62, 312, 14); ctext(g, (v < 0 ? '' : '') + Math.round(v), x + 62, 338, 22, v < 0 ? '#2f80ed' : INK); });
+      // battery store bar + stability
+      btext(g, 'Battery stored', 720, 300, 13);
+      g.fillStyle = '#e9e2cf'; rr(g, 670, 310, 100, 16, 6); g.fill(); g.lineWidth = 2; g.strokeStyle = INK; g.stroke();
+      g.fillStyle = C.green; if (st.store > 1) { rr(g, 670, 310, 100 * st.store / st.cap, 16, 6); g.fill(); g.stroke(); }
+      btext(g, 'Stability', 720, 342, 13);
+      g.fillStyle = '#e9e2cf'; rr(g, 670, 352, 200, 20, 8); g.fill(); g.stroke();
+      g.fillStyle = st.stab > 50 ? C.green : st.stab > 25 ? C.yellow : C.accent; if (st.stab > 1) { rr(g, 670, 352, 200 * st.stab / 100, 20, 8); g.fill(); g.stroke(); }
+      ctext(g, Math.round(st.stab) + '%', 770, 363, 16);
+      if (!st.run) ctext(g, 'TAP "START THE DAY"', 450, 220, 30, '#fff', 'center', 6);
+    }
+  },
+  quiz: [
+    { art: icon('pylon', 76), q: 'Why use super-high voltage on long lines?', a: ['Less heat lost', 'Cleaner power', 'Goes backward', 'For birds'], ic: ['heat', 'panel', 'regen', 'star'], c: 0, why: 'Less energy is wasted as <b>heat</b> on the way!', more: 'Higher voltage means less current is needed for the same power, so the wires waste less energy as heat. Transformers lower it before it reaches homes.', hint: 'Wires get warm…' },
+    { art: peakArt(), q: 'When is demand highest?', a: ['Evening', '3 AM', 'Sunrise', 'Always the same'], ic: ['house', 'moon', 'sun', 'clock'], c: 0, why: 'Evening! Everyone gets home and turns things on.', hint: 'When does everyone get home?' },
+    { q: 'How can noon sunshine power the night?', a: ['Batteries store it', 'Panels glow at night', 'Wires save it', 'It can\'t'], ic: ['homebatt', 'panel', 'pylon', 'none'], c: 0, why: '<b>Batteries</b> save extra sunshine for later.', hint: 'What stores energy?' },
+  ],
+};
+
+/* ================= MISSION 4: Charging Levels ================= */
+// charging model: 75 kWh pack, ~3.5 mi/kWh mixed driving
+const PACK = 75, MPK = 3.5;
+const CHARGERS = {
+  L1: { name: 'Level 1', sub: '120 V outlet', icon: 'lvl1', color: '#b8c0cc', kw: () => 1.3, ac: true },
+  L2: { name: 'Level 2', sub: '240 V charger', icon: 'lvl2', color: C.blue, kw: () => 7.7, ac: true },
+  DC: { name: 'DC Fast', sub: 'like a Supercharger', icon: 'lvl3', color: C.yellow, ac: false,
+    kw: soc => soc < 0.5 ? 170 : soc < 0.8 ? 170 - (soc - 0.5) / 0.3 * 110 : Math.max(10, 60 - (soc - 0.8) / 0.2 * 50) },
+};
+// charge for `hours`; returns new soc
+function chargeFor(type, soc, hours, cap = 1) {
+  let t = 0; const dtH = 1 / 600;
+  while (t < hours && soc < cap) { soc = Math.min(cap, soc + CHARGERS[type].kw(soc) * dtH / PACK); t += dtH; }
+  return soc;
+}
+// time (h) to reach target soc
+function timeTo(type, soc, target) {
+  let t = 0; const dtH = 1 / 600;
+  while (soc < target && t < 200) { soc += CHARGERS[type].kw(soc) * dtH / PACK; t += dtH; }
+  return t;
+}
+function durStr(h) { if (h >= 1) { const hh = Math.floor(h), mm = Math.round((h - hh) * 60); return `${hh} h${mm ? ' ' + mm + ' min' : ''}`; } return `${Math.max(1, Math.round(h * 60))} min`; }
+
+const M4 = {
+  id: 4, name: 'Charging Levels', stop: 'Charge Junction', icon: 'plug', color: C.purple,
+  badge: 'Road Trip Pro', badgeText: 'Level 1, Level 2, DC fast — you know which charger to pick!',
+  challenge(P) {
+    P.talk('Car at <b>10%</b>. Beach: <b>100 mi</b>. Leaving in <b>1 hour</b>! Plug in!', 'The garage only has a regular wall outlet. Plug in and fast-forward one hour.'); setTimeout(() => cur && demoTap(btn, .5, .5, 2600), 60);
+    const S = P.canvas(820, 320, .44);
+    const ui = P.add(`<div class="row" style="margin-top:12px"><button class="btn yel">${icon('lvl1', 40)} Plug in &#9193; 1 hour</button></div>`);
+    const btn = $('button', ui);
+    let soc = 0.10, plugged = false, clock = 0, done = false;
+    btn.onclick = () => { if (plugged) return; plugged = true; btn.disabled = true; sfx.zap(); };
+    P.loop((dt, now) => {
+      if (plugged && clock < 1) { clock = Math.min(1, clock + dt / 4); soc = 0.10 + 1.3 * clock / PACK; if (Math.random() < 0.1) sfx.blip(); }
+      if (plugged && clock >= 1 && !done) { done = true; result(); }
+      const g = S.g; S.clear('#e8e2d4');
+      g.fillStyle = '#c9c1ae'; g.fillRect(0, 260, 820, 60); g.strokeStyle = INK; g.lineWidth = 3; g.beginPath(); g.moveTo(0, 260); g.lineTo(820, 260); g.stroke();
+      // outlet on wall
+      g.fillStyle = '#fff'; rr(g, 60, 150, 60, 80, 10); g.fill(); g.stroke();
+      for (const yy of [170, 200]) { g.fillStyle = INK; g.fillRect(78, yy, 5, 12); g.fillRect(96, yy, 5, 12); }
+      if (plugged) { g.strokeStyle = INK; g.lineWidth = 7; g.beginPath(); g.moveTo(90, 190); g.bezierCurveTo(160, 300, 240, 260, 330, 222); g.stroke(); }
+      drawCar(g, 450, 290, 1.1, { color: C.blue, rot: 0, blink: (now / 1000) % 4 < .12 });
+      // clock + battery
+      cpanel(g, 590, 20, 210, 120);
+      ctext(g, `+${Math.round(clock * 60)} min`, 695, 50, 28);
+      g.fillStyle = '#e9e2cf'; rr(g, 610, 74, 160, 34, 8); g.fill(); g.lineWidth = 3; g.stroke();
+      g.fillStyle = soc < .2 ? C.accent : C.green; rr(g, 610, 74, 160 * soc, 34, 8); g.fill(); g.stroke();
+      ctext(g, `${(soc * 100).toFixed(0)}%`, 690, 92, 22);
+      btext(g, `range about ${Math.round(soc * PACK * MPK)} mi`, 695, 124, 15);
+      ctext(g, 'Need 100 mi', 120, 40, 26, C.accent, 'center', 5);
+    });
+    function result() {
+      sfx.bad(); burst('ONLY +5 MI?!', C.accent);
+      P.talk('1 hour = only about <b>5 miles</b>! That\'s <b>Level 1</b>, the slowest.', 'A regular 120-volt outlet is Level 1. Pup needs a faster charger!');
+      P.next();
+    }
+  },
+  discover: {
+    talk: 'Three ways to charge! Tap each plug.',
+    cards: [
+      { art: icon('lvl1', 84) + barsArt([{ icon: 'clock', v: 5, label: '3–5 mi', col: '#b8c0cc' }]), q: 'Level 1', a: 'Regular <b>120 V</b> outlet. Slowest: about 3–5 miles per hour.', more: 'Fine if you drive a little each day and can plug in for many hours. (120 V is the US household outlet.)' },
+      { art: icon('lvl2', 84) + barsArt([{ icon: 'clock', v: 30, label: '20–40', col: C.blue }]), q: 'Level 2', a: '<b>240 V</b>, like a dryer plug. About 20–40 miles per hour.', more: 'Home wall chargers and many public chargers. How fast depends on the car and charger. Perfect for charging overnight at home or a hotel.' },
+      { art: icon('lvl3', 84) + barsArt([{ icon: 'clock', v: 100, label: '15–30 min', col: C.yellow }]), q: 'Level 3: DC Fast', a: 'Tesla Superchargers are this type. Hundreds of miles in about 15–30 min!', more: 'DC fast chargers push <b>direct current</b> straight into the battery at very high power. How fast depends on the car and conditions. Great for highway road trips.' },
+      { art: acdcArt(), q: 'AC, DC &amp; 80%', a: 'Batteries store <b>DC</b>. Charging slows near full, so stop around <b>80%</b>.', more: 'Outlets give <b>AC</b> (alternating current). For Level 1 and 2, the car\'s <b>onboard charger</b> converts AC to DC. Fast chargers convert inside the big charging cabinet and send DC directly. Charging slows as the battery fills, so on road trips people often stop at about 80%.' },
+    ],
+  },
+  experiment(P) {
+    P.talk('Pick a plug. Slide the time. Watch it <b>slow down</b> near full!');
+    const S = P.canvas(880, 380, .46);
+    const ui = P.add(`<div class="panel" style="padding:10px 12px;margin-top:12px;text-align:center">
+      <div class="bigTiles ch" style="max-width:560px;margin:0 auto">${Object.entries(CHARGERS).map(([k, c]) => `<button class="tile" data-c="${k}">${icon(c.icon, 56)}<span>${c.name}</span></button>`).join('')}</div>
+      <div class="lbl">${icon('battery', 26)} Start: <b class="sv"></b></div><input type="range" class="s" min="5" max="90" value="20">
+      <div class="lbl">${icon('clock', 26)} Plugged in: <b class="tv"></b></div><input type="range" class="t" min="0" max="100" value="30">
+      <div class="readout"></div><ul class="goals"></ul></div>`);
+    let type = 'L2';
+    const sIn = $('.s', ui), tIn = $('.t', ui), out = $('.readout', ui), goalsEl = $('.goals', ui);
+    const maxH = () => type === 'L1' ? 24 : type === 'L2' ? 12 : 1.5;
+    const goals = [
+      { t: `${icon('lvl2', 28)} +30 mi in 1 hour`, f: (c, s0, s1, h) => c === 'L2' && h <= 1.05 && (s1 - s0) * PACK * MPK >= 25 },
+      { t: `${icon('lvl3', 28)} 20% &#10140; 80%`, f: (c, s0, s1) => c === 'DC' && s0 <= 0.21 && s1 >= 0.795 },
+      { t: `${icon('lvl1', 28)} ${icon('moon', 24)} 10+ hours`, f: (c, s0, s1, h) => c === 'L1' && h >= 10 },
+    ];
+    const done = new Set();
+    const update = () => {
+      const s0 = +sIn.value / 100, h = +tIn.value / 100 * maxH(), s1 = chargeFor(type, s0, h);
+      $('.sv', ui).textContent = Math.round(s0 * 100) + '%'; $('.tv', ui).textContent = durStr(h);
+      const kwNow = CHARGERS[type].kw(s1);
+      out.innerHTML = `<div class="rd panel"><small>Battery</small><b>${Math.round(s0 * 100)}% &#10140; ${Math.round(s1 * 100)}%</b></div><div class="rd panel"><small>Range added (about)</small><b>+${Math.round((s1 - s0) * PACK * MPK)} mi</b></div><div class="rd panel"><small>Charging power now</small><b>${kwNow.toFixed(kwNow < 10 ? 1 : 0)} kW</b></div>`;
+      goals.forEach((g, i) => { if (!done.has(i) && g.f(type, s0, s1, h)) { done.add(i); sfx.good(); yay(); } });
+      goalsEl.innerHTML = goals.map((g, i) => `<li class="${done.has(i) ? 'ok' : ''}">${g.t}</li>`).join('');
+      if (done.size >= 2) P.next();
+      draw(s0, h, s1);
+    };
+    $$('[data-c]', ui).forEach(b => b.onclick = () => { type = b.dataset.c; $$('[data-c]', ui).forEach(x => x.classList.toggle('on', x === b)); sfx.blip(); update(); });
+    $$('[data-c]', ui).find(b => b.dataset.c === type).classList.add('on');
+    [sIn, tIn].forEach(i => i.addEventListener('input', update));
+    let anim = 0;
+    P.loop(dt => { anim += dt; drawFlow(); });
+    let last = null;
+    function draw(s0, h, s1) { last = { s0, h, s1 }; }
+    function drawFlow() {
+      if (!last) return;
+      const { s0, h, s1 } = last, g = S.g; S.clear('#f3eee2');
+      // left: path diagram (AC vs DC)
+      const c = CHARGERS[type];
+      cpanel(g, 14, 14, 852, 140);
+      const nodes = c.ac
+        ? [['plug', type === 'L1' ? '120 V outlet' : '240 V charger', 'AC'], ['motor', 'Onboard charger', 'AC → DC'], ['battery', 'Battery', 'DC']]
+        : [['bolt', 'Fast charger', 'AC → DC inside'], ['car', 'Skips the onboard charger', 'DC'], ['battery', 'Battery', 'DC']];
+      nodes.forEach(([ic, n, cur], i) => {
+        const x = 110 + i * 330;
+        cicon(g, ic, x, 66, 64); btext(g, n, x, 116, 16); ctext(g, cur, x, 138, 16, cur.includes('DC') && !cur.includes('AC') ? '#2f80ed' : '#c06a00');
+        if (i < nodes.length - 1) {
+          g.strokeStyle = INK; g.lineWidth = 4; g.beginPath(); g.moveTo(x + 50, 66); g.lineTo(x + 280, 66); g.stroke();
+          const wavy = (i === 0 && c.ac);
+          g.strokeStyle = wavy ? C.orange : '#2f80ed'; g.lineWidth = 5; g.beginPath();
+          for (let k = 0; k <= 60; k++) { const xx = x + 55 + k * 3.7, yy = 66 + (wavy ? Math.sin(k / 4 - anim * 8) * 10 : 0); k ? g.lineTo(xx, yy) : g.moveTo(xx, yy); }
+          g.stroke();
+          if (!wavy) for (let k = 0; k < 4; k++) { const xx = x + 55 + ((anim * 120 + k * 56) % 220); g.fillStyle = '#2f80ed'; ell(g, xx, 66, 5, 5); g.fill(); }
+        }
+      });
+      // bottom: % vs time graph for the chosen charger
+      cpanel(g, 14, 170, 852, 196);
+      const gx = 70, gy = 190, gw = 760, gh = 140, mh = maxH();
+      const X = t => gx + t / mh * gw, Y = s => gy + gh - s * gh;
+      g.fillStyle = 'rgba(6,214,160,.12)'; g.fillRect(gx, Y(1), gw, Y(0.8) - Y(1));
+      btext(g, 'above 80%: slower', gx + gw - 70, Y(0.9), 13, '#078a63');
+      g.strokeStyle = '#b8b0a0'; g.lineWidth = 2; g.beginPath(); g.moveTo(gx, gy); g.lineTo(gx, gy + gh); g.lineTo(gx + gw, gy + gh); g.stroke();
+      for (const p of [0, .5, 1]) btext(g, (p * 100) + '%', gx - 26, Y(p), 13);
+      btext(g, '0', gx, gy + gh + 12, 13); btext(g, durStr(mh), gx + gw - 10, gy + gh + 12, 13); btext(g, durStr(mh / 2), gx + gw / 2, gy + gh + 12, 13);
+      // full curve faint, chosen part bold
+      let soc = s0; g.strokeStyle = '#d0c8b6'; g.lineWidth = 3; g.beginPath(); g.moveTo(X(0), Y(soc));
+      const steps = 120;
+      for (let k = 1; k <= steps; k++) { soc = chargeFor(type, soc, mh / steps); g.lineTo(X(k * mh / steps), Y(soc)); } g.stroke();
+      soc = s0; g.strokeStyle = c.color === '#b8c0cc' ? '#6b7280' : (type === 'DC' ? '#e0a800' : '#2f80ed'); g.lineWidth = 6; g.beginPath(); g.moveTo(X(0), Y(soc));
+      const n2 = Math.max(1, Math.round(steps * h / mh));
+      for (let k = 1; k <= n2; k++) { soc = chargeFor(type, soc, h / n2); g.lineTo(X(k * h / n2), Y(soc)); } g.stroke();
+      g.fillStyle = C.accent; g.strokeStyle = INK; g.lineWidth = 3; ell(g, X(h), Y(s1), 9, 9); g.fill(); g.stroke();
+      ctext(g, `${c.name}: ${c.sub}`, 450, 186, 18, INK);
+    }
+    update();
+  },
+  boss(P) {
+    P.talk('<b>BOSS!</b> Road trip to Grandma\'s. Don\'t run out. Be on time!', 'At each stop, pick a charger and how full to charge. Check the battery % you need for the next leg. Fast chargers on the highway, slower ones when you stop for a long time.');
+    P.chip(150);
+    // stops: miles to reach this stop from the previous
+    const STOPS = [
+      { name: 'Home', type: 'start' },
+      { name: 'Highway Stop A', mi: 150, opts: ['DC', 'L2'], note: 'Fast chargers and a diner with a Level 2 charger.' },
+      { name: 'Highway Stop B', mi: 140, opts: ['DC', 'L1'], note: 'Fast chargers and a rest area wall outlet.' },
+      { name: 'Hotel', mi: 115, type: 'hotel', opts: ['L2', 'L1'], note: 'Sleep about 10 hours here.', deadline: 16.25 },
+      { name: 'Highway Stop C', mi: 160, opts: ['DC', 'L2'], note: 'Fast chargers and a cafe with Level 2.' },
+      { name: 'Grandma\'s', mi: 130, type: 'end', deadline: 13.5 },
+    ];
+    const MPK_HW = 3.3, RANGE = PACK * MPK_HW, SPEED = 60;
+    const st = { i: 0, soc: 0.9, day: 1, clock: 8, pos: 0, anim: null, log: [], over: false, travel: 0 };
+    if (window.__game) window.__game.trip = st;
+    const S = P.canvas(900, 260, .32);
+    const panel = P.add(`<div class="panel" style="padding:12px;margin-top:12px;text-align:center"></div>`);
+    const clockStr = h => { const hh = Math.floor(h), mm = Math.round((h - hh) * 60); const H = hh + (mm === 60 ? 1 : 0), M = mm % 60; return `${(H + 11) % 12 + 1}:${String(M).padStart(2, '0')} ${H % 24 < 12 ? 'AM' : 'PM'}`; };
+    const needPct = mi => Math.ceil(mi / RANGE * 100);
+    const legHTML = (pct, nx, dl) => `<div class="legBox">${barsArt([{ icon: 'battery', v: pct, label: pct + '%' }, { icon: 'motion', v: needPct(nx.mi), label: 'need ' + needPct(nx.mi) + '%', col: C.orange }])}<div class="say" style="font-size:18px">&#10140; <b>${nx.name}</b> ${nx.mi} mi${dl ? `<br>${icon('clock', 22)} by <b>${clockStr(dl.deadline)}</b>` : ''}</div></div>`;
+    const nextDeadline = () => STOPS.slice(st.i + 1).find(s => s.deadline);
+    function choose() {
+      const s = STOPS[st.i], nx = STOPS[st.i + 1];
+      if (s.type === 'hotel') return hotel();
+      const dl = nextDeadline();
+      const pct = Math.round(st.soc * 100);
+      let h = `<h3>${s.name === 'Home' ? 'Day 1: Leaving home' : s.name} &mdash; ${clockStr(st.clock)}</h3>
+        ${legHTML(pct, nx, dl)}`;
+      if (s.type === 'start') {
+        h += `<div class="row"><button class="btn go" data-go="1">${icon('motion', 34)} Drive!</button></div>`;
+      } else {
+        h += `<div class="bigTiles">`;
+        for (const c of s.opts) for (const tgt of [0.5, 0.8, 1]) {
+          if (tgt <= st.soc + 0.005) continue;
+          const t = timeTo(c, st.soc, tgt);
+          h += `<button class="tile" data-c="${c}" data-t="${tgt}">${icon(CHARGERS[c].icon, 44)}<span>&#10140; <b>${tgt * 100}%</b></span><small>${icon('clock', 18)} ${durStr(t)}</small></button>`;
+        }
+        h += `<button class="tile" data-c="" data-t="0">${icon('motion', 44)}<span><b>Skip</b></span><small>keep driving</small></button></div>`;
+      }
+      panel.innerHTML = h;
+      $$('[data-c]', panel).forEach(b => b.onclick = () => { sfx.tap(); const c = b.dataset.c, tgt = +b.dataset.t; doCharge(c, tgt); });
+      $$('[data-go]', panel).forEach(b => b.onclick = () => { sfx.whoosh(); drive(); });
+    }
+    function doCharge(c, tgt) {
+      if (c) { const t = timeTo(c, st.soc, tgt); st.clock += t; st.soc = tgt; st.log.push(`${STOPS[st.i].name}: ${CHARGERS[c].name} to ${tgt * 100}% (${durStr(t)})`); sfx.zap(); }
+      else st.log.push(`${STOPS[st.i].name}: no charge`);
+      drive();
+    }
+    function hotel() {
+      panel.innerHTML = `<h3>${icon('homes', 34)} Hotel &mdash; ${clockStr(st.clock)}</h3>${legHTML(Math.round(st.soc * 100), STOPS[st.i + 1])}<p style="font-size:20px;margin:4px 0">${icon('moon', 30)} Sleep 10 hours. Pick a plug:</p>
+        <div class="bigTiles" style="max-width:420px;margin:0 auto">${['L2', 'L1'].map(c => `<button class="tile" data-c="${c}">${icon(CHARGERS[c].icon, 56)}<b>${CHARGERS[c].name}</b><small>${CHARGERS[c].sub}</small></button>`).join('')}</div>`;
+      $$('[data-c]', panel).forEach(b => b.onclick = () => {
+        const c = b.dataset.c, s0 = st.soc; st.soc = chargeFor(c, st.soc, 10); sfx.zap();
+        st.log.push(`Hotel: ${CHARGERS[c].name} overnight (${Math.round(s0 * 100)}% → ${Math.round(st.soc * 100)}%)`);
+        st.day = 2; st.clock = 8;
+        toast(`${icon('sun', 30)} Good morning! ${icon(CHARGERS[c].icon, 30)} <b>${Math.round(s0 * 100)}% &#10140; ${Math.round(st.soc * 100)}%</b>`, 2600);
+        choose2();
+      });
+    }
+    function choose2() {
+      // Day 2 starts at the hotel: show it like a stop with only "drive"
+      const nx = STOPS[st.i + 1], dl = nextDeadline();
+      panel.innerHTML = `<h3>${icon('sun', 30)} Day 2 &mdash; ${clockStr(st.clock)}</h3>${legHTML(Math.round(st.soc * 100), nx, dl)}<div class="row"><button class="btn go">${icon('motion', 34)} Drive!</button></div>`;
+      $('button', panel).onclick = () => { sfx.whoosh(); drive(); };
+    }
+    function drive() {
+      const nx = STOPS[st.i + 1];
+      const need = nx.mi / RANGE;
+      panel.innerHTML = `<h3>${icon('motion', 40)} Driving to ${nx.name}…</h3>`;
+      const startSoc = st.soc, startClock = st.clock;
+      const reach = Math.min(1, startSoc / need);
+      st.anim = { k: 0, from: st.i, reach, need, startSoc, startClock, mi: nx.mi };
+    }
+    function arrive() {
+      const a = st.anim; st.anim = null;
+      const nx = STOPS[st.i + 1];
+      if (a.reach < 1) {
+        st.over = true; st.soc = 0;
+        const l1 = st.log.some(x => x.startsWith('Hotel: Level 1'));
+        P.bossLose(`Battery empty, ${Math.round(nx.mi * (1 - a.reach))} mi short!`, `You needed about ${needPct(nx.mi)}%. ${l1 && STOPS[st.i].type === 'hotel' ? 'A regular outlet (Level 1) adds only a little in one night. Level 2 at the hotel would have filled you up.' : 'Check the "need" bar before you leave a stop.'}`, () => runPhase(3));
+        return;
+      }
+      st.i++; st.soc = a.startSoc - a.need; st.clock = a.startClock + nx.mi / SPEED;
+      if (nx.deadline && st.clock > nx.deadline + 0.001) {
+        st.over = true;
+        P.bossLose(`${icon('clock', 30)} Late! Got there at ${clockStr(st.clock)}.`, 'Level 1 and 2 take hours. On the highway, DC fast charging to about 80% is usually quickest, because charging slows near full.', () => runPhase(3));
+        return;
+      }
+      sfx.good();
+      if (nx.type === 'end') {
+        st.over = true;
+        const extra = Math.round(chargeFor('L1', st.soc, 40) * 100);
+        P.bossWin(`${icon('house', 40)} Grandma\'s at <b>${clockStr(st.clock)}</b>! ${icon('lvl3', 34)} highway, ${icon('lvl2', 34)} night, ${icon('lvl1', 34)} long stays.`, `Grandma only has a regular outlet (Level 1), but Pup is staying 2 nights, so it slowly adds up to about ${extra}% for the drive home.`);
+        P.add(`<div class="note"><b>Your trip:</b><br>${st.log.join('<br>')}</div>`);
+        return;
+      }
+      choose();
+    }
+    let rot = 0;
+    P.loop((dt, now) => {
+      if (st.anim) {
+        st.anim.k = Math.min(st.anim.reach, st.anim.k + dt / 2.6);
+        st.soc = st.anim.startSoc - st.anim.need * st.anim.k;
+        st.clock = st.anim.startClock + st.anim.mi * st.anim.k / SPEED;
+        rot += dt * 12;
+        if (st.anim.k >= st.anim.reach) arrive();
+      }
+      draw(now);
+    });
+    function draw(now) {
+      const g = S.g; S.clear(st.day === 1 ? '#bde8fb' : '#ffe1c2');
+      const total = STOPS.reduce((a, s) => a + (s.mi || 0), 0);
+      let acc = 0; const xs = STOPS.map(s => { acc += s.mi || 0; return 50 + acc / total * 800; });
+      g.fillStyle = '#9fe2bf'; g.fillRect(0, 150, 900, 110);
+      g.strokeStyle = INK; g.lineWidth = 3; g.beginPath(); g.moveTo(0, 150); g.lineTo(900, 150); g.stroke();
+      g.fillStyle = '#5c5a6b'; g.fillRect(30, 172, 840, 36); g.strokeRect(30, 172, 840, 36);
+      g.strokeStyle = C.yellow; g.setLineDash([16, 12]); g.beginPath(); g.moveTo(30, 190); g.lineTo(870, 190); g.stroke(); g.setLineDash([]);
+      STOPS.forEach((s, k) => {
+        const x = xs[k];
+        const ic = s.type === 'start' ? 'house' : s.type === 'hotel' ? 'homes' : s.type === 'end' ? 'house' : 'bolt';
+        g.fillStyle = k <= st.i ? '#c7f9e5' : '#fff'; g.strokeStyle = INK; g.lineWidth = 3; ell(g, x, 130, 26, 26); g.fill(); g.stroke();
+        cicon(g, ic, x, 130, 34);
+        btext(g, s.name, x, 230, 14);
+        if (s.mi) btext(g, s.mi + ' mi', (x + xs[k - 1]) / 2, 160, 13, '#335');
+        if (s.deadline) btext(g, 'by ' + clockStr(s.deadline), x, 248, 13, '#d6204a');
+      });
+      let cx = xs[st.i];
+      if (st.anim) cx = lerp(xs[st.i], xs[st.i + 1], st.anim.k);
+      drawCar(g, cx, 200, 0.33, { color: C.blue, rot, blink: (now / 1000) % 4 < .12 });
+      cpanel(g, 14, 12, 300, 72);
+      g.fillStyle = '#e9e2cf'; rr(g, 30, 40, 160, 30, 8); g.fill(); g.lineWidth = 3; g.stroke();
+      g.fillStyle = st.soc > .3 ? C.green : st.soc > .12 ? C.yellow : C.accent; if (st.soc > 0.01) { rr(g, 30, 40, 160 * st.soc, 30, 8); g.fill(); g.stroke(); }
+      ctext(g, Math.round(st.soc * 100) + '%', 110, 56, 20); btext(g, 'BATTERY', 110, 26, 13);
+      ctext(g, `Day ${st.day}`, 250, 34, 20); ctext(g, clockStr(st.clock), 250, 62, 22, C.accent);
+    }
+    choose();
+  },
+  quiz: [
+    { q: 'Which is FASTEST?', a: ['Level 3 DC fast', 'Level 2', 'Level 1', 'All the same'], ic: ['lvl3', 'lvl2', 'lvl1', 'clock'], c: 0, why: '<b>DC fast</b>: hundreds of miles in about 15–30 minutes!', hint: 'Which did you use on the highway?' },
+    { art: acdcArt(), q: 'Level 1 and 2: what turns AC into DC?', a: ['Car\'s onboard charger', 'The tires', 'Power lines', 'Nothing'], ic: ['car', 'motion', 'pylon', 'none'], c: 0, why: 'The car\'s <b>onboard charger</b>!', more: 'Batteries store DC. DC fast chargers do the converting inside the charging station instead.', hint: 'It\'s inside the car.' },
+    { q: 'Why stop fast charging near 80%?', a: ['It slows near full', 'Battery pops at 81%', 'Car can\'t go above 80%', 'Charger shuts off'], ic: ['clock', 'none', 'car', 'plug'], c: 0, why: 'Charging <b>slows down</b> as the battery fills up.', more: 'The last 20% takes a long time. Stopping near 80% and driving on usually gets you there sooner.', hint: 'Remember the curve!' },
+  ],
+};
+/* ================= MISSION 5: Electric vs Gas ================= */
+// energy-flow bars (Sankey-like): parts sum to 100
+function drawFlowBars(g, x, y, w, parts, title, k = 1) {
+  ctext(g, title, x + w / 2, y - 18, 20, INK);
+  let cx = x;
+  const shown = parts.map(p => ({ ...p, w: w * p.v / 100 * k }));
+  g.lineWidth = 3; g.strokeStyle = INK;
+  for (const p of shown) {
+    if (p.w < 0.5) continue;
+    g.fillStyle = p.col; g.fillRect(cx, y, p.w, 44); g.strokeRect(cx, y, p.w, 44);
+    if (p.w > 54) { ctext(g, p.v + '%', cx + p.w / 2, y + 23, 18, INK); }
+    cx += p.w;
+  }
+}
+const M5 = {
+  id: 5, name: 'Electric vs Gas', stop: 'Speedway', icon: 'motor', color: C.accent,
+  badge: 'Fair Judge', badgeText: 'You can compare electric and gas cars fairly — the good and the trade-offs!',
+  challenge(P) {
+    P.talk('Drag race! Who starts faster? Guess, then GO!', 'Pup\'s electric car vs a gas car with about the same power.');
+    const S = P.canvas(880, 300, .4);
+    const ui = P.add(`<div class="row" style="margin-top:12px"><button class="tile gEV" style="min-width:180px">${icon('car', 56)} Electric</button><button class="tile gGAS" style="min-width:180px">${icon('gascar', 56)} Gas</button><button class="btn go goB" disabled>GO! &#9654;</button></div>`);
+    let guess = null, run = false, t = 0, done = false;
+    const ev = { x: 0, v: 0, r: 0 }, gc = { x: 0, v: 0, r: 0 };
+    $('.gEV', ui).onclick = () => { guess = 'ev'; $('.gEV', ui).classList.add('on'); $('.gGAS', ui).classList.remove('on'); $('.goB', ui).disabled = false; sfx.tap(); };
+    $('.gGAS', ui).onclick = () => { guess = 'gas'; $('.gGAS', ui).classList.add('on'); $('.gEV', ui).classList.remove('on'); $('.goB', ui).disabled = false; sfx.tap(); };
+    $('.goB', ui).onclick = () => { if (run) return; run = true; sfx.whoosh(); $$('button', ui).forEach(b => b.disabled = true); };
+    P.loop((dt, now) => {
+      if (run && !done) {
+        t += dt;
+        ev.v += (ev.v < 30 ? 9 : 2) * dt;
+        const rpm = t % 1.0;
+        gc.v += (t < 0.3 ? 2 : (rpm < 0.85 ? 7.5 : 0.5)) * dt;
+        if (Math.random() < 0.3) tone(80 + gc.v * 6, .05, 'sawtooth', .02);
+        ev.x += ev.v * dt; gc.x += gc.v * dt; ev.r += ev.v * dt / 2; gc.r += gc.v * dt / 2;
+        if (t > 3.2) { done = true; result(); }
+      }
+      const g = S.g; S.clear('#bde8fb');
+      g.fillStyle = '#5c5a6b'; g.fillRect(0, 120, 880, 180); g.fillStyle = '#fff'; g.fillRect(0, 205, 880, 6);
+      g.fillStyle = INK; for (let k = 0; k < 10; k++) { g.fillRect(820 + (k % 2) * 14, 120 + k * 18, 14, 18); }
+      ctext(g, 'FINISH', 840, 104, 20, INK);
+      drawCar(g, 120 + ev.x * 9, 196, 0.55, { color: C.blue, rot: ev.r, blink: (now / 1000) % 4 < .12 });
+      drawCar(g, 120 + gc.x * 9, 288, 0.55, { color: C.orange, gas: true, rot: gc.r, pup: false });
+      if (run && !done) { g.fillStyle = 'rgba(160,155,170,.6)'; for (let k = 0; k < 3; k++) ell(g, 120 + gc.x * 9 - 80 - k * 18 - (now / 20 % 18), 274 - k * 4, 10 + k * 3, 8 + k * 2); g.fill(); }
+      btext(g, 'ELECTRIC', 20, 160, 15, '#fff', 'left'); btext(g, 'GAS', 20, 250, 15, '#fff', 'left');
+      cpanel(g, 300, 10, 280, 66);
+      btext(g, `Electric: ${Math.round(ev.v * 2.237)} mph`, 440, 30, 17); btext(g, `Gas: ${Math.round(gc.v * 2.237)} mph`, 440, 56, 17);
+    });
+    function result() {
+      const right = guess === 'ev';
+      right ? (sfx.good(), burst('YOU CALLED IT!', C.green)) : sfx.bad();
+      P.talk(`${right ? 'Right!' : 'Surprise!'} Electric motors give <b>instant</b> push!`, 'Electric motors give full twisting force (torque) right from zero speed. A gas engine has to rev up and shift gears first. Some powerful gas cars are fast too, but EVs are known for quick starts.');
+      P.next();
+    }
+  },
+  discover: {
+    talk: 'What\'s inside each car? Be a fair judge!',
+    cards: [
+      { art: icon('pump', 52) + icon('heat', 52) + icon('smoke', 52), q: 'Gas Engine', a: 'Burns fuel. Many moving parts, oil changes and tailpipe smoke.', more: 'Small explosions push pistons up and down. There are hundreds of moving parts, and exhaust (including CO&#8322;) comes out the tailpipe. Upside: refueling takes about 5 minutes, and gas stations are everywhere.' },
+      { art: icon('magnet', 56) + icon('bolt', 44) + icon('motor', 56), q: 'Electric Motor', a: 'Magnets + electricity. Few parts, quiet, no tailpipe, instant zoom!', more: 'Only a few moving parts and no oil changes. It gives <b>instant torque</b> (twisting force), so it speeds up quickly.' },
+      { art: barsArt([{ icon: 'car', v: 80, label: '70–90%' }, { icon: 'gascar', v: 25, label: '20–30%', col: C.orange }]), q: 'Energy to Wheels', a: 'EVs use most energy to move. Gas cars lose most as <b>heat</b>.', more: 'A gas car turns only about 20–30% of its fuel energy into moving the car. In an EV, very roughly 70–90% of the battery\'s energy ends up moving the car, and regen braking saves some more.' },
+      { art: icon('clock', 46) + icon('pylon', 46) + icon('coal', 46) + icon('panel', 46), q: 'Fair Trade-offs', a: 'EVs charge slower, cost more, need mining. Clean power helps most!', more: 'Charging takes longer than filling a tank. Some places have fewer chargers. Batteries are expensive and need mined materials like lithium. Electricity can come from clean sources (sun, wind, water) or fossil fuels (coal, gas). An EV is cleanest on a clean grid.' },
+    ],
+  },
+  experiment(P) {
+    P.talk('100 energy units each. Where do they go?'); setTimeout(() => cur && demoTap($('.flowB', ui), .5, .5, 2600), 60);
+    const S = P.canvas(880, 380, .48);
+    const ui = P.add(`<div class="panel" style="padding:10px 12px;margin-top:12px;text-align:center">
+      <div class="row"><button class="btn sm yel flowB">${icon('bolt', 34)} GO! &#9654;</button></div>
+      <div class="lbl">${icon('car', 26)} gets power from&#8230;</div>
+      <div class="seg gridSeg"><button data-g="coal">${icon('coal', 30)} Coal</button><button data-g="mix" class="on">${icon('coal', 22)}${icon('panel', 22)} Mix</button><button data-g="clean">${icon('panel', 26)}${icon('wind', 26)} Clean</button></div>
+      <p class="qWhy gridWhy"></p></div>`);
+    const EV = [{ n: 'Moves car', v: 80, col: C.green }, { n: 'Charging loss', v: 10, col: '#ffc6a8' }, { n: 'Motor heat', v: 10, col: C.orange }];
+    const GAS = [{ n: 'Moves car', v: 25, col: C.green }, { n: 'Engine heat', v: 62, col: C.orange }, { n: 'Friction & other', v: 13, col: '#ffc6a8' }];
+    let k = 0, going = false, grid = 'mix';
+    const gridTxt = {
+      coal: ['Coal power makes lots of CO&#8322;. The source matters!', 'On a mostly coal grid, an EV can be about as clean as an efficient gas car, sometimes better or worse.'],
+      mix: ['Average grid: EVs usually pollute less over their life.', 'Studies generally find EVs cause less climate pollution over their lifetime than similar gas cars, even counting battery making.'],
+      clean: ['Sun + wind: the cleanest way to drive an EV!', 'Charging makes very little pollution. Making the car and battery still has an impact.'],
+    };
+    const gridCO2 = { coal: 0.9, mix: 0.5, clean: 0.12 };
+    const gridHTML = k => `<div class="say">${gridTxt[k][0]}</div>${readBtn(gridTxt[k][0])}${moreHTML(gridTxt[k][1])}`;
+    $('.flowB', ui).onclick = () => { k = 0; going = true; sfx.whoosh(); };
+    $$('[data-g]', ui).forEach(b => b.onclick = () => { grid = b.dataset.g; $$('[data-g]', ui).forEach(x => x.classList.toggle('on', x === b)); sfx.blip(); $('.gridWhy', ui).innerHTML = gridHTML(grid); seen.add(grid); if (seen.size >= 2 && k >= 1) P.next(); });
+    const seen = new Set(['mix']);
+    $('.gridWhy', ui).innerHTML = gridHTML('mix');
+    let anim = 0;
+    P.loop(dt => {
+      anim += dt;
+      if (going) { k = Math.min(1, k + dt / 2.2); if (k >= 1) { going = false; sfx.good(); P.talk('EV: mostly <b>motion</b>. Gas: mostly <b>heat</b>! Now try the grids.'); if (seen.size >= 2) P.next(); } }
+      const g = S.g; S.clear('#f3eee2');
+      cicon(g, 'car', 60, 70, 70); cicon(g, 'gascar', 60, 230, 70);
+      drawFlowBars(g, 110, 60, 740, EV, 'ELECTRIC: 100 units', k);
+      drawFlowBars(g, 110, 220, 740, GAS, 'GAS: 100 units', k);
+      if (going) for (let j = 0; j < 14; j++) { const t = ((anim * 0.9 + j / 14) % 1), x = 110 + 740 * k * t; for (const y of [82, 242]) { g.fillStyle = 'rgba(255,224,102,.45)'; ell(g, x, y + Math.sin(j * 7) * 12, 10, 10); g.fill(); g.fillStyle = '#fff6b0'; ell(g, x, y + Math.sin(j * 7) * 12, 4.5, 4.5); g.fill(); } }
+      // legend
+      const leg = (arr, y) => arr.forEach((p, i) => { const x = 110 + i * 250; g.fillStyle = p.col; g.strokeStyle = INK; g.lineWidth = 2; g.fillRect(x, y, 18, 18); g.strokeRect(x, y, 18, 18); btext(g, p.n, x + 24, y + 10, 14, INK, 'left'); });
+      leg(EV, 116); leg(GAS, 276);
+      // pollution meter
+      cpanel(g, 110, 316, 740, 50, '#fff');
+      cicon(g, 'smoke', 150, 341, 36); btext(g, 'EV: 0   Gas: yes', 230, 341, 16, '#d6204a');
+      cicon(g, 'gasplant', 345, 341, 34); btext(g, 'EV power-plant CO₂', 470, 330, 14);
+      g.fillStyle = '#e9e2cf'; rr(g, 380, 344, 180, 14, 6); g.fill(); g.lineWidth = 2; g.stroke();
+      g.fillStyle = grid === 'clean' ? C.green : grid === 'mix' ? C.yellow : C.accent; rr(g, 380, 344, 180 * gridCO2[grid], 14, 6); g.fill(); g.stroke();
+      cicon(g, 'pump', 640, 341, 34); btext(g, 'Gas: burns fuel', 740, 330, 14); btext(g, 'every mile', 740, 352, 14);
+    });
+  },
+  boss(P) {
+    P.talk('<b>BOSS!</b> Electric, gas, or both? Get <b>8</b> right!');
+    P.chip(90, () => { if (!won) P.bossLose(`${icon('clock', 30)} Time! ${score} of 8.`); });
+    const facts = shuffle([
+      ['Has a tailpipe that releases exhaust', 'gas'], ['Needs regular oil changes', 'gas'], ['Refuels in about 5 minutes at a station', 'gas'],
+      ['Loses most of its fuel energy as heat', 'gas'], ['Has hundreds of moving engine parts', 'gas'],
+      ['Gets instant torque for quick starts', 'ev'], ['Can recharge a little with regen braking', 'ev'], ['Usually takes longer to refill (charge)', 'ev'],
+      ['Battery needs mined materials like lithium', 'ev'], ['Is cleanest when the grid uses solar and wind', 'ev'], ['Spins its wheels with magnets and electricity', 'ev'],
+      ['Has tires, brakes and seat belts', 'both'], ['Uses energy that changes form to make motion', 'both'], ['Range goes down in very cold weather', 'both'],
+    ]);
+    let i = 0, score = 0, miss = 0, won = false, lock = false;
+    const box = P.add(`<div class="panel" style="padding:14px;text-align:center"><div class="row"><span class="chip sc">Score: 0 / 8</span></div><p class="qText fact"></p>
+      <div class="row"><button class="btn blue tf" data-a="ev">${icon('car', 36)} Electric</button><button class="btn yel tf" data-a="both">Both</button><button class="btn tf" data-a="gas" style="background:${C.orange};color:${INK}">${icon('gascar', 36)} Gas</button></div><p class="qWhy"></p></div>`);
+    const show = () => { $('.fact', box).innerHTML = facts[i % facts.length][0] + ' ' + readBtn(facts[i % facts.length][0]); $('.fact', box).classList.remove('pop'); void box.offsetWidth; $('.fact', box).classList.add('pop'); };
+    $$('[data-a]', box).forEach(b => b.onclick = e => {
+      if (lock || won) return;
+      const [f, ans] = facts[i % facts.length];
+      const name = { ev: 'electric', gas: 'gas', both: 'both' };
+      if (b.dataset.a === ans) { score++; sfx.good(); yay(e); $('.qWhy', box).innerHTML = `<b style="color:#078a63">Yes!</b>`; }
+      else { miss++; sfx.bad(); oops(e); $('.qWhy', box).innerHTML = `<b style="color:#c25a00">That one's</b> ${icon(ans === 'ev' ? 'car' : ans === 'gas' ? 'gascar' : 'star', 36)} <b>${name[ans]}</b>`; }
+      $('.sc', box).textContent = `Score: ${score} / 8`;
+      i++; lock = true;
+      setTimeout(() => {
+        lock = false;
+        if (score >= 8) { won = true; P.bossWin(`Fair and square! ${miss ? '' : 'Perfect sorting!'}`, 'You can explain both the strengths and the trade-offs of electric cars.'); }
+        else show();
+      }, 900);
+    });
+    show();
+  },
+  quiz: [
+    { q: 'Why do EVs zoom off the line?', a: ['Instant torque', 'Always lighter', 'Bigger engines', 'Sticky tires'], ic: ['motor', 'star', 'gasplant', 'motion'], c: 0, why: 'Electric motors give full twist <b>instantly</b>!', more: 'They deliver torque from zero speed. No revving up or shifting gears.', hint: 'Remember the race!' },
+    { art: icon('gascar', 76), q: 'Most gas-car fuel energy becomes…', a: ['Heat', 'Motion', 'Back to the tank', 'Battery'], ic: ['heat', 'motion', 'pump', 'battery'], c: 0, why: 'Mostly <b>heat</b>! Only about 20–30% moves the car.', hint: 'The big orange bar!' },
+    { q: 'Which is a FAIR EV downside?', a: ['Charging takes longer', 'Max 30 mph', 'Tailpipe smoke', 'Weekly oil changes'], ic: ['clock', 'motion', 'smoke', 'oil'], c: 0, why: 'Even fast charging takes about 15–30 min. Gas: about 5.', more: 'Other fair trade-offs: battery cost, mining for materials, and how clean the electricity is.', hint: 'Fair means honest about downsides.' },
+  ],
+};
+
+/* ================= BONUS MISSION 6: Home Energy Hero ================= */
+const M6 = {
+  id: 6, name: 'Home Energy Hero', stop: 'Pup\'s House', icon: 'house', color: C.orange,
+  badge: 'Energy Hero', badgeText: 'Solar, home battery and EV — you ran a whole smart home!',
+  challenge(P) {
+    P.talk('It\'s 8 PM. Tap the <b>solar panels</b> to charge my car!'); setTimeout(() => cur && demoTap(S.cv, .4, .45, 2600), 60);
+    const S = P.canvas(820, 320, .44);
+    let taps = 0, done = false;
+    P.on(S.cv, 'pointerdown', () => { if (done) return; taps++; sfx.blip(); if (taps >= 3) { done = true; sfx.bad(); burst('ZERO!', C.accent); P.talk('<b>Zero</b> at night! No sun, no solar. We need to <b>store</b> it!'); P.next(); } });
+    P.loop((dt, now) => {
+      const g = S.g; S.clear('#22204a');
+      for (let k = 0; k < 30; k++) { g.fillStyle = '#fff'; ell(g, (k * 137) % 820, (k * 71) % 160, 2, 2); g.fill(); }
+      g.fillStyle = '#ffe9a8'; ell(g, 700, 60, 30, 30); g.fill(); g.fillStyle = '#22204a'; ell(g, 715, 52, 26, 26); g.fill();
+      g.fillStyle = '#3c6a4a'; g.fillRect(0, 270, 820, 50);
+      drawHouseC(g, 330, 270, 3, true);
+      g.save(); g.translate(330, 270); g.scale(3, 3); g.fillStyle = '#3a6ea5'; g.strokeStyle = INK; g.lineWidth = 1.5;
+      g.beginPath(); g.moveTo(-30, -44); g.lineTo(-6, -64); g.lineTo(-2, -60); g.lineTo(-26, -40); g.closePath(); g.fill(); g.stroke(); g.restore();
+      drawCar(g, 610, 290, 0.8, { color: C.blue, plug: true, blink: (now / 1000) % 4 < .12 });
+      cpanel(g, 20, 20, 250, 70);
+      btext(g, 'Solar power now', 145, 40, 16); ctext(g, '0.0 kW', 145, 68, 26, C.accent);
+      ctext(g, done ? '' : `TAP THE PANELS! (${taps}/3)`, 410, 120, 26, '#fff', 'center', 6);
+    });
+  },
+  discover: {
+    talk: 'A smart home is a mini power grid! Tap each card.',
+    cards: [
+      { art: icon('sun', 56) + icon('panel', 60), q: 'Rooftop Solar', a: 'Most power at <b>midday</b>. Zero at night.', more: 'On a sunny day, a home system often makes more than the house needs around noon.' },
+      { art: flowArt(['sun', 'homebatt', 'house'], 50), q: 'Home Battery', a: 'Saves extra sunshine for evening or a power outage.', more: 'A typical home battery holds about 10–15 kWh, much less than an EV pack.' },
+      { art: icon('car', 56) + icon('moon', 44) + icon('sun', 44), q: 'Smart EV Charging', a: 'Charge with sunshine, or at night when the grid is calm.', more: 'Night is less busy, and power is often cheaper then. Many EVs can be set to charge at certain times.' },
+      { art: icon('washer', 50) + icon('dish', 50) + icon('sun', 44), q: 'Shift Your Load', a: 'Run the washer while the sun shines!', more: 'Then you use your own solar power instead of buying electricity at the busy evening peak.' },
+    ],
+  },
+  experiment(P) {
+    P.talk('Slide the sun. Change the weather. Watch the power!');
+    const S = P.canvas(820, 300, .42);
+    const ui = P.add(`<div class="panel" style="padding:10px;margin-top:12px;text-align:center"><div class="lbl">${icon('sun', 26)} <b class="tv"></b></div><input type="range" class="t" min="0" max="24" step="0.25" value="9">
+      <div class="seg wx" style="margin-top:8px"><button data-w="1" class="on">${icon('sun', 30)}</button><button data-w="0.45">${icon('cloud', 30)}</button><button data-w="0.15">${icon('storm', 30)}</button></div><ul class="goals"></ul></div>`);
+    let wx = 1;
+    const goals = [{ t: `${icon('sun', 26)} Find the MOST power`, f: (h, kw) => kw > 6.3 && wx === 1 }, { t: `${icon('moon', 26)} Find ZERO power`, f: (h, kw) => kw === 0 }, { t: `${icon('storm', 26)} Try a storm`, f: () => wx < 0.2 }];
+    const done = new Set();
+    const tIn = $('.t', ui);
+    $$('[data-w]', ui).forEach(b => b.onclick = () => { wx = +b.dataset.w; $$('[data-w]', ui).forEach(x => x.classList.toggle('on', x === b)); sfx.blip(); });
+    const solarKW = h => Math.max(0, 6.5 * Math.sin(Math.PI * (h - 6.5) / 13));
+    P.loop(() => {
+      const h = +tIn.value, kw = +(solarKW(h) * wx).toFixed(1);
+      $('.tv', ui).textContent = `${(Math.floor(h) + 11) % 12 + 1}:${String(Math.round((h % 1) * 60)).padStart(2, '0')} ${h % 24 < 12 ? 'AM' : 'PM'}`;
+      goals.forEach((gl, i) => { if (!done.has(i) && gl.f(h, kw)) { done.add(i); sfx.good(); yay(); $('.goals', ui).innerHTML = goals.map((x, j) => `<li class="${done.has(j) ? 'ok' : ''}">${x.t}</li>`).join(''); if (done.size >= 2) P.next(); } });
+      const g = S.g, sun = solarKW(h) > 0;
+      const sky = sun ? (wx > .5 ? '#8fd9f5' : wx > .2 ? '#a9c2d6' : '#6f7d8f') : '#22204a';
+      S.clear(sky);
+      if (sun) { const a = Math.PI * (h - 6.5) / 13; const sx = 410 - Math.cos(a) * 340, sy = 250 - Math.sin(a) * 210; g.fillStyle = C.yellow; g.strokeStyle = INK; g.lineWidth = 3; ell(g, sx, sy, 28, 28); g.fill(); g.stroke(); }
+      if (wx < 1) { g.fillStyle = wx < .2 ? '#5b6270' : '#e7eef5'; g.strokeStyle = INK; g.lineWidth = 3; for (const [cx, cy] of [[200, 70], [330, 50], [480, 80], [620, 60]]) { ell(g, cx, cy, 60, 26); g.fill(); g.stroke(); } }
+      g.fillStyle = '#7bd389'; g.fillRect(0, 250, 820, 50);
+      drawHouseC(g, 410, 250, 2.6, !sun);
+      cpanel(g, 20, 20, 210, 74);
+      btext(g, 'Solar power', 125, 40, 15); ctext(g, kw.toFixed(1) + ' kW', 125, 70, 30, kw > 0 ? '#078a63' : C.accent);
+      if (!$('.goals', ui).innerHTML) $('.goals', ui).innerHTML = goals.map((x, j) => `<li class="${done.has(j) ? 'ok' : ''}">${x.t}</li>`).join('');
+    });
+  },
+  boss(P) {
+    P.talk('<b>BOSS!</b> Car to <b>70%</b>. Do chores. Avoid <b>peak</b> grid power!', 'By 7 AM tomorrow: fill the car to at least 70% and run the washer and dishwasher. Buy as little grid power as you can during the peak (4 to 9 PM). Tip: chores while sunny, save the home battery for evening, charge the car with sunshine or after 9 PM.');
+    P.chip(110);
+    const S = P.canvas(900, 360, .42);
+    const ui = P.add(`<div class="panel" style="padding:10px 12px;margin-top:12px">
+      <div class="ctrls" style="margin-top:0">
+        <div style="text-align:center"><div class="lbl" style="margin-top:0">${icon('lvl2', 30)} Car</div><div class="seg evm"><button data-e="off" class="on">Off</button><button data-e="sun">${icon('sun', 26)} Sunny</button><button data-e="on">${icon('bolt', 26)} Now</button></div></div>
+        <div style="text-align:center"><div class="lbl" style="margin-top:0">${icon('homebatt', 30)} Battery</div><div class="seg hb"><button data-h="auto" class="on">${icon('moon', 26)} Save</button><button data-h="now">Use now</button></div></div>
+      </div>
+      <div class="row apps" style="margin-top:8px"></div>
+      <div class="row" style="margin-top:6px"><button class="btn sm go startB">Start the day &#9654;</button><button class="btn sm alt ffB" hidden>${icon('moon', 26)} &#9193;</button></div></div>`);
+    const APPS = [{ id: 'wash', n: 'Washer', ic: 'washer', kw: 2, hrs: 1.5 }, { id: 'dish', n: 'Dishwasher', ic: 'dish', kw: 1.5, hrs: 1.5 }];
+    const st = { h: 6, run: false, over: false, ev: 'off', hb: 'auto', car: 0.3, hbE: 4, hbCap: 13.5, peakBuy: 0, buy: 0, solarUsed: 0, apps: {}, ff: false, hist: [] };
+    if (window.__game) window.__game.home = st;
+    APPS.forEach(a => st.apps[a.id] = { left: 0, done: false });
+    const appsEl = $('.apps', ui);
+    const renderApps = () => {
+      appsEl.innerHTML = APPS.map(a => { const s = st.apps[a.id]; return `<button class="tile ${s.left > 0 ? 'on' : s.done ? 'good' : ''}" data-a="${a.id}">${icon(a.ic, 44)} ${a.n} ${s.left > 0 ? '&#8635;' : s.done ? '&#10004;' : '&#9654;'}</button>`; }).join('');
+      $$('[data-a]', appsEl).forEach(b => b.onclick = () => { const s = st.apps[b.dataset.a]; if (!st.run || s.left > 0 || s.done) return; s.left = APPS.find(x => x.id === b.dataset.a).hrs; sfx.zap(); renderApps(); });
+    };
+    renderApps();
+    $$('[data-e]', ui).forEach(b => b.onclick = () => { st.ev = b.dataset.e; $$('[data-e]', ui).forEach(x => x.classList.toggle('on', x === b)); sfx.blip(); });
+    $$('[data-h]', ui).forEach(b => b.onclick = () => { st.hb = b.dataset.h; $$('[data-h]', ui).forEach(x => x.classList.toggle('on', x === b)); sfx.blip(); });
+    const startB = $('.startB', ui), ffB = $('.ffB', ui);
+    startB.onclick = () => { st.run = true; startB.remove(); sfx.whoosh(); };
+    ffB.onclick = () => { st.ff = true; sfx.whoosh(); };
+    const solarKW = h => { const hh = h % 24; return Math.max(0, 7 * Math.sin(Math.PI * (hh - 6.5) / 13)) * (hh > 13 && hh < 14.5 ? 0.4 : 1); };
+    const base = h => { const hh = h % 24; return 0.5 + (hh > 6.5 && hh < 8.5 ? 1 : 0) + (hh > 17 && hh < 22 ? 2.2 : 0); };
+    const peak = h => { const hh = h % 24; return hh >= 16 && hh < 21; };
+    const clockStr = h => { const hh = Math.floor(h % 24), mm = Math.floor((h % 1) * 4) * 15; return `${(hh + 11) % 12 + 1}:${String(mm).padStart(2, '0')} ${hh < 12 ? 'AM' : 'PM'}`; };
+    let flow = { sol: 0, load: 0, ev: 0, hb: 0, grid: 0 };
+    P.loop((dt, now) => {
+      if (st.run && !st.over) {
+        const speed = st.ff ? 6 : st.h >= 22 ? 1.6 : 0.4; // game-hours per real second
+        const dh = dt * speed; st.h += dh;
+        if (st.h >= 22) ffB.hidden = false;
+        const sol = solarKW(st.h);
+        let load = base(st.h);
+        for (const a of APPS) { const s = st.apps[a.id]; if (s.left > 0) { load += a.kw; s.left -= dh; if (s.left <= 0) { s.left = 0; s.done = true; renderApps(); } } }
+        let ev = 0;
+        const surplus = sol - load, room = (st.hbCap - st.hbE) / Math.max(dh, 1e-6);
+        const hbFirst = Math.max(0, Math.min(surplus, 3, room)); // sunny-mode leaves room for the home battery first
+        if (st.car < 1 && st.ev === 'on') ev = 7.7;
+        else if (st.car < 1 && st.ev === 'sun' && surplus - hbFirst > 0.8) ev = Math.min(7.7, surplus - hbFirst);
+        st.car = Math.min(1, st.car + ev * dh / PACK);
+        let need = load + ev - sol, hb = 0;
+        if (need < 0) { const ch = Math.min(-need, 5, (st.hbCap - st.hbE) / dh); hb = -ch; st.hbE += ch * dh; need += ch; need = Math.min(0, need); }
+        else {
+          const allow = st.hb === 'now' || peak(st.h) || st.h % 24 >= 21;
+          if (allow) { const d = Math.min(need, 5, st.hbE / dh); hb = d; st.hbE -= d * dh; need -= d; }
+        }
+        const grid = need; // >0 buy, <0 export
+        if (grid > 0) { st.buy += grid * dh; if (peak(st.h)) st.peakBuy += grid * dh; }
+        st.solarUsed += Math.min(sol, load + ev + Math.max(0, -hb)) * dh;
+        flow = { sol, load, ev, hb, grid };
+        if (!st.hist.length || st.h - st.hist[st.hist.length - 1].h > 0.2) st.hist.push({ h: st.h, sol, use: load + ev, grid });
+        if (st.h >= 31) { st.over = true; finish(); }
+      }
+      draw(now);
+    });
+    function finish() {
+      const carOK = st.car >= 0.695, appsOK = APPS.every(a => st.apps[a.id].done), peakOK = st.peakBuy <= 3;
+      const res = `${icon('car', 30)} ${Math.round(st.car * 100)}% ${carOK ? '&#10004;' : '&#10008;'} &nbsp; ${icon('washer', 30)} ${appsOK ? '&#10004;' : '&#10008;'} &nbsp; ${icon('pylon', 30)} peak ${st.peakBuy.toFixed(1)} kWh ${peakOK ? '&#10004;' : '&#10008;'}`;
+      if (carOK && appsOK && peakOK) P.bossWin(`Energy Hero! ${res}`, 'You used the sun while it was shining, saved energy for the evening peak, and charged the car smartly.');
+      else P.bossLose(res, 'Run chores while the sun is out, save the home battery for the evening, and charge the car with sunshine or after 9 PM (off-peak). Peak goal: 3 kWh or less.');
+    }
+    function draw(now) {
+      const g = S.g, hh = st.h % 24, sun = solarKW(st.h) > 0;
+      S.clear(sun ? '#bde8fb' : '#2b2a4a');
+      g.fillStyle = '#7bd389'; g.fillRect(0, 230, 470, 130);
+      drawHouseC(g, 170, 230, 2.4, !sun || flow.load > 1.5);
+      g.save(); g.translate(170, 230); g.scale(2.4, 2.4); g.fillStyle = '#3a6ea5'; g.strokeStyle = INK; g.lineWidth = 1.5;
+      g.beginPath(); g.moveTo(4, -64); g.lineTo(30, -42); g.lineTo(26, -38); g.lineTo(1, -60); g.closePath(); g.fill(); g.stroke(); g.restore();
+      // home battery box
+      g.fillStyle = '#fff'; g.strokeStyle = INK; g.lineWidth = 3; rr(g, 270, 150, 40, 80, 8); g.fill(); g.stroke();
+      g.fillStyle = C.green; const hf = st.hbE / st.hbCap; if (hf > 0.01) { rr(g, 275, 225 - 70 * hf, 30, 70 * hf, 4); g.fill(); }
+      btext(g, Math.round(hf * 100) + '%', 290, 140, 14, sun ? INK : '#fff');
+      drawCar(g, 400, 260, 0.5, { color: C.blue, plug: flow.ev > 0, blink: (now / 1000) % 4 < .12 });
+      ctext(g, clockStr(st.h), 120, 30, 30, sun ? INK : '#fff');
+      if (peak(st.h)) ctext(g, 'PEAK HOURS', 120, 64, 20, C.accent, 'center', 4);
+      // flows panel
+      cpanel(g, 490, 14, 396, 332);
+      const rows = [['sun', 'Solar making', flow.sol], ['house', 'House using', flow.load], ['car', 'Car charging', flow.ev], ['homebatt', flow.hb < 0 ? 'Battery storing' : 'Battery giving', Math.abs(flow.hb)], ['pylon', flow.grid < 0 ? 'Sending to grid' : 'Buying from grid', Math.abs(flow.grid)]];
+      rows.forEach(([ic, n, v], i) => {
+        const y = 44 + i * 44; cicon(g, ic, 520, y, 34); btext(g, n, 545, y, 16, INK, 'left');
+        g.fillStyle = '#e9e2cf'; rr(g, 700, y - 9, 110, 18, 6); g.fill(); g.lineWidth = 2; g.strokeStyle = INK; g.stroke();
+        g.fillStyle = i === 4 && flow.grid > 0 && peak(st.h) ? C.accent : C.green; if (v > 0.05) { rr(g, 700, y - 9, 110 * Math.min(1, v / 10), 18, 6); g.fill(); g.stroke(); }
+        btext(g, v.toFixed(1), 845, y, 15);
+      });
+      btext(g, 'kW', 845, 22, 12);
+      g.strokeStyle = '#d8d0bd'; g.lineWidth = 2; g.beginPath(); g.moveTo(506, 262); g.lineTo(870, 262); g.stroke();
+      btext(g, `Car battery: ${Math.round(st.car * 100)}% (goal 70%)`, 688, 282, 16, st.car >= .695 ? '#078a63' : INK);
+      btext(g, `Peak grid power bought: ${st.peakBuy.toFixed(1)} kWh`, 688, 308, 16, st.peakBuy > 3 ? '#d6204a' : '#078a63');
+      btext(g, `Ends 7:00 AM tomorrow`, 688, 332, 14, '#555');
+      if (!st.run) ctext(g, 'TAP "START THE DAY"', 240, 120, 26, '#fff', 'center', 6);
+    }
+  },
+  quiz: [
+    { q: 'When do panels make the MOST power?', a: ['Sunny midday', 'Midnight', 'Stormy sunrise', 'Only in winter'], ic: ['sun', 'moon', 'storm', 'snow'], c: 0, why: 'The sun is highest at <b>midday</b>!', hint: 'When is the sun highest?' },
+    { art: icon('homebatt', 72), q: 'What does a home battery do?', a: ['Saves solar for later', 'Makes energy from nothing', 'Charges the panels', 'Burns gas'], ic: ['homebatt', 'star', 'panel', 'gasplant'], c: 0, why: 'It <b>stores</b> energy for later. It can\'t make energy!', hint: 'Remember the big rule from Mission 1.' },
+    { art: icon('washer', 72), q: 'Best time to run the washer?', a: ['When sunny', '6 PM peak', 'Never matters', 'In a storm'], ic: ['sun', 'clock', 'none', 'storm'], c: 0, why: 'Use your own <b>sunshine</b> power!', hint: 'When are panels working?' },
+  ],
+};
+
+/* ================= boot ================= */
+const MISSIONS = [M1, M2, M3, M4, M5, M6];
+syncMute();
+$$('.muteBtn').forEach(b => b.onclick = () => { save.mute = !save.mute; persist(); syncMute(); if (!save.mute) { initAudio(); sfx.blip(); } });
+$('#badgesBtn').onclick = () => { sfx.tap(); showBadges(); };
+$('#toMap').onclick = () => { sfx.tap(); backToMap(); };
+$('#ov').addEventListener('click', e => { if (e.target.id === 'ov' && !cur) hideOverlay(); });
+let rT = 0;
+window.addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(() => { if (!$('#title').hidden) drawMap(); }, 120); });
+renderTitle();
+showScreen('title');
+// test hook
+window.__game = {
+  open: openMission, phase: i => runPhase(i), map: backToMap, save: () => save,
+  unlockAll() { MISSIONS.forEach(m => save.done[m.id] = true); persist(); renderTitle(); },
+  reset() { save = { done: {}, stars: {}, mute: save.mute }; persist(); renderTitle(); },
+  cur: () => cur, bossWin: () => cur && (cur.bossWon = true),
+};
+</script>
+</body>
+</html>
