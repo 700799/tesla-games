@@ -2821,21 +2821,24 @@ genRooms = function (R_, th) {
     // anchors: a window with something moving outside, a clock/sign/shirt, one animated floor object and three countables
     const themeAnchors = (th.anchors || []);
     for (const f of th.fixed || []) { const o = mkObj(f.t, f.x, f.cy + f.s / 2, f.s); o.noMove = 1; Lr.push(o); }
-    const anchors = th.anchorSet ? th.anchorSet.slice() : [['window', 'wall', .13, .155], [pick(['wclock', 'shirt', 'arrowsign']), 'wall', .1, .12], [pick(MOTION_FLOOR), 'floor', .1, .12], ...shuffle(COUNTABLE_FLOOR.slice()).slice(0, 3).map(t => [t, 'floor', .095, .12]), ...themeAnchors];
-    for (const [t, want, a, b] of anchors) place(t, wallS.length || want !== 'wall' ? want : 'floor', a, b);
+    const VK = th.key && PROPS['vista_' + th.key] ? 'vista_' + th.key : null;
+    const anchors = th.anchorSet ? th.anchorSet.slice() : [(VK ? [VK, 'wall', .16, .19] : ['window', 'wall', .13, .155]), [pick(['wclock', 'shirt', 'arrowsign']), 'wall', .1, .12], [pick(MOTION_FLOOR), 'floor', .1, .12], ...shuffle(COUNTABLE_FLOOR.slice()).slice(0, 3).map(t => [t, 'floor', .095, .12]), ...themeAnchors];
+    if (VK) { if (th.anchorSet) anchors.unshift([VK, 'wall', .16, .19]); if (Math.random() < .45) anchors.splice(1, 0, [VK, 'wall', .15, .17]); }
+    for (const [t, want, a, b] of anchors) { const ok = place(t, wallS.length || want !== 'wall' ? want : 'floor', a, b); if (!ok && t === VK && !Lr.some(o => o.t === VK)) place(VK, 'wall', .125, .145) || place(VK, 'wall', .11, .125); }
+    if (VK && !Lr.some(o => o.t === VK)) place(VK, 'wall', .12, .14) || place(VK, 'wall', .1, .12);
     for (let i = Lr.length; i < R_.objs; i++) {
       for (let tr = 0; tr < 60; tr++) { const sf = pickSurf(); let t = pickType(th, sf, Math.random() < .25); if (Math.random() < .14) t = sf.wall ? pick(CODE_WALL.concat(th.extraWall || [])) : pick(CODE_FLOOR.concat(th.extraFloor || [])); const s = rand(sf.smin, sf.smax), p = placeOn(sf, s), o = mkObj(t, p.x, p.by, s); if (PROPS[t].pin) continue; if (fits(o, Lr)) { Lr.push(o); break; } }
     }
     if (Lr.length < Math.min(R_.objs, 14)) { genRooms.lastFail = 'place' + Lr.length; continue; }
     const Rr = Lr.map(o => JSON.parse(JSON.stringify(o))), diffs = [], used = new Set();
     const N = R_.N; const pool = ['swap', 'count', 'orient', 'color', 'motion', 'swap', 'count', 'orient', 'motion']; if (Math.random() < .3) pool.push('missing');
-    let kinds = ['swap', 'count', 'motion']; while (kinds.length < N) { const k = pick(pool); if (k === 'missing' && kinds.includes('missing')) continue; kinds.push(k); } kinds = shuffle(kinds);
+    let kinds = ['swap', 'count', 'motion']; if (Math.random() < .6) kinds.push('motion'); while (kinds.length < N) { const k = pick(pool); if (k === 'missing' && kinds.includes('missing')) continue; kinds.push(k); } kinds = shuffle(kinds);
     const ctr = o => ({ x: o.x, y: o.by - o.s / 2 });
     const farFromDiffs = (x, y) => diffs.every(d => [d.L, d.R, d.L2, d.R2].filter(Boolean).every(p => Math.hypot(p.x - x, p.y - y) > .14));
     const cand = () => shuffle(Rr.map((o, i) => i)).filter(i => !used.has(i) && !Rr[i].pin && !(Rr[i].noMove && Math.random() < .3) && Rr[i].s >= MINS && farFromDiffs(Rr[i].x, Rr[i].by - Rr[i].s / 2));
-    const push = (kind, i, extra = {}) => { used.add(i); const o = Rr[i], a = Lr[i]; diffs.push({ kind, iL: i, iR: i, L: ctr(a), R: ctr(o), r: Math.max(.065, Math.max(o.s, a.s) * .62), ...extra }); return true; };
+    const push = (kind, i, extra = {}) => { used.add(i); const o = Rr[i], a = Lr[i]; diffs.push({ kind, iL: i, iR: i, L: ctr(a), R: ctr(o), r: Math.max(.065, Math.max(o.s, a.s) * (PROPS[o.t].vista ? .72 : .62)), ...extra }); return true; };
     const tryKind = kind => {
-      const C = cand();
+      const C = cand(); if (kind === 'motion') C.sort((a, b) => (PROPS[Rr[b].t].vista ? 1 : 0) - (PROPS[Rr[a].t].vista ? 1 : 0));
       if (kind === 'swap') {
         // either a shelf/stack whose order is shuffled, or two neighbours that traded places
         if (Math.random() < .4) for (const i of C) { const P_ = PROPS[Rr[i].t]; if (P_.v && P_.v.rearr) { P_.v.rearr(Rr[i]); return push('swap', i, { what: 'order' }); } }
@@ -2862,7 +2865,7 @@ genRooms = function (R_, th) {
     for (const kind of kinds) { if (!tryKind(kind)) { let alt = false; for (const fb of shuffle(['count', 'orient', 'swap', 'motion', 'color'])) { if (fb !== kind && tryKind(fb)) { alt = true; break; } } if (!alt) { ok = false; genRooms.lastFail = kind; break; } } }
     if (!ok || diffs.length !== N) continue;
     // fairness: each difference really changes what its kind says, objects stay ≥ the minimum size, at most one missing
-    const fair = diffs.every(d => { const a = Lr[d.iL], b = Rr[d.iR], w = diffWhat(a, b); if (sameLook(a, b) || !KIND_OK[d.kind](w)) return false; if (d.j != null && (Lr[d.j].t === Lr[d.iL].t || sameLook(Lr[d.j], Rr[d.j]))) return false; return b.s >= MINS && a.s >= MINS; }) && diffs.filter(d => d.kind === 'missing').length <= 1
+    const fair = diffs.every(d => { const a = Lr[d.iL], b = Rr[d.iR], w = diffWhat(a, b); if (sameLook(a, b) || !KIND_OK[d.kind](w)) return false; if (PROPS[b.t].vista && typeof vistaVisible === 'function' && !vistaVisible(a, b)) return false; if (d.j != null && (Lr[d.j].t === Lr[d.iL].t || sameLook(Lr[d.j], Rr[d.j]))) return false; return b.s >= MINS && a.s >= MINS; }) && diffs.filter(d => d.kind === 'missing').length <= 1
       && Rr.every((o, i) => used.has(i) || sameLook(o, Lr[i]));
     if (!fair) { genRooms.lastFail = 'fair'; continue; }
     Lr.forEach((o, i) => { if (PROPS[o.t].motion) { o.live = Rr[i].live = 1; o.ph = Rr[i].ph = i * 1.3; } });
@@ -3491,7 +3494,7 @@ function playStepKoto(s, w, spb) {
   const n = KOTO[bar][st]; if (n) pluck(mf(n + tr), spb * 3.2, .075, w);
   if (st === 0 && bar % 4 === 0) { pluck(mf(root + 12), spb * 6, .05, w); pluck(mf(root + 19), spb * 6, .035, w + .03); }
 }
-playStep = (function (base) { return function (s, w, spb) { if (P && P.R && P.R.music === 'koto' && (G.scene === 'intro' || G.scene === 'play' || G.scene === 'win' || G.scene === 'lose')) return playStepKoto(s, w, spb); return base(s, w, spb); }; })(playStep);
+const playStepKpop = playStep;
 
 /* ===================== SAVE MIGRATION: progress follows the raid NAME, not its index ===================== */
 function migrateSave() {
@@ -3508,6 +3511,184 @@ function migrateSave() {
 }
 migrateSave();
 const _loadSaveM = loadSave; loadSave = function () { delete SAVE.ids; delete SAVE.gone; _loadSaveM(); migrateSave(); };
+</script>
+<script>
+'use strict';
+/* ---- r8.js: window scenes + music library ---- */
+/* ===================== WINDOWS TO THE OUTSIDE: themed animated scenes (identical in both rooms unless they ARE the difference) ===================== */
+for (const k in THEMES) THEMES[k].key = k;
+const VCOL = ['#ff4d6d', '#4cc9f0', '#ffd23f', '#06d6a0', '#9b5de5', '#ff9f1c', '#ff8fd8', '#ffffff'];
+const lp = (t, spd, off = 0, span = 1.05) => wrap01(t * spd + off) * span - span / 2; // looping x across the view (period = 1/spd ≤ 4 s)
+function vSky(c, a, b) { const g = c.createLinearGradient(0, -.34, 0, .34); g.addColorStop(0, a); g.addColorStop(1, b); c.fillStyle = g; c.fillRect(-.5, -.4, 1, .8); }
+function vGround(c, y, col) { c.fillStyle = col; c.fillRect(-.5, y, 1, .5); }
+function vCar(c, kind, col) { c.lineWidth = .014; if (kind === 'bus') { R(c, -.13, -.075, .26, .075, .015); F(c, '#ffd23f'); for (let k = 0; k < 4; k++) { R(c, -.11 + k * .055, -.065, .04, .028, .006); F(c, '#bfe9ff'); } for (const x of [-.08, .08]) { E(c, x, 0, .02, .02); F(c, INK); } }
+  else if (kind === 'bike') { for (const x of [-.04, .04]) { c.beginPath(); c.arc(x, -.015, .02, 0, TAU); c.stroke(); } L(c, -.04, -.015, 0, -.05); L(c, 0, -.05, .04, -.015); E(c, 0, -.075, .012, .012); F(c, '#f2c8a0'); R(c, -.012, -.065, .024, .022, .005); F(c, col); }
+  else { R(c, -.075, -.045, .15, .035, .012); F(c, col); R(c, -.04, -.07, .08, .03, .01); F(c, '#bfe9ff'); for (const x of [-.045, .045]) { E(c, x, -.008, .016, .016); F(c, INK); } } }
+function vBird(c, x, y, s, t, k) { const f = Math.sin(t * 12 + k) * s * .6; c.beginPath(); c.moveTo(x - s, y - f); c.quadraticCurveTo(x - s * .4, y - s * .4, x, y); c.quadraticCurveTo(x + s * .4, y - s * .4, x + s, y - f); c.stroke(); }
+function vKid(c, x, y, col, s = 1) { c.lineWidth = .012; R(c, x - .018 * s, y - .05 * s, .036 * s, .05 * s, .008); F(c, col); E(c, x, y - .068 * s, .02 * s, .02 * s); F(c, '#f2c8a0'); }
+const VSCENE = {
+  traffic: { init: sp => { sp.dir = pick([-1, 1]); sp.kinds = shuffle(['car', 'bus', 'bike', 'car']).slice(0, ri(2, 3)); sp.c = ri(0, 6); },
+    mods: [sp => { sp.dir *= -1; }, sp => { sp.kinds = sp.kinds.length > 2 ? sp.kinds.slice(0, 2) : sp.kinds.concat(['car']); }, sp => { const i = ri(0, sp.kinds.length - 1); sp.kinds = sp.kinds.slice(); sp.kinds[i] = sp.kinds[i] === 'bus' ? 'car' : 'bus'; }],
+    draw(c, sp, t) { vSky(c, '#8fd6ff', '#e6f7ff'); c.fillStyle = '#9aa7c7'; for (const [x, h] of [[-.38, .3], [-.22, .2], [-.05, .34], [.14, .24], [.3, .32]]) c.fillRect(x, .1 - h, .13, h); vGround(c, .1, '#6c757d'); c.fillStyle = '#fff'; for (let x = -.4; x < .4; x += .12) c.fillRect(x, .2, .06, .008);
+      sp.kinds.forEach((k, i) => { c.save(); c.translate(lp(t, .27 * sp.dir, i / sp.kinds.length), .19); c.scale(sp.dir * 1.2, 1.2); vCar(c, k, VCOL[(sp.c + i) % 7]); c.restore(); });
+      for (let i = 0; i < 2; i++) { c.save(); c.translate(lp(t, -.27 * sp.dir, i * .5 + .25), .3); c.scale(-sp.dir, 1); vCar(c, i ? 'bike' : 'car', VCOL[(sp.c + 3 + i) % 7]); c.restore(); } } },
+  train: { init: sp => { sp.dir = pick([-1, 1]); sp.n = ri(2, 4); sp.c = ri(0, 6); }, mods: [sp => { sp.n = bump(sp.n, 2, 5); }, sp => { sp.dir *= -1; }, sp => { sp.c = (sp.c + 3) % 7; }],
+    draw(c, sp, t) { vSky(c, '#9be7ff', '#f0fbff'); c.fillStyle = '#8bd346'; E(c, -.25, .12, .35, .14); c.fill(); E(c, .25, .14, .3, .12); c.fill(); vGround(c, .16, '#6b8f5a'); c.lineWidth = .012; L(c, -.5, .24, .5, .24);
+      const len = .16 * (sp.n + 1), x0 = wrap01(t * .26) * (1.0 + len) - .5 - len; c.save(); if (sp.dir < 0) c.scale(-1, 1); for (let k = 0; k <= sp.n; k++) { const x = x0 + (sp.n - k) * .16; if (k === 0) { R(c, x, .12, .15, .1, .02); F(c, VCOL[sp.c]); R(c, x + .1, .06, .04, .06, .01); F(c, INK); R(c, x + .02, .135, .05, .035, .008); F(c, '#bfe9ff'); } else { R(c, x, .14, .14, .08, .015); F(c, k % 2 ? '#ffd23f' : '#4cc9f0'); R(c, x + .03, .155, .08, .03, .006); F(c, '#bfe9ff'); } for (const wx of [.03, .11]) { E(c, x + wx, .23, .014, .014); F(c, INK); } } c.restore(); } },
+  balloons: { init: sp => { sp.n = ri(1, 3); sp.dir = pick([-1, 1]); sp.cols = shuffle([0, 1, 2, 4, 5, 6]).slice(0, 4); }, mods: [sp => { sp.n = bump(sp.n, 1, 3); }, sp => { sp.dir *= -1; }, sp => { sp.cols = sp.cols.slice(); sp.cols[0] = (sp.cols[0] + 3) % 7; }],
+    draw(c, sp, t) { vSky(c, '#7fd3ff', '#fff3d6'); c.fillStyle = 'rgba(255,255,255,.85)'; E(c, lp(t, .05), -.2, .1, .04); c.fill(); vGround(c, .24, '#8bd346');
+      for (let i = 0; i < sp.n; i++) { const x = lp(t, .25 * sp.dir, i / sp.n, 1.05), y = -.08 + i * .07 + Math.sin(t * 2 + i) * .02; c.lineWidth = .012; L(c, x - .05, y + .05, x - .025, y + .11); L(c, x + .05, y + .05, x + .025, y + .11); E(c, x, y, .07, .08); F(c, VCOL[sp.cols[i]]); c.fillStyle = 'rgba(255,255,255,.5)'; c.fillRect(x - .012, y - .08, .024, .16); R(c, x - .03, y + .11, .06, .04, .01); F(c, '#c98a4b'); } } },
+  plane: { init: sp => { sp.dir = pick([-1, 1]); sp.c = ri(0, 6); }, mods: [sp => { sp.dir *= -1; }, sp => { sp.c = (sp.c + 2) % 7; }],
+    draw(c, sp, t) { vSky(c, '#6cc6ff', '#dff6ff'); vGround(c, .26, '#8bd346'); for (let k = 0; k < 2; k++) { const x = lp(t, .3 * sp.dir, k * .5, 1.2), y = -.12 + k * .16; c.save(); c.translate(x, y); c.scale(sp.dir, 1); c.lineWidth = .012; L(c, -.06, 0, -.1, 0); R(c, -.36, -.035, .26, .07, .01); F(c, VCOL[(sp.c + k * 2) % 7]); c.fillStyle = '#fff'; for (let j = 0; j < 3; j++) { E(c, -.3 + j * .08, 0, .018, .018); c.fill(); } E(c, .02, 0, .08, .025); F(c, '#fff'); PL(c, [0, 0, -.03, -.06, .03, 0]); F(c, '#adb5bd'); c.restore(); } } },
+  birdsV: { init: sp => { sp.n = pick([3, 5]); sp.dir = pick([-1, 1]); }, mods: [sp => { sp.n = sp.n === 3 ? 5 : sp.n === 5 ? pick([3, 7]) : 5; }, sp => { sp.dir *= -1; }],
+    draw(c, sp, t) { vSky(c, '#ffb38a', '#ffe8cc'); E(c, .22, .14, .1, .1); FO(c, '#ff9f1c'); vGround(c, .2, '#5a8f4e'); c.lineWidth = .012; for (let g = 0; g < 2; g++) { const x0 = lp(t, .25 * sp.dir, g * .5, 1.1), y0 = -.14 + g * .12; for (let i = 0; i < sp.n; i++) { const r = Math.ceil(i / 2), sd = i % 2 ? 1 : -1; vBird(c, x0 - sp.dir * r * .07, y0 + sd * r * .05, .032, t, i); } } } },
+  seesaw: { init: sp => { sp.pp = pick([0, Math.PI]); sp.c = ri(0, 6); }, mods: [sp => { sp.pp = sp.pp ? 0 : Math.PI; }, sp => { sp.c = (sp.c + 3) % 7; }],
+    draw(c, sp, t) { vSky(c, '#8fd6ff', '#e6f7ff'); E(c, -.3, -.2, .06, .06); FO(c, '#ffd23f'); vGround(c, .14, '#8bd346'); const a = Math.sin(t * Math.PI + sp.pp) * .28; c.lineWidth = .014; PL(c, [-.03, .26, .03, .26, 0, .2]); F(c, '#e63946'); c.save(); c.translate(0, .2); c.rotate(a); R(c, -.3, -.012, .6, .024, .008); F(c, '#ffd23f'); vKid(c, -.26, -.012, VCOL[sp.c]); vKid(c, .26, -.012, VCOL[(sp.c + 2) % 7]); c.restore(); c.save(); c.translate(.32, .2); R(c, -.01, -.16, .02, .16, .005); F(c, '#8a5a2b'); E(c, 0, -.2, .07, .07); F(c, '#2f9e44'); c.restore(); } },
+  dogball: { init: sp => { sp.dir = pick([-1, 1]); sp.c = pick([0, 1, 2]); }, mods: [sp => { sp.dir *= -1; }, sp => { sp.c = (sp.c + 1) % 3; }],
+    draw(c, sp, t) { vSky(c, '#8fd6ff', '#e6f7ff'); vGround(c, .1, '#8bd346'); for (const x of [-.35, .3]) { R(c, x - .01, -.05, .02, .15, .005); FO(c, '#8a5a2b'); E(c, x, -.1, .07, .07); FO(c, '#2f9e44'); } const x = lp(t, .3 * sp.dir, 0, 1.1); c.save(); c.translate(x, 0); c.scale(sp.dir, 1); c.translate(0, .2); c.scale(1.3, 1.3); c.translate(0, -.2); c.lineWidth = .012; const by = .26 - Math.abs(Math.sin(t * 7)) * .1; E(c, .12, by, .025, .025); F(c, ['#e63946', '#4cc9f0', '#ffd23f'][sp.c]); const hop = Math.abs(Math.sin(t * 10)) * .02; c.translate(0, -hop); E(c, -.02, .23, .06, .03); F(c, '#c98a4b'); E(c, .04, .2, .03, .025); F(c, '#c98a4b'); E(c, .03, .19, .01, .02); FO(c, '#8a5a2b'); for (const lx of [-.06, -.03, .01, .03]) L(c, lx, .25, lx + Math.sin(t * 20 + lx * 50) * .01, .28); L(c, -.08, .22, -.11, .2 + Math.sin(t * 15) * .02); c.restore(); } },
+  squirrel: { init: sp => { sp.dir = pick([-1, 1]); sp.n = ri(1, 3); }, mods: [sp => { sp.dir *= -1; }, sp => { sp.n = bump(sp.n, 1, 3); }],
+    draw(c, sp, t) { vSky(c, '#b9ecff', '#f0fbff'); vGround(c, .24, '#8bd346'); c.lineWidth = .014; R(c, -.06, -.34, .12, .62, .02); F(c, '#8a5a2b'); E(c, -.22, -.2, .2, .1); F(c, '#2f9e44'); E(c, .24, -.24, .2, .1); F(c, '#37b24d'); L(c, .06, -.12, .28, -.14); for (let i = 0; i < sp.n; i++) { E(c, .14 + i * .05, -.11, .018, .022); F(c, '#a0703c'); }
+      const y = .22 - wrap01(t * .28 * sp.dir) * .5; c.save(); c.translate(.07, y); c.scale(1, sp.dir); E(c, 0, 0, .025, .04); F(c, '#c8691c'); E(c, 0, -.045, .02, .018); F(c, '#c8691c'); c.beginPath(); c.moveTo(0, .03); c.quadraticCurveTo(.07, .04, .05, -.03); c.lineWidth = .02; c.strokeStyle = '#c8691c'; c.stroke(); c.restore(); c.strokeStyle = INK; } },
+  fireworks: { init: sp => { sp.cols = shuffle([0, 1, 2, 3, 4, 6]).slice(0, 3); sp.n = ri(2, 3); }, mods: [sp => { sp.cols = sp.cols.slice(); sp.cols[0] = (sp.cols[0] + 3) % 7; }, sp => { sp.n = sp.n === 2 ? 3 : 2; }],
+    draw(c, sp, t) { vSky(c, '#0d1b3e', '#2b2d6e'); c.fillStyle = '#1d1b26'; for (const [x, h] of [[-.4, .14], [-.2, .22], [0, .12], [.18, .2], [.32, .16]]) c.fillRect(x, .34 - h, .16, h); c.fillStyle = '#ffe27a'; for (const [x, y] of [[-.35, .26], [-.14, .2], [.22, .22]]) c.fillRect(x, y, .02, .02);
+      for (let i = 0; i < sp.n; i++) { const k = wrap01(t * .5 + i / sp.n), x = -.25 + i * .25, y = -.1 - (i % 2) * .06, col = VCOL[sp.cols[i]]; c.save(); if (k < .3) { c.strokeStyle = col; c.lineWidth = .01; L(c, x, .3, x, lerp(.3, y, k / .3)); } else { const r = (k - .3) / .7 * .14; c.globalAlpha = 1 - (k - .3) / .7 * .8; c.fillStyle = col; for (let j = 0; j < 12; j++) { const a = j / 12 * TAU; E(c, x + Math.cos(a) * r, y + Math.sin(a) * r, .012, .012); c.fill(); } } c.restore(); } } },
+  weather: { init: sp => { sp.v = pick(['rain', 'snow']); sp.dir = pick([-1, 1]); }, mods: [sp => { sp.v = sp.v === 'rain' ? 'snow' : 'rain'; }],
+    draw(c, sp, t) { const snow = sp.v === 'snow'; vSky(c, snow ? '#c9d6e3' : '#8d99ae', snow ? '#f1f5f9' : '#c9d6e3'); vGround(c, .18, snow ? '#ffffff' : '#6b8f5a'); c.lineWidth = .012; R(c, -.3, .02, .18, .16, .01); F(c, '#e9c46a'); PL(c, [-.32, .02, -.21, -.08, -.1, .02]); F(c, '#c0392b'); R(c, .12, .06, .02, .12, .005); F(c, '#8a5a2b'); E(c, .13, .02, .08, .07); F(c, snow ? '#e9f5ff' : '#2f9e44');
+      c.save(); c.strokeStyle = snow ? '#fff' : '#4a7bd8'; c.fillStyle = '#fff'; c.lineWidth = .008; for (let i = 0; i < 22; i++) { const x = ((i * .173) % 1) - .5, k = wrap01(t * (snow ? .3 : .9) + i * .29), y = k * .7 - .35, dx = sp.dir * k * (snow ? .06 : .03) + (snow ? Math.sin(t * 2 + i) * .02 : 0); if (snow) { E(c, x + dx, y, .01, .01); c.fill(); } else L(c, x + dx, y, x + dx + sp.dir * .015, y + .05); } c.restore(); } },
+  rainbow: { init: sp => { sp.n = pick([1, 2]); sp.dir = pick([-1, 1]); }, mods: [sp => { sp.n = sp.n === 1 ? 2 : 1; }, sp => { sp.dir *= -1; }],
+    draw(c, sp, t) { vSky(c, '#7fd3ff', '#e6f7ff'); const a = .55 + .45 * Math.sin(t * Math.PI / 2); c.save(); c.globalAlpha = a; c.lineWidth = .025; for (let r = 0; r < sp.n; r++) ['#ff4d6d', '#ff9f1c', '#ffd23f', '#06d6a0', '#4cc9f0', '#9b5de5'].forEach((col, j) => { c.strokeStyle = col; c.beginPath(); c.arc(0, .3, .3 + r * .18 + j * .022, Math.PI, 0); c.stroke(); }); c.restore(); vGround(c, .26, '#8bd346');
+      c.fillStyle = '#fff'; for (let i = 0; i < 2; i++) { const x = lp(t, .25 * sp.dir, i * .5); E(c, x, -.2 + i * .1, .08, .035); c.fill(); E(c, x + .05, -.22 + i * .1, .05, .035); c.fill(); } } },
+  sea: { init: sp => { sp.n = ri(1, 2); sp.dir = pick([-1, 1]); }, mods: [sp => { sp.n = sp.n === 1 ? 2 : 1; }, sp => { sp.dir *= -1; }],
+    draw(c, sp, t) { vSky(c, '#9be7ff', '#e6f7ff'); vGround(c, .0, '#2a7fd4'); c.strokeStyle = '#bfe9ff'; c.lineWidth = .01; for (let y = .06; y < .34; y += .07) { c.beginPath(); for (let x = -.5; x <= .5; x += .05) c.lineTo(x, y + Math.sin(x * 20 + t * 3 + y * 30) * .01); c.stroke(); } c.strokeStyle = INK; c.lineWidth = .012;
+      const bx = lp(t, .25 * sp.dir, 0, 1.05); c.save(); c.translate(bx, .02); c.scale(sp.dir * 1.3, 1.3); PL(c, [-.1, 0, .1, 0, .07, .04, -.07, .04]); F(c, '#c0392b'); L(c, 0, 0, 0, -.12); PL(c, [0, -.12, .07, -.02, 0, -.02]); F(c, '#fff'); c.restore();
+      for (let i = 0; i < sp.n; i++) { const x = -.25 + i * .32, k = wrap01(t * .5 + i * .5); E(c, x, .16, .09, .04); F(c, '#3a5a8c'); E(c, x + .07, .15, .01, .01); FO(c, INK); if (k < .5) { c.strokeStyle = '#bfe9ff'; c.lineWidth = .012; for (const d of [-1, 0, 1]) L(c, x - .03, .12, x - .03 + d * .04 * k * 2, .12 - k * .2); c.strokeStyle = INK; } } } },
+  jungle: { init: sp => { sp.n = ri(1, 3); sp.pp = pick([0, Math.PI]); }, mods: [sp => { sp.n = bump(sp.n, 1, 3); }, sp => { sp.pp = sp.pp ? 0 : Math.PI; }],
+    draw(c, sp, t) { vSky(c, '#8fd6a0', '#d8f3dc'); c.fillStyle = '#2f9e44'; for (let i = 0; i < 5; i++) { E(c, -.4 + i * .2, -.32, .14, .08); c.fill(); } vGround(c, .24, '#37b24d'); c.lineWidth = .012;
+      for (let i = 0; i < sp.n; i++) { const px = -.25 + i * .25, a = Math.sin(t * Math.PI + sp.pp + i * 1.1) * .7, L2 = .36, mx = px + Math.sin(a) * L2, my = -.3 + Math.cos(a) * L2; c.strokeStyle = '#2f9e44'; c.lineWidth = .012; L(c, px, -.3, mx, my); c.strokeStyle = INK; E(c, mx, my + .04, .03, .035); F(c, '#8a5a2b'); E(c, mx, my, .025, .022); F(c, '#8a5a2b'); E(c, mx, my + .005, .015, .012); FO(c, '#f2c8a0'); } } },
+  moonwalk: { init: sp => { sp.n = ri(1, 2); sp.dir = pick([-1, 1]); }, mods: [sp => { sp.n = sp.n === 1 ? 2 : 1; }, sp => { sp.dir *= -1; }],
+    draw(c, sp, t) { c.fillStyle = '#05060f'; c.fillRect(-.5, -.4, 1, .8); c.fillStyle = '#fff'; for (let i = 0; i < 18; i++) c.fillRect(((i * .37) % 1) - .5, ((i * .61) % .5) - .35, .006, .006); E(c, .28, -.2, .08, .08); FO(c, '#3a86ff'); E(c, .26, -.22, .04, .03); FO(c, '#8bd346'); vGround(c, .12, '#adb5bd'); c.lineWidth = .012;
+      for (let i = 0; i < sp.n; i++) { const x = -.28 + i * .22, y = .22 - Math.abs(Math.sin(t * Math.PI + i)) * .14; R(c, x - .045, y - .1, .09, .1, .02); F(c, '#fff'); E(c, x, y - .135, .045, .045); F(c, '#fff'); E(c, x + .015, y - .135, .028, .022); FO(c, '#1d2b4f'); }
+      const rx = lp(t, .25 * sp.dir, .3, 1.05); c.save(); c.translate(rx, .26); c.scale(sp.dir * 1.5, 1.5); R(c, -.07, -.05, .14, .04, .01); F(c, '#ff9f1c'); for (const x of [-.05, 0, .05]) { E(c, x, -.008, .015, .015); F(c, INK); } L(c, .04, -.05, .05, -.09); c.restore(); } },
+  meteors: { init: sp => { sp.n = ri(3, 4); sp.dir = pick([-1, 1]); }, mods: [sp => { sp.dir *= -1; }, sp => { sp.n = sp.n === 3 ? 5 : 3; }],
+    draw(c, sp, t) { vSky(c, '#0b0b2b', '#2b1b55'); c.fillStyle = '#fff'; for (let i = 0; i < 20; i++) c.fillRect(((i * .37) % 1) - .5, ((i * .53) % .6) - .32, .006, .006); vGround(c, .26, '#1d1b26');
+      c.lineCap = 'round'; for (let i = 0; i < sp.n; i++) { const k = wrap01(t * .5 + i / sp.n), x = sp.dir * (k * .9 - .45) + (i % 2) * .1 * sp.dir, y = -.3 + k * .45 + (i % 3) * .04; c.globalAlpha = Math.sin(k * Math.PI); c.strokeStyle = '#ffe27a'; c.lineWidth = .014; L(c, x, y, x - sp.dir * .12, y - .06); c.fillStyle = '#fff'; E(c, x, y, .012, .012); c.fill(); } c.globalAlpha = 1; c.strokeStyle = INK; } },
+  koi: { init: sp => { sp.n = ri(2, 3); sp.dir = pick([-1, 1]); sp.cols = [5, 7, 0]; }, mods: [sp => { sp.dir *= -1; }, sp => { sp.n = sp.n === 2 ? 3 : 2; }, sp => { sp.cols = sp.cols.slice(); sp.cols[0] = sp.cols[0] === 5 ? 2 : 5; }],
+    draw(c, sp, t) { c.fillStyle = '#7bd3a0'; c.fillRect(-.5, -.4, 1, .8); E(c, 0, .02, .4, .28); FO(c, '#2a9d8f'); E(c, 0, .02, .36, .24); FO(c, '#3fb8c4'); for (const [x, y] of [[-.2, -.12], [.22, .14]]) { E(c, x, y, .06, .04); FO(c, '#2f9e44'); }
+      c.lineWidth = .01; for (let i = 0; i < sp.n; i++) { const a = t * Math.PI / 2 * sp.dir + i * TAU / sp.n, x = Math.cos(a) * .24, y = .02 + Math.sin(a) * .15; c.save(); c.translate(x, y); c.rotate(a + sp.dir * Math.PI / 2); E(c, 0, 0, .05, .02); F(c, VCOL[sp.cols[i]]); PL(c, [-.05, 0, -.08, -.02, -.08, .02]); F(c, VCOL[sp.cols[i]]); E(c, .02, 0, .012, .008); FO(c, '#ff4d6d'); c.restore(); } } },
+  scooters: { init: sp => { sp.n = ri(1, 3); sp.dir = pick([-1, 1]); sp.c = ri(0, 6); }, mods: [sp => { sp.n = bump(sp.n, 1, 3); }, sp => { sp.dir *= -1; }],
+    draw(c, sp, t) { vSky(c, '#ffe8cc', '#fff3d6'); c.fillStyle = '#e9c46a'; c.fillRect(-.5, -.34, .3, .44); c.fillStyle = '#ff8fd8'; c.fillRect(.22, -.34, .3, .44); c.lineWidth = .012; R(c, -.42, -.1, .14, .08, .01); F(c, '#c0392b'); vGround(c, .1, '#6c757d');
+      R(c, .26, .0, .16, .1, .01); F(c, '#a0703c'); E(c, .34, -.01, .05, .03); F(c, '#fff'); for (let i = 0; i < 2; i++) { const k = wrap01(t * .5 + i * .5); c.globalAlpha = 1 - k; c.strokeStyle = '#fff'; L(c, .32 + i * .04, -.04 - k * .1, .33 + i * .04, -.08 - k * .1); } c.globalAlpha = 1; c.strokeStyle = INK;
+      for (let i = 0; i < sp.n; i++) { c.save(); c.translate(lp(t, .28 * sp.dir, i / sp.n, 1.05), .27 - (i % 2) * .05); c.scale(sp.dir * 1.35, 1.35); for (const x of [-.04, .04]) { E(c, x, 0, .015, .015); F(c, INK); } R(c, -.05, -.035, .09, .025, .01); F(c, VCOL[(sp.c + i) % 7]); L(c, .04, -.03, .045, -.07); vKid(c, -.01, -.03, '#2b2d42', .8); c.restore(); } } },
+  pigeons: { init: sp => { sp.n = ri(2, 4); sp.dir = pick([-1, 1]); }, mods: [sp => { sp.n = bump(sp.n, 2, 4); }, sp => { sp.dir *= -1; }],
+    draw(c, sp, t) { vSky(c, '#7fd3ff', '#e6f7ff'); c.fillStyle = '#f2e3c6'; c.fillRect(-.5, -.25, 1, .35); c.fillStyle = '#6b4b2a'; for (let i = 0; i < 6; i++) c.fillRect(-.45 + i * .17, -.05, .07, .15); vGround(c, .1, '#c2b098'); c.lineWidth = .01;
+      const cx = lp(t, .25 * sp.dir, 0, 1.15); c.save(); c.translate(cx, .2); c.scale(sp.dir * 1.3, 1.3); R(c, -.18, -.08, .12, .08, .01); F(c, '#2b2d42'); for (const x of [-.16, -.08]) { E(c, x, .0, .025, .025); F(c, '#c0392b'); } E(c, .03, -.04, .05, .03); F(c, '#fff'); E(c, .08, -.07, .025, .02); F(c, '#fff'); for (const x of [0, .05]) L(c, x, -.02, x + Math.sin(t * 12 + x * 9) * .01, .01); c.restore();
+      for (let i = 0; i < sp.n; i++) { const x = -.32 + i * .16, y = .31, b = Math.max(0, Math.sin(t * 4 + i * 1.7)) * .02; E(c, x, y - .02, .038, .024); F(c, '#adb5bd'); E(c, x + .034, y - .045 + b, .018, .018); F(c, '#adb5bd'); PL(c, [x + .05, y - .045 + b, x + .066, y - .04 + b, x + .05, y - .036 + b]); F(c, '#ff9f1c'); } } },
+  dino: { init: sp => { sp.dir = pick([-1, 1]); sp.c = pick([3, 4, 5]); }, mods: [sp => { sp.dir *= -1; }, sp => { sp.c = sp.c === 4 ? 3 : 4; }],
+    draw(c, sp, t) { vSky(c, '#ffcf8a', '#fff3d6'); c.fillStyle = '#8a6a44'; PL(c, [-.5, .1, -.3, -.15, -.1, .1]); c.fill(); PL(c, [.1, .1, .3, -.2, .5, .1]); c.fill(); E(c, .35, -.24, .05, .03); FO(c, '#ff6a1c'); vGround(c, .1, '#6b8f5a'); c.lineWidth = .012;
+      const x = lp(t, .25 * sp.dir, 0, 1.15), st = Math.abs(Math.sin(t * 6)) * .015; c.save(); c.translate(x, .28 - st); c.scale(sp.dir * 1.45, 1.45); const col = VCOL[sp.c]; c.beginPath(); c.moveTo(-.2, -.06); c.quadraticCurveTo(-.1, -.1, -.05, -.08); c.lineTo(-.06, -.04); c.closePath(); F(c, col); E(c, 0, -.07, .07, .045); F(c, col); R(c, .04, -.2, .04, .12, .015); F(c, col); E(c, .08, -.2, .045, .025); F(c, col); E(c, .09, -.21, .008, .008); FO(c, INK); for (const lx of [-.03, .03]) { R(c, lx - .012, -.04, .024, .05 + (lx > 0 ? st : -st), .006); F(c, col); } c.restore(); } },
+  ghosts: { init: sp => { sp.n = ri(1, 3); sp.dir = pick([-1, 1]); }, mods: [sp => { sp.n = bump(sp.n, 1, 3); }, sp => { sp.dir *= -1; }],
+    draw(c, sp, t) { vSky(c, '#1d1b3e', '#3b2d5e'); E(c, .25, -.2, .07, .07); FO(c, '#fff3a0'); c.fillStyle = '#14122a'; PL(c, [-.5, .34, -.5, .1, -.35, .05, -.3, -.05, -.25, .05, -.1, .1, .1, .08, .2, -.02, .3, .08, .5, .1, .5, .34]); c.fill(); c.lineWidth = .01;
+      for (let i = 0; i < sp.n; i++) { const x = lp(t, .25 * sp.dir, i / sp.n, 1.05), y = -.05 + i * .08 + Math.sin(t * 3 + i * 2) * .03; c.save(); c.translate(x, y); c.scale(sp.dir * 1.6, 1.6); c.globalAlpha = .9; c.beginPath(); c.arc(0, 0, .045, Math.PI, 0); c.lineTo(.045, .06); for (let k = 0; k < 4; k++) c.lineTo(.045 - (k + .5) * .0225, .06 - (k % 2 ? 0 : .015)); c.lineTo(-.045, .06); c.closePath(); F(c, '#f8f9fa'); E(c, -.012, -.005, .007, .01); FO(c, INK); E(c, .014, -.005, .007, .01); FO(c, INK); c.restore(); } } },
+};
+// frames: where the view is (clip) and how the window looks around it
+const VFRAME = {
+  window: { clip(c) { R(c, -.42, -.32, .84, .64, .02); }, over(c, o) { c.lineWidth = .035; L(c, 0, -.32, 0, .32); c.lineWidth = .045; R(c, -.42, -.32, .84, .64, .02); c.stroke(); R(c, -.5, .36, 1, .06, .02); F(c, '#fff'); }, under(c, o) { R(c, -.48, -.38, .96, .76, .04); F(c, o.c); } },
+  arch: { clip(c) { c.beginPath(); c.moveTo(-.38, .34); c.lineTo(-.38, -.04); c.arc(0, -.04, .38, Math.PI, 0); c.lineTo(.38, .34); c.closePath(); }, under(c, o) { c.beginPath(); c.moveTo(-.45, .42); c.lineTo(-.45, -.04); c.arc(0, -.04, .45, Math.PI, 0); c.lineTo(.45, .42); c.closePath(); F(c, o.c); }, over(c) { c.lineWidth = .03; L(c, 0, -.42, 0, .34); L(c, -.38, .06, .38, .06); c.lineWidth = .045; VFRAME.arch.clip(c); c.stroke(); } },
+  porthole: { clip(c) { E(c, 0, 0, .36, .36); }, under(c) { E(c, 0, 0, .46, .46); F(c, '#d4a017'); }, over(c) { E(c, 0, 0, .36, .36); c.stroke(); for (let k = 0; k < 8; k++) { const a = k * TAU / 8; E(c, Math.cos(a) * .41, Math.sin(a) * .41, .025, .025); F(c, '#8a6a1c'); } } },
+  monitor: { clip(c) { R(c, -.4, -.3, .8, .52, .02); }, under(c) { R(c, -.46, -.36, .92, .64, .05); F(c, '#2b2d42'); R(c, -.06, .28, .12, .1, .01); F(c, '#5c5f6e'); R(c, -.2, .38, .4, .06, .02); F(c, '#5c5f6e'); }, over(c) { R(c, -.4, -.3, .8, .52, .02); c.stroke(); E(c, .38, .25, .02, .02); FO(c, '#4dff9a'); } },
+  viewport: { clip(c) { R(c, -.4, -.3, .8, .6, .12); }, under(c) { R(c, -.48, -.38, .96, .76, .16); F(c, '#adb5bd'); }, over(c) { R(c, -.4, -.3, .8, .6, .12); c.stroke(); for (const [x, y] of [[-.44, -.34], [.44, -.34], [-.44, .34], [.44, .34]]) { E(c, x, y, .025, .025); F(c, '#5c5f6e'); } } },
+  cavemouth: { clip(c) { PL(c, [-.42, .34, -.44, -.05, -.32, -.26, -.12, -.34, .1, -.32, .3, -.24, .43, -.04, .42, .34]); }, under(c) { PL(c, [-.5, .42, -.52, -.1, -.38, -.36, -.12, -.44, .12, -.42, .36, -.32, .52, -.08, .5, .42]); F(c, '#4a3520'); }, over(c) { VFRAME.cavemouth.clip(c); c.stroke(); } },
+  street: { clip(c) { R(c, -.42, -.28, .84, .62, .01); }, under(c, o) { R(c, -.48, -.38, .96, .76, .03); F(c, o.c); }, over(c) { c.save(); for (let k = 0; k < 8; k++) { c.fillStyle = k % 2 ? '#fff' : '#e63946'; c.fillRect(-.46 + k * .115, -.38, .115, .1); } c.restore(); R(c, -.46, -.38, .92, .1, .01); c.stroke(); R(c, -.42, -.28, .84, .62, .01); c.stroke(); } },
+  shoji: { clip(c) { R(c, -.42, -.32, .84, .64, .01); }, under(c) { R(c, -.48, -.38, .96, .76, .02); F(c, '#5e3b1c'); }, over(c) { c.save(); R(c, .1, -.32, .32, .64, 0); c.fillStyle = 'rgba(255,250,240,.92)'; c.fill(); c.lineWidth = .015; c.strokeStyle = '#8a5a2b'; for (let k = 1; k < 3; k++) L(c, .1 + k * .107, -.32, .1 + k * .107, .32); for (let j = 1; j < 4; j++) L(c, .1, -.32 + j * .16, .42, -.32 + j * .16); c.restore(); L(c, .1, -.32, .1, .32); R(c, -.42, -.32, .84, .64, .01); c.stroke(); } },
+};
+const VISTAS = { party: ['window', ['balloons', 'plane', 'birdsV', 'seesaw']], kitchen: ['window', ['dogball', 'squirrel', 'weather', 'birdsV']], classroom: ['window', ['seesaw', 'traffic', 'sea', 'rainbow']],
+  pets: ['window', ['dogball', 'jungle', 'squirrel']], cafeteria: ['window', ['traffic', 'train', 'seesaw']], museum: ['arch', ['balloons', 'plane', 'birdsV', 'rainbow']], sumo: ['shoji', ['koi', 'birdsV', 'weather']],
+  pho: ['street', ['scooters', 'traffic']], bedroom: ['window', ['fireworks', 'meteors', 'weather']], garage: ['window', ['traffic', 'train', 'dogball']], castle: ['arch', ['balloons', 'birdsV', 'weather', 'fireworks']],
+  laser: ['monitor', ['meteors', 'fireworks', 'traffic']], moon: ['viewport', ['moonwalk', 'meteors']], cave: ['cavemouth', ['dino', 'meteors', 'weather']], library: ['arch', ['ghosts', 'meteors', 'weather']],
+  rynek: ['street', ['pigeons', 'balloons']], dojo: ['shoji', ['koi', 'birdsV', 'weather']] };
+const vSync = o => { o.show = o.scene + JSON.stringify(o.sp); };
+for (const [th, [frame, scenes]] of Object.entries(VISTAS)) {
+  PROPS['vista_' + th] = { cols: frame === 'street' ? ['#6b4423', '#2a6f97'] : ['#8a5a2b', '#5e3b1c', '#ffffff'], wall: 1, motion: 1, vista: 1, round: frame === 'porthole' ? 1 : 0,
+    init(o) { o.frame = frame; o.scene = pick(scenes); o.sp = {}; VSCENE[o.scene].init(o.sp); vSync(o); },
+    d(c, o) { const F_ = VFRAME[o.frame], S_ = VSCENE[o.scene]; if (!F_ || !S_) return; const t = tOf(o); F_.under(c, o); c.save(); F_.clip(c); c.clip(); c.lineWidth = .012; c.strokeStyle = INK; S_.draw(c, o.sp, t); c.restore(); c.strokeStyle = INK; c.lineWidth = .045; F_.over(c, o); },
+    v: { motion(o) { o.sp = JSON.parse(JSON.stringify(o.sp)); pick(VSCENE[o.scene].mods)(o.sp); vSync(o); return 1; } } };
+}
+// fairness: a scene difference must actually show within a 4 s loop (sampled every 0.5 s on a tiny canvas)
+function vistaVisible(a, b) {
+  const cv = vistaVisible.cv || (vistaVisible.cv = document.createElement('canvas')); cv.width = cv.height = 48; const x = cv.getContext('2d', { willReadFrequently: true }); let hits = 0;
+  for (let k = 0; k < 8; k++) { const px = []; for (const o of [a, b]) { x.clearRect(0, 0, 48, 48); drawObj(x, { ...o, _t: k * .5, rot: 0, flip: false }, 24, 24, 48); px.push(x.getImageData(0, 0, 48, 48).data); } let d = 0; for (let i = 0; i < px[0].length; i += 4) if (Math.abs(px[0][i] - px[1][i]) + Math.abs(px[0][i + 1] - px[1][i + 1]) + Math.abs(px[0][i + 2] - px[1][i + 2]) > 70) d++; if (d >= 3) hits++; }
+  return hits >= 4;
+}
+LOOKF.push('frame');
+
+/* ===================== MUSIC LIBRARY: 11 original synthesized tracks, per-raid defaults, 🎵 cycle button ===================== */
+const NT = (m, d, type, v, w, m2) => tone(mf(m), d, type, v, w, m2 != null ? mf(m2) : null);
+const HAT = (w, v = .05) => noise(.025, v, 8000, 'highpass', w), SNR = (w, v = .22, f = 1800) => noise(.12, v, f, 'bandpass', w), TOM = (w, f = 110, v = .14) => tone(f, .24, 'sine', v, w, f * .5);
+const SOFTK = (w, v = .3) => tone(70, .22, 'sine', v, w, 38);
+const chord = (r, q) => q === 'm' ? [r, r + 3, r + 7] : q === 'm7' ? [r, r + 3, r + 7, r + 10] : q === 'M7' ? [r, r + 4, r + 7, r + 11] : q === '7' ? [r, r + 4, r + 7, r + 10] : [r, r + 4, r + 7];
+const TRACKS = {
+  kpop: { name: 'K-Pop Hero', tempo: 116, step(s, w, spb) { playStepKpop(s, w, spb); } },
+  chip: { name: '8-Bit Quest', tempo: 144, step(s, w, spb, tr) { const bar = s >> 4, st = s & 15, R0 = [60, 60, 55, 55, 57, 57, 53, 55][bar] + tr, q = bar === 4 || bar === 5 ? 'm' : '';
+    const ch = chord(R0, q); if (st % 2 === 0) NT(ch[(st / 2) % 3] + 12 + (st % 8 === 6 ? 12 : 0), spb * 1.4, 'square', .03, w); if (st % 4 === 0) NT(R0 - 12, spb * 3, 'triangle', .14, w);
+    const ML = [[72, 0, 76, 0, 79, 0, 76, 0, 84, 0, 0, 79, 0, 76, 0, 0], [74, 0, 79, 0, 83, 0, 79, 0, 81, 0, 79, 0, 74, 0, 0, 0], [72, 0, 0, 76, 0, 81, 0, 79, 0, 76, 0, 72, 0, 74, 0, 0], [77, 0, 76, 0, 74, 0, 72, 0, 74, 0, 0, 0, 79, 0, 0, 0]][bar % 4]; if (ML[st]) NT(ML[st] + tr, spb * 1.7, 'square', .045, w);
+    if (st === 0 || st === 8) kick(w); if (st === 4 || st === 12) noise(.06, .14, 6000, 'highpass', w); if (st % 2) HAT(w, .025); } },
+  funk: { name: 'Funky Bass', tempo: 102, step(s, w, spb, tr) { const bar = s >> 4, st = s & 15, R0 = [52, 52, 52, 52, 57, 57, 55, 57][bar] + tr, BP = [0, -1, -1, 12, -1, 0, -1, 10, 0, -1, 7, -1, 12, 10, 7, -1];
+    if (BP[st] >= 0) { NT(R0 - 12 + BP[st], spb * .9, 'sawtooth', .07, w, R0 - 12 + BP[st] - .3); NT(R0 - 12 + BP[st], spb * .9, 'square', .04, w); }
+    if (st % 4 === 2) chord(R0 + 12, 'm7').forEach(n => NT(n, spb * .45, 'square', .018, w)); if (st === 0 || st === 7 || st === 10) kick(w); if (st === 4 || st === 12) SNR(w, .26); if (st === 15) SNR(w, .07); HAT(w, st % 2 ? .02 : .045);
+    if (bar % 2 === 1 && (st === 8 || st === 11)) NT(R0 + 24 + (st === 8 ? 7 : 10), spb * 1.2, 'sawtooth', .03, w); } },
+  surf: { name: 'Spy Surf', tempo: 152, step(s, w, spb, tr) { const bar = s >> 4, st = s & 15, R0 = [52, 52, 48, 48, 45, 45, 47, 47][bar] + tr, d = R0 - 52;
+    if (st % 4 === 0) NT(R0 - 12 + [0, 3, 5, 7][st / 4], spb * 3.4, 'triangle', .15, w);
+    const SM = bar % 2 ? [67, 0, 0, 66, 0, 0, 64, 0, 0, 0, 62, 0, 64, 0, 0, 0] : [64, 0, 0, 67, 0, 0, 66, 0, 64, 0, 0, 62, 0, 64, 0, 0]; if (SM[st]) { const n = SM[st] + d; NT(n + .3, spb * 2.4, 'sawtooth', .045, w, n - .1); NT(n, spb * 2.4, 'triangle', .05, w); NT(n, spb * 1.6, 'triangle', .02, w + spb * 1.5); }
+    if (st === 0 || st === 8) kick(w); if (st === 4 || st === 12) noise(.09, .14, 3000, 'bandpass', w); if (st % 2 === 0) noise(.05, .03, 9500, 'highpass', w); } },
+  dnb: { name: 'Breakbeat Chase', tempo: 174, step(s, w, spb, tr) { const bar = s >> 4, st = s & 15, R0 = [50, 50, 53, 53, 48, 48, 55, 55][bar] + tr;
+    if (st === 0 || st === 10) kick(w); if (st === 4 || st === 12) SNR(w, .3, 2000); if (st === 7 || st === 15) SNR(w, .07, 2000); HAT(w, st % 2 ? .02 : .035);
+    if (st === 0 || st === 8) { NT(R0 - 24, spb * 7, 'sine', .2, w); NT(R0 - 12, spb * 7, 'sawtooth', .02, w, R0 - 12.2); NT(R0 - 12.1, spb * 7, 'sawtooth', .02, w); }
+    if (st === 0 && bar % 2 === 0) chord(R0 + 12, 'm').forEach(n => NT(n, spb * 2, 'triangle', .03, w)); if (st === 6 || st === 14) NT(R0 + 24 + (st === 6 ? 7 : 3), spb * .8, 'square', .025, w); } },
+  lofi: { name: 'Lo-Fi Chill', tempo: 78, step(s, w, spb, tr) { const bar = s >> 4, st = s & 15, R0 = [53, 52, 50, 48][bar % 4], Q = ['M7', 'm7', 'm7', 'M7'][bar % 4];
+    if (st === 0 || st === 10) chord(R0, Q).forEach((n, i) => { NT(n, spb * 11, 'triangle', .028, w + i * .015); NT(n + .08, spb * 9, 'sine', .02, w + i * .015); });
+    if (st === 0 || st === 7 || st === 9) SOFTK(w, .28); if (st === 4 || st === 12) noise(.1, .08, 1500, 'bandpass', w); if (st % 2 === 0) HAT(w, .014); if (st % 5 === 3) noise(.012, .02, 5000, 'highpass', w);
+    if (st === 0) NT(R0 - 12, spb * 8, 'sine', .14, w); const ML = [[0, 0, 7, 0, 0, 0, 0, 11, 0, 0, 12, 0, 0, 0, 0, 0], [0, 0, 0, 0, 10, 0, 0, 0, 7, 0, 0, 0, 3, 0, 0, 0]][bar % 2]; if (ML[st]) NT(R0 + 12 + ML[st], spb * 3, 'triangle', .04, w); } },
+  epic: { name: 'Anime Battle', tempo: 132, step(s, w, spb, tr) { const bar = s >> 4, st = s & 15, R0 = [50, 50, 46, 46, 53, 53, 48, 48][bar] + tr, q = bar < 2 ? 'm' : '';
+    if (st === 0) chord(R0, q).forEach(n => { NT(n, spb * 15, 'sawtooth', .014, w); NT(n + 12, spb * 15, 'triangle', .022, w); }); NT(R0 + (st % 2 ? 7 : 0), spb * .8, 'sawtooth', .018, w);
+    if ([0, 3, 6, 8, 11, 14].includes(st)) { TOM(w, st % 8 === 0 ? 85 : 120, st % 8 === 0 ? .24 : .14); if (st % 8 === 0) noise(.08, .12, 400, 'lowpass', w); } if (st === 4 || st === 12) SNR(w, .2, 1400); if (st % 2 === 0) HAT(w, .025);
+    const BM = [74, 0, 0, 0, 72, 0, 74, 0, 77, 0, 0, 0, 76, 0, 72, 0]; if (bar % 2 === 1 && BM[st]) { NT(BM[st] + tr - (bar >= 4 ? 2 : 0), spb * 2.6, 'square', .035, w); NT(BM[st] + tr - 12 - (bar >= 4 ? 2 : 0), spb * 2.6, 'sawtooth', .018, w); } } },
+  spooky: { name: 'Spooky Organ', tempo: 92, step(s, w, spb, tr) { const bar = s >> 4, st = s & 15, R0 = [57, 57, 50, 50, 52, 52, 57, 57][bar] + tr, q = bar === 4 || bar === 5 ? '' : 'm';
+    if (st === 0 || st === 8) chord(R0, q).concat([R0 + 12]).forEach(n => { NT(n, spb * 7.5, 'square', .012, w); NT(n - 12, spb * 7.5, 'triangle', .02, w); });
+    const TH = [[76, 77], [72, 69], [74, 77], [76, 71]][bar % 4]; if (st === 0 || st === 8) NT(TH[st ? 1 : 0] + tr, spb * 8, 'sine', .05, w, TH[st ? 0 : 1] + tr + .5);
+    if (st % 4 === 0) noise(.02, .03, 6000, 'highpass', w); if (st === 0) SOFTK(w, .26); if (st === 12 && bar % 2) NT(R0 - 24, spb * 4, 'sawtooth', .04, w, R0 - 25); } },
+  koto: { name: 'Koto Dojo', tempo: 116, step(s, w, spb) { playStepKoto(s, w, spb); } },
+  polka: { name: 'Market Polka', tempo: 122, step(s, w, spb, tr) { const bar = s >> 4, st = s & 15, R0 = [53, 53, 48, 48, 53, 53, 48, 53][bar] + tr;
+    if (st === 0 || st === 8) { NT(R0 - 12 - (st === 8 ? 5 : 0), spb * 1.5, 'triangle', .15, w); NT(R0 - 12 - (st === 8 ? 5 : 0), spb * 1.2, 'square', .03, w); } if (st === 4 || st === 12) chord(R0 + 12, '').forEach(n => NT(n, spb * .6, 'square', .022, w));
+    const PM = [[77, 0, 76, 0, 77, 0, 81, 0, 84, 0, 0, 0, 81, 0, 0, 0], [79, 0, 77, 0, 76, 0, 77, 0, 79, 0, 0, 0, 72, 0, 0, 0]][bar % 2]; if (PM[st]) { NT(PM[st] + tr, spb * 1.7, 'square', .03, w); NT(PM[st] + tr + .1, spb * 1.7, 'square', .02, w); }
+    if (st === 4 || st === 12) noise(.06, .12, 3000, 'bandpass', w); if (st % 4 === 2) HAT(w, .03); if (st === 0) SOFTK(w, .3); } },
+  synth: { name: 'Space Synthwave', tempo: 108, step(s, w, spb, tr) { const bar = s >> 4, st = s & 15, R0 = [57, 57, 53, 53, 48, 48, 55, 55][bar] + tr, q = bar < 2 ? 'm' : '';
+    if (st % 4 === 0) kick(w); if (st === 4 || st === 12) { noise(.28, .16, 1500, 'bandpass', w); noise(.1, .1, 5000, 'highpass', w); } if (st % 2 === 1) HAT(w, .02);
+    const ar = [0, 7, 12, 7][st % 4]; NT(R0 + 12 + ar, spb * .9, 'sawtooth', .016, w); if (st % 2 === 0) NT(R0 - 12, spb * .8, 'sawtooth', .05, w);
+    if (st === 0) chord(R0, q).forEach(n => NT(n + 12, spb * 15, 'triangle', .022, w)); const LM = [76, 0, 0, 0, 74, 0, 72, 0, 74, 0, 0, 0, 0, 0, 0, 0]; if (bar >= 4 && LM[st]) NT(LM[st] + tr, spb * 3.5, 'sawtooth', .03, w); } },
+};
+const TRACK_IDS = Object.keys(TRACKS), TRACK_OF = { dojo: 'koto', party: 'kpop', kitchen: 'funk', classroom: 'chip', pets: 'kpop', cafeteria: 'funk', museum: 'surf', sumo: 'epic', bedroom: 'chip', garage: 'dnb', castle: 'epic', pho: 'funk', cave: 'epic', library: 'spooky', laser: 'dnb', moon: 'synth', rynek: 'polka' };
+const MKEY = 'rescueRaid.music'; let musicPref = 'auto'; try { const v = localStorage.getItem(MKEY); if (v === 'auto' || TRACKS[v]) musicPref = v; } catch (e) {}
+const GAMEPLAY = () => G.scene === 'intro' || G.scene === 'play' || G.scene === 'win' || G.scene === 'lose';
+function curTrack() { if (musicPref !== 'auto') return musicPref; return GAMEPLAY() && P && P.R ? (TRACK_OF[P.R.th] || 'kpop') : 'lofi'; }
+musicTick = function () {
+  if (!Music.on || !AC || muted) return; const id = curTrack(), T_ = TRACKS[id];
+  if (Music.cur !== id) { Music.cur = id; Music.step = 0; Music.next = AC.currentTime + .08; }
+  const rush = Music.rush && G.scene === 'play', spb = 60 / (T_.tempo * (rush ? 1.08 : 1)) / 4, tr = rush ? 2 : 0;
+  if (Music.next < AC.currentTime - 0.2) Music.next = AC.currentTime + 0.02;
+  while (Music.next < AC.currentTime + 0.12) { MBUS.on = true; try { T_.step(Music.step, Music.next - AC.currentTime, spb, tr); } finally { MBUS.on = false; } Music.next += spb; Music.step = (Music.step + 1) % 128; }
+};
+if (Music.timer) { clearInterval(Music.timer); Music.timer = setInterval(musicTick, 40); }
+musicStart = function () { if (!AC) return; Music.on = true; Music.next = AC.currentTime + 0.06; Music.step = 0; Music.cur = null; if (!Music.timer) Music.timer = setInterval(() => musicTick(), 40); };
+// 🎵 button (map / title): Auto → each track → Auto; remembered on this device
+(function () {
+  const top = $('#top'), btn = document.createElement('button'); btn.id = 'bMusic'; btn.className = 'round'; btn.title = 'Music'; btn.setAttribute('aria-label', 'Change music'); btn.textContent = '🎵'; top.insertBefore(btn, $('#bMute'));
+  const toast = document.createElement('div'); toast.id = 'musicToast'; toast.style.cssText = 'position:fixed;top:78px;right:12px;z-index:30;background:#fffaf0;border:3px solid #1d1b26;border-radius:18px;padding:6px 14px;font:20px "Luckiest Guy","Comic Sans MS",system-ui,sans-serif;box-shadow:0 4px 0 #1d1b26;pointer-events:none;opacity:0;transition:opacity .25s'; document.body.appendChild(toast);
+  let tm = 0; const show = txt => { toast.textContent = txt; toast.style.opacity = '1'; clearTimeout(tm); tm = setTimeout(() => { toast.style.opacity = '0'; }, 1600); };
+  btn.onclick = () => { initAudio(); SFX.click(); const order = ['auto'].concat(TRACK_IDS), i = order.indexOf(musicPref); musicPref = order[(i + 1) % order.length]; try { localStorage.setItem(MKEY, musicPref); } catch (e) {} if (AC && !Music.on && !muted) musicStart(); show('🎵 ' + (musicPref === 'auto' ? 'Auto (' + TRACKS[curTrack()].name + ')' : TRACKS[musicPref].name)); };
+  const _setTopM = setTop; setTop = function () { _setTopM(); const s = G.scene; btn.hidden = !(s === 'title' || s === 'map'); };
+  setTop();
+  window.__game.music = { get pref() { return musicPref; }, set pref(v) { musicPref = v; }, get cur() { return Music.cur; }, tracks: TRACK_IDS, trackOf: TRACK_OF, curTrack };
+})();
 </script>
 </body>
 </html>
