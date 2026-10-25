@@ -1765,8 +1765,8 @@ function foundDiff(d, room, x, y) {
   let rm = room, arr = rm === 'L' ? P.objsL : P.objsR, idx = rm === 'L' ? d.iL : d.iR;
   if (idx < 0 || !arr[idx] || arr[idx].hid) { rm = rm === 'L' ? 'R' : 'L'; arr = rm === 'L' ? P.objsL : P.objsR; idx = rm === 'L' ? d.iL : d.iR; }
   const o = arr[idx]; o.hid = true; P['dirty' + rm] = true;
-  const hp = 2, ar = clamp(o.s * .9, .08, .13);
-  P.aliens.push({ room: rm, o: { ...o, hid: false }, ph: 'morph', pt: 0, hp, max: hp, r: ar, col: pick(['#7bd88f', '#c77dff', '#4cc9f0', '#ff8fd8', '#ffd23f']), eyes: ri(1, 3), fx: o.x, fy: clamp(o.by - o.s / 2, .12, .68), tx: o.x, ty: o.by - o.s / 2, ht: 1, hd: 1, wait: .2, flash: 0, born: G.t, spd: P.moon ? .65 : .975, hits: 0 });
+  const hp = DIFF.g().hp(), ar = clamp(o.s * .9, .08, .13);
+  P.aliens.push({ room: rm, o: { ...o, hid: false }, ph: 'morph', pt: 0, hp, max: hp, r: ar, col: pick(['#7bd88f', '#c77dff', '#4cc9f0', '#ff8fd8', '#ffd23f']), eyes: ri(1, 3), fx: o.x, fy: clamp(o.by - o.s / 2, .12, .68), tx: o.x, ty: o.by - o.s / 2, ht: 1, hd: 1, wait: .2, flash: 0, born: G.t, spd: (P.moon ? .65 : .975) * DIFF.g().aSpd / .975, hits: 0 });
   for (const k of [0, 1]) { const pt = d[k ? 'R' : 'L'], p = toScr(k, pt.x, pt.y); boomAt(p.x, p.y, 10, [COL.green, COL.yellow, '#fff'], .6); }
   burst(pick(['GOT IT!', 'FOUND!', 'YES!', 'NICE!']), x, y, COL.green, .8); floatTxt('+100', x, y - 30, COL.yellow, 30);
   if (P.found === P.N) { FX.slow = 1.1; FX.focus = { x, y, t: 0 }; speedLines(x, y, 1.0, '#ffe27a', 60, .12); FX.flash = .15; SFX.doon(); }
@@ -2320,7 +2320,7 @@ function renderBoard() {
   document.querySelectorAll('#ovBoard [data-tab]').forEach(b => b.classList.toggle('on', +b.dataset.tab === i));
   $('#bdName').textContent = i < 0 ? '⭐ All raids' : RAIDS[i].icon + ' ' + RAIDS[i].name;
   const meTs = last ? (i < 0 ? Math.max(0, ...realList(-1).filter(e => e.n === SAVE.nm).map(e => e.ts)) : (last.i === i ? last.ts : -1)) : -1;
-  $('#bdRows').innerHTML = list.map((e, j) => { const me = !e.seed && e.ts && e.ts === meTs; return `<div class="brow ${e.seed ? 'seed' : 'real'} ${me ? 'me' : ''}"><span class="n">#${j + 1}</span><canvas width="92" height="92" data-k="${e.k}"></canvas><span>${e.n}${e.seed ? ' <small title="computer">🤖</small>' : ''}${me ? '<span class="you">YOU</span>' : ''}</span><span>${e.s}</span><span class="tm">${i < 0 ? '🏁 ' + (e.raids || 1) : '⏱ ' + fmt(e.tm || 0)}</span></div>`; }).join('');
+  $('#bdRows').innerHTML = list.map((e, j) => { const me = !e.seed && e.ts && e.ts === meTs; return `<div class="brow ${e.seed ? 'seed' : 'real'} ${me ? 'me' : ''}"><span class="n">#${j + 1}</span><canvas width="92" height="92" data-k="${e.k}"></canvas><span>${e.n}${e.seed ? ' <small title="computer">🤖</small>' : ''}${e.tr != null && typeof TIERS !== 'undefined' && TIERS[e.tr] ? ' <small title="' + TIERS[e.tr].name + '">' + TIERS[e.tr].emo + '</small>' : ''}${me ? '<span class="you">YOU</span>' : ''}</span><span>${e.s}</span><span class="tm">${i < 0 ? '🏁 ' + (e.raids || 1) : '⏱ ' + fmt(e.tm || 0)}</span></div>`; }).join('');
   document.querySelectorAll('#bdRows canvas').forEach(cn => { const c = cn.getContext('2d'); c.clearRect(0, 0, 92, 92); drawBadge(c, 46, 40, 34, +cn.dataset.k, 0); });
 }
 /* ---------- end of raid panel ---------- */
@@ -2809,7 +2809,7 @@ const jsn = v => JSON.stringify(v == null ? null : v);
 sameLook = function (a, b) { return LOOKF.every(k => (typeof a[k] === 'number' && typeof b[k] === 'number') ? Math.abs(a[k] - b[k]) < 1e-6 : a[k] === b[k]) && jsn(a.pc) === jsn(b.pc) && jsn(a.order) === jsn(b.order) && jsn(a.txt) === jsn(b.txt); };
 // what changed between two versions of the same object (used by the fairness check)
 function diffWhat(a, b) { const w = []; if (a.hid !== b.hid) w.push('missing'); if (a.n !== b.n || a.panes !== b.panes) w.push('count'); if (a.flip !== b.flip || Math.abs((a.rot || 0) - (b.rot || 0)) > 1e-6 || a.h !== b.h) w.push('orient'); if (a.dir !== b.dir || a.scene !== b.scene || a.rain !== b.rain || a.pp !== b.pp || a.show !== b.show || a.tw !== b.tw) w.push('motion'); if (a.c !== b.c || jsn(a.pc) !== jsn(b.pc) || a.top !== b.top || a.hat !== b.hat) w.push('color'); if (jsn(a.order) !== jsn(b.order) || jsn(a.txt) !== jsn(b.txt)) w.push('rearr'); if (Math.abs(a.x - b.x) > 1e-6 || Math.abs(a.by - b.by) > 1e-6) w.push('pos'); return w; }
-const KIND_OK = { missing: w => w.includes('missing'), count: w => w.includes('count'), orient: w => w.includes('orient'), motion: w => w.includes('motion'), color: w => w.includes('color'), swap: w => w.includes('pos') || w.includes('rearr') };
+const KIND_OK = { move: w => w.includes('pos'), missing: w => w.includes('missing'), count: w => w.includes('count'), orient: w => w.includes('orient'), motion: w => w.includes('motion'), color: w => w.includes('color'), swap: w => w.includes('pos') || w.includes('rearr') };
 genRooms = function (R_, th) {
   const tier = R_.tier || 0;
   for (let attempt = 0; attempt < 150; attempt++) {
@@ -2824,20 +2824,23 @@ genRooms = function (R_, th) {
     const VK = th.key && PROPS['vista_' + th.key] ? 'vista_' + th.key : null;
     const anchors = th.anchorSet ? th.anchorSet.slice() : [(VK ? [VK, 'wall', .16, .19] : ['window', 'wall', .13, .155]), [pick(['wclock', 'shirt', 'arrowsign']), 'wall', .1, .12], [pick(MOTION_FLOOR), 'floor', .1, .12], ...shuffle(COUNTABLE_FLOOR.slice()).slice(0, 3).map(t => [t, 'floor', .095, .12]), ...themeAnchors];
     if (VK) { if (th.anchorSet) anchors.unshift([VK, 'wall', .16, .19]); if (Math.random() < .45) anchors.splice(1, 0, [VK, 'wall', .15, .17]); }
+    if (DIFF.g().clutter < 1) anchors.length = Math.max(4, Math.min(anchors.length, Math.round(Math.min(R_.objs, 16) * DIFF.g().clutter) - Lr.length - 2));
     for (const [t, want, a, b] of anchors) { const ok = place(t, wallS.length || want !== 'wall' ? want : 'floor', a, b); if (!ok && t === VK && !Lr.some(o => o.t === VK)) place(VK, 'wall', .125, .145) || place(VK, 'wall', .11, .125); }
     if (VK && !Lr.some(o => o.t === VK)) place(VK, 'wall', .12, .14) || place(VK, 'wall', .1, .12);
-    for (let i = Lr.length; i < R_.objs; i++) {
+    const OBJN = DIFF.g().clutter < 1 ? Math.round(Math.min(R_.objs, 16) * DIFF.g().clutter) : R_.objs;
+    for (let i = Lr.length; i < OBJN; i++) {
       for (let tr = 0; tr < 60; tr++) { const sf = pickSurf(); let t = pickType(th, sf, Math.random() < .25); if (Math.random() < .14) t = sf.wall ? pick(CODE_WALL.concat(th.extraWall || [])) : pick(CODE_FLOOR.concat(th.extraFloor || [])); const s = rand(sf.smin, sf.smax), p = placeOn(sf, s), o = mkObj(t, p.x, p.by, s); if (PROPS[t].pin) continue; if (fits(o, Lr)) { Lr.push(o); break; } }
     }
-    if (Lr.length < Math.min(R_.objs, 14)) { genRooms.lastFail = 'place' + Lr.length; continue; }
+    if (Lr.length < Math.min(OBJN, 12)) { genRooms.lastFail = 'place' + Lr.length; continue; }
     const Rr = Lr.map(o => JSON.parse(JSON.stringify(o))), diffs = [], used = new Set();
     const N = R_.N; const pool = ['swap', 'count', 'orient', 'color', 'motion', 'swap', 'count', 'orient', 'motion']; if (Math.random() < .3) pool.push('missing');
-    let kinds = ['swap', 'count', 'motion']; if (Math.random() < .6) kinds.push('motion'); while (kinds.length < N) { const k = pick(pool); if (k === 'missing' && kinds.includes('missing')) continue; kinds.push(k); } kinds = shuffle(kinds);
+    let kinds = ['swap', 'count', 'motion']; if (Math.random() < .6) kinds.push('motion'); while (kinds.length < N) { const k = pick(pool); if (k === 'missing' && kinds.includes('missing')) continue; kinds.push(k); } kinds = DIFF.kinds(shuffle(kinds), N);
     const ctr = o => ({ x: o.x, y: o.by - o.s / 2 });
     const farFromDiffs = (x, y) => diffs.every(d => [d.L, d.R, d.L2, d.R2].filter(Boolean).every(p => Math.hypot(p.x - x, p.y - y) > .14));
-    const cand = () => shuffle(Rr.map((o, i) => i)).filter(i => !used.has(i) && !Rr[i].pin && !(Rr[i].noMove && Math.random() < .3) && Rr[i].s >= MINS && farFromDiffs(Rr[i].x, Rr[i].by - Rr[i].s / 2));
-    const push = (kind, i, extra = {}) => { used.add(i); const o = Rr[i], a = Lr[i]; diffs.push({ kind, iL: i, iR: i, L: ctr(a), R: ctr(o), r: Math.max(.065, Math.max(o.s, a.s) * (PROPS[o.t].vista ? .72 : .62)), ...extra }); return true; };
+    const cand = () => shuffle(Rr.map((o, i) => i)).filter(i => !used.has(i) && !Rr[i].pin && !(Rr[i].noMove && Math.random() < .3) && Rr[i].s >= Math.max(MINS, DIFF.g().minS) && farFromDiffs(Rr[i].x, Rr[i].by - Rr[i].s / 2));
+    const push = (kind, i, extra = {}) => { used.add(i); const o = Rr[i], a = Lr[i]; diffs.push({ kind, iL: i, iR: i, L: ctr(a), R: ctr(o), r: Math.max(.065, DIFF.g().minR, Math.max(o.s, a.s) * (PROPS[o.t].vista ? .72 : .62)), ...extra }); return true; };
     const tryKind = kind => {
+      if (DIFF_EASY[kind]) return DIFF_EASY[kind]({ Lr, Rr, C: cand(), push, farFromDiffs, th, tryKind });
       const C = cand(); if (kind === 'motion') C.sort((a, b) => (PROPS[Rr[b].t].vista ? 1 : 0) - (PROPS[Rr[a].t].vista ? 1 : 0));
       if (kind === 'swap') {
         // either a shelf/stack whose order is shuffled, or two neighbours that traded places
@@ -2862,10 +2865,10 @@ genRooms = function (R_, th) {
       return false;
     };
     let ok = true;
-    for (const kind of kinds) { if (!tryKind(kind)) { let alt = false; for (const fb of shuffle(['count', 'orient', 'swap', 'motion', 'color'])) { if (fb !== kind && tryKind(fb)) { alt = true; break; } } if (!alt) { ok = false; genRooms.lastFail = kind; break; } } }
+    for (const kind of kinds) { if (!tryKind(kind)) { let alt = false; for (const fb of shuffle(DIFF.fallback())) { if (fb !== kind && tryKind(fb)) { alt = true; break; } } if (!alt) { ok = false; genRooms.lastFail = kind; break; } } }
     if (!ok || diffs.length !== N) continue;
     // fairness: each difference really changes what its kind says, objects stay ≥ the minimum size, at most one missing
-    const fair = diffs.every(d => { const a = Lr[d.iL], b = Rr[d.iR], w = diffWhat(a, b); if (sameLook(a, b) || !KIND_OK[d.kind](w)) return false; if (PROPS[b.t].vista && typeof vistaVisible === 'function' && !vistaVisible(a, b)) return false; if (d.j != null && (Lr[d.j].t === Lr[d.iL].t || sameLook(Lr[d.j], Rr[d.j]))) return false; return b.s >= MINS && a.s >= MINS; }) && diffs.filter(d => d.kind === 'missing').length <= 1
+    const fair = diffs.every(d => { const a = Lr[d.iL], b = Rr[d.iR], w = diffWhat(a, b); if (sameLook(a, b) || !KIND_OK[d.kind](w)) return false; if (PROPS[b.t].vista && typeof vistaVisible === 'function' && !vistaVisible(a, b)) return false; if (d.j != null && (Lr[d.j].t === Lr[d.iL].t || sameLook(Lr[d.j], Rr[d.j]))) return false; return b.s >= MINS && a.s >= MINS; }) && diffs.filter(d => d.kind === 'missing').length <= DIFF.g().maxMiss
       && Rr.every((o, i) => used.has(i) || sameLook(o, Lr[i]));
     if (!fair) { genRooms.lastFail = 'fair'; continue; }
     Lr.forEach((o, i) => { if (PROPS[o.t].motion) { o.live = Rr[i].live = 1; o.ph = Rr[i].ph = i * 1.3; } });
@@ -3688,6 +3691,78 @@ musicStart = function () { if (!AC) return; Music.on = true; Music.next = AC.cur
   const _setTopM = setTop; setTop = function () { _setTopM(); const s = G.scene; btn.hidden = !(s === 'title' || s === 'map'); };
   setTop();
   window.__game.music = { get pref() { return musicPref; }, set pref(v) { musicPref = v; }, get cur() { return Music.cur; }, tracks: TRACK_IDS, trackOf: TRACK_OF, curTrack };
+})();
+</script>
+<script>
+'use strict';
+/* ---- r9.js: difficulty by wins ---- */
+/* ===================== DIFFICULTY BY WINS: Rookie → Cadet → Agent → Elite (all raids stay unlocked) ===================== */
+const TIERS = [
+  { key: 'rookie', name: 'Rookie', emo: '🐣', T: 180, clutter: .7, minS: .105, minR: .12, maxMiss: 2, hp: () => 1, aSpd: .6, fbFirst: 60, fbGap: [50, 70] },
+  { key: 'cadet', name: 'Cadet', emo: '🦊', T: 165, clutter: .85, minS: .095, minR: .09, maxMiss: 1, hp: () => ri(1, 2), aSpd: .8, fbFirst: 30, fbGap: [28, 34] },
+  { key: 'agent', name: 'Agent', emo: '🐺', T: 135, clutter: 1, minS: 0, minR: 0, maxMiss: 1, hp: () => 2, aSpd: .975, fbFirst: null },
+  { key: 'elite', name: 'Elite', emo: '🐉', T: 110, clutter: 1, minS: 0, minR: 0, maxMiss: 1, hp: () => 2, aSpd: .975, fbFirst: null },
+];
+const winsOf = () => SAVE.wins | 0, earnedTier = (w = winsOf()) => w <= 1 ? 0 : w <= 4 ? 1 : w <= 8 ? 2 : 3;
+const warmUp = () => (SAVE.lossStreak | 0) >= 2 && earnedTier() > 0, effTier = () => Math.max(0, earnedTier() - (warmUp() ? 1 : 0));
+const DIFF = {
+  cur: null, g() { return DIFF.cur || TIERS[effTier()]; },
+  kinds(base, N) { const k = DIFF.g().key, E = ['ecolor', 'emissing', 'move'];
+    if (k === 'rookie') return shuffle(['ecolor', 'emissing', 'move', 'emotion', pick(E)]).slice(0, N);
+    if (k === 'cadet') { const H = ['swap', 'count', 'orient']; return shuffle(['motion', pick(H), pick(H), pick(['ecolor', 'move']), pick(E)]).slice(0, N); }
+    if (k === 'elite') { const out = base.slice(); let m = out.filter(x => x === 'motion').length; for (let i = 0; i < out.length && m < 2; i++) if (out[i] !== 'motion' && out[i] !== 'swap') { out[i] = 'motion'; m++; } while (out.filter(x => x === 'motion').length > 2) out[out.lastIndexOf('motion')] = 'count'; return out; }
+    return base; },
+  fallback() { const k = DIFF.g().key; return k === 'rookie' ? ['ecolor', 'move', 'emissing', 'ecolor'] : k === 'cadet' ? ['ecolor', 'move', 'count', 'swap', 'orient'] : ['count', 'orient', 'swap', 'motion', 'color']; },
+};
+// easy difference kinds (obvious at a glance) used by Rookie/Cadet
+const ECOLOR_CODE = ['punchbag', 'kickshield', 'stool', 'bonsai', 'woodhorse', 'dragon', 'puppy', 'tvset', 'deskfan'];
+const DIFF_EASY = {
+  ecolor({ Rr, C, push }) { const list = C.slice().sort((a, b) => (PROPS[Rr[b].t].sp ? 1 : 0) - (PROPS[Rr[a].t].sp ? 1 : 0));
+    for (const i of list) { const o = Rr[i], P_ = PROPS[o.t]; if (P_.motion || P_.vista || o.noMove) continue;
+      if (P_.sp && !o.wall) { const opts = SPR_TINTS.slice(0, 6).filter(c => c !== o.c && (!o.c || hueFar(c, o.c))); o.c = pick(opts); o.mild = 0; return push('color', i, { what: 'colour' }); }
+      if (ECOLOR_CODE.includes(o.t)) { const opts = BRIGHT.filter(c => c !== o.c && hueFar(c, o.c)); if (!opts.length) continue; o.c = pick(opts); return push('color', i, { what: 'colour' }); } }
+    return false; },
+  emissing({ Lr, Rr, C, push }) { for (const i of C) { const o = Rr[i], P_ = PROPS[o.t]; if (P_.motion || o.noMove || P_.pin) continue; if (Math.random() < .5) o.hid = true; else Lr[i].hid = true; return push('missing', i, { what: Lr[i].hid ? 'extra' : 'missing' }); } return false; },
+  move({ Lr, Rr, C, push, farFromDiffs }) { for (const i of C) { const o = Rr[i], P_ = PROPS[o.t]; if (P_.motion || o.noMove || P_.pin) continue; const others = Rr.filter((_, k) => k !== i);
+      for (let tr = 0; tr < 12; tr++) { const nx = o.x + pick([-1, 1]) * rand(.2, .34); if (nx - o.s / 2 < .01 || nx + o.s / 2 > .99) continue; const q = { ...o, x: nx }; if (!fits(q, others) || !farFromDiffs(nx, o.by - o.s / 2)) continue; if (Math.abs(nx - Lr[i].x) < o.s * 1.2) continue; o.x = nx; return push('move', i, { what: 'moved', L2: { x: nx, y: o.by - o.s / 2 }, R2: { x: Lr[i].x, y: Lr[i].by - Lr[i].s / 2 } }); } }
+    return false; },
+  emotion({ Rr, C, push, th, tryKind }) { for (const i of C) { const o = Rr[i]; if (!PROPS[o.t].vista) continue; const opts = (VISTAS[th.key] || [0, []])[1].filter(s => s !== o.scene); if (!opts.length) continue; o.scene = pick(opts); o.sp = {}; VSCENE[o.scene].init(o.sp); vSync(o); return push('motion', i, { what: 'scene' }); }
+    return tryKind('motion'); },
+};
+/* ---- per raid: tier sets timer, aliens, fireballs, free hint ---- */
+const _newRaidD = newRaid; newRaid = function (i) {
+  const ti = effTier(); DIFF.cur = TIERS[ti]; let p; try { p = _newRaidD(i); } finally { DIFF.cur = null; }
+  const T_ = TIERS[ti]; p.tier = ti; p.warm = warmUp(); p.T = p.left = T_.T; if (T_.fbFirst) p.fbNext = T_.fbFirst; p.freeHint = ti === 0 ? 1 : 0; p.hintOffered = 0; return p; };
+const _hpG = DIFF.g; DIFF.g = function () { return DIFF.cur || (P && P.tier != null && G.scene === 'play' ? TIERS[P.tier] : _hpG()); };
+const HINT_HTML = $('#bHint').innerHTML;
+function hintLabel() { const b = $('#bHint'); if (!b) return; const free = !!(P && P.freeHint && !P.done); b.innerHTML = free ? '💡 FREE' : HINT_HTML; b.classList.toggle('glowHint', free && !!P.hintOffered); }
+const _updPlayD = updPlay; updPlay = function (dt) { const had = !!(P && P.fb); _updPlayD(dt); if (!P || G.paused) return; const T_ = TIERS[P.tier || 0];
+  if (had && !P.fb && T_.fbGap) P.fbNext = P.elapsed + rand(T_.fbGap[0], T_.fbGap[1]);
+  if (P.freeHint && !P.hintOffered && !P.done && P.elapsed - Math.max(0, P.lastFind) > 25) { P.hintOffered = 1; hintLabel(); say('Stuck? Free hint! Tap 💡', 4500, true); } };
+const _useHintD = useHint; useHint = function () {
+  if (P && P.freeHint && G.scene === 'play' && !P.done && !G.paused) { const rem = P.diffs.filter(d => !d.found); if (!rem.length) return; const d = pick(rem); P.freeHint = 0; P.hintCool = 3; P.idle = 0; P.glow = { L: d.L, R: d.R, r: .16, t: 0 }; SFX.ding(); say('Free hint! Look in the glow!', 3000); hintLabel(); return; }
+  _useHintD(); };
+const _startPlayD = startPlay; startPlay = function () { _startPlayD(); if (G.scene !== 'play' || !P) return; hintLabel(); if (P.warm) { say("Let's warm up!", 3500, true); if (typeof talkSay === 'function') talkSay({ who: 'pup', text: "Let's warm up!" }, 5); } };
+/* ---- wins / loss streak (saved in rescueRaid.v1) ---- */
+const _startWinD = startWin; startWin = function () { const was = G.scene; _startWinD(); if (was === 'play' && G.scene === 'win') { SAVE.wins = winsOf() + 1; SAVE.lossStreak = 0; store(); } };
+const _startLoseD = startLose; startLose = function () { const was = G.scene; _startLoseD(); if (was === 'play' && G.scene === 'lose') { SAVE.lossStreak = (SAVE.lossStreak | 0) + 1; store(); } };
+const _addEntryD = addEntry; addEntry = function (i, name, sc) { _addEntryD(i, name, sc); const l = SAVE.b[i] || []; let e = null; for (const x of l) if (!e || (x.ts || 0) > (e.ts || 0)) e = x; if (e && P) { e.tr = P.tier; store(); } };
+function initWins() { if (SAVE.wins == null) SAVE.wins = (SAVE.st || []).filter(x => x > 0).length; if (SAVE.tierSeen == null) SAVE.tierSeen = earnedTier(); }
+initWins(); store();
+const _loadSaveD = loadSave; loadSave = function () { delete SAVE.wins; delete SAVE.lossStreak; delete SAVE.tierSeen; _loadSaveD(); initWins(); };
+/* ---- map HUD badge + GSAP rank-up ---- */
+(function () {
+  const st = document.createElement('style'); st.textContent = '#rankBadge{position:fixed;left:10px;top:74px;z-index:19;background:#fffaf0;border:3px solid #1d1b26;border-radius:999px;padding:5px 12px 3px;font:19px "Luckiest Guy","Comic Sans MS",system-ui,sans-serif;box-shadow:0 3px 0 #1d1b26;pointer-events:none;white-space:nowrap}#rankBadge small{font-size:14px;opacity:.75}#rankBadge{transform-origin:left center}#rankUp{position:fixed;left:50%;top:40%;z-index:40;margin:-110px 0 0 -150px;width:300px;text-align:center;pointer-events:none;font:40px/1.1 "Luckiest Guy","Comic Sans MS",system-ui,sans-serif;color:#ffd23f;-webkit-text-stroke:2px #1d1b26;background:#3a2a6e;border:4px solid #1d1b26;border-radius:28px;box-shadow:0 6px 0 #1d1b26;padding:14px 10px 18px;opacity:0}#rankUp .e{font-size:80px;display:block;-webkit-text-stroke:0}#rankUp .n{color:#fff;font-size:34px}#bHint.glowHint{animation:hintGlow .8s ease-in-out infinite alternate}@keyframes hintGlow{from{box-shadow:0 4px 0 #1d1b26,0 0 0 0 rgba(255,210,63,.9)}to{box-shadow:0 4px 0 #1d1b26,0 0 22px 10px rgba(255,210,63,.95)}}';
+  document.head.appendChild(st);
+  const bd = document.createElement('div'); bd.id = 'rankBadge'; document.body.appendChild(bd); const up = document.createElement('div'); up.id = 'rankUp'; document.body.appendChild(up);
+  const paint = () => { const ti = effTier(), T_ = TIERS[ti], w = winsOf(); bd.innerHTML = `${T_.emo} ${T_.name} · ${w} win${w === 1 ? '' : 's'}${warmUp() ? ' <small>(warm-up)</small>' : ''}`; };
+  function celebrate(ti) { const T_ = TIERS[ti]; up.innerHTML = `<span class="e">${T_.emo}</span>RANK UP!<br><span class="n">${T_.name}</span>`; SFX.fanfare && SFX.fanfare(); confetti(70);
+    const tl = gsap.timeline(); tl.set(up, { opacity: 1, scale: .2, rotation: -12 }).to(up, { scale: 1.15, rotation: 4, duration: .45, ease: 'back.out(3)' }).to(up, { scale: 1, rotation: 0, duration: .25 })
+      .fromTo(bd, { scale: 1 }, { scale: 1.35, duration: .25, yoyo: true, repeat: 3, ease: 'sine.inOut' }, '<').to(up, { opacity: 0, y: -60, duration: .5, ease: 'power2.in' }, '+=1.4'); }
+  const _setTopR = setTop; setTop = function () { _setTopR(); bd.hidden = G.scene !== 'map'; if (G.scene === 'map') paint(); };
+  const _goMapR = goMap; goMap = function () { _goMapR(); paint(); const e = earnedTier(); if (e > (SAVE.tierSeen | 0)) { SAVE.tierSeen = e; store(); setTimeout(() => { if (G.scene === 'map') celebrate(e); }, 350); } };
+  setTop();
+  window.__game.tier = { TIERS, earnedTier, effTier, warmUp, get cur() { return P ? P.tier : null; }, celebrate };
 })();
 </script>
 </body>
