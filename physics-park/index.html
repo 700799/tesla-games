@@ -704,13 +704,15 @@ function sizeCanvas(cv) { const r = cv.getBoundingClientRect(), d = Math.min(2, 
 const MAP_POS_WIDE = [[.12, .74], [.27, .52], [.42, .78], [.56, .5], [.7, .78], [.84, .52], [.9, .84]];
 const MAP_POS_TALL = [[.28, .12], [.72, .23], [.28, .36], [.72, .48], [.28, .6], [.72, .72], [.5, .87]];
 function mapPos() { const r = $('rides').getBoundingClientRect(); return r.width / Math.max(1, r.height) < 1 ? MAP_POS_TALL : MAP_POS_WIDE; }
+// next suggested ride = first one not fixed yet (all rides are always open)
+function nextRide() { const i = MISSIONS.findIndex(m => !save.done[m.id]); return i < 0 ? MISSIONS.length - 1 : i; }
 function buildMap() {
   const box = $('rides'); box.innerHTML = '';
   const pos = mapPos(); let total = 0;
   MISSIONS.forEach((m, i) => {
-    const locked = i + 1 > save.unlocked, st = save.stars[m.id] || 0; total += st;
+    const locked = false, st = save.stars[m.id] || 0; total += st;
     const cv = h('canvas', { width: 168, height: 168 });
-    const el = h('button', { class: 'ride' + (locked ? ' locked' : '') + (!locked && !save.done[m.id] && i + 1 === save.unlocked ? ' next' : ''), style: `left:${pos[i][0] * 100}%;top:${pos[i][1] * 100}%`, 'aria-label': m.name },
+    const el = h('button', { class: 'ride' + (locked ? ' locked' : '') + (!locked && !save.done[m.id] && i === nextRide() ? ' next' : ''), style: `left:${pos[i][0] * 100}%;top:${pos[i][1] * 100}%`, 'aria-label': m.name },
       h('span', { class: 'num' }, String(i + 1)), cv, h('b', {}, m.name),
       h('div', { class: 'st', html: [1, 2, 3].map(k => k <= st ? '★' : '<span class="off">★</span>').join('') }),
       locked ? h('span', { class: 'lock' }, '🔒') : null);
@@ -922,7 +924,7 @@ function finishMission() {
   $('resStars').innerHTML = [1, 2, 3].map(k => k <= stars ? '★' : '<span class="off">★</span>').join('');
   const lastRide = cur.mi === MISSIONS.length - 1;
   $('resMsg').innerHTML = '✅ <b>' + r + ' / ' + n + '</b> right! ' + (stars === 3 ? '🏆 Perfect!' : '↻ Replay for 3 ★') +
-    (lastRide ? '<br><b>🎉 Physics Park is OPEN! 🎉</b>' : '<br>🔓 Next ride open!');
+    (lastRide ? '<br><b>🎉 Physics Park is OPEN! 🎉</b>' : '<br>🎢 Ride fixed!');
   const btns = $('resBtns'); btns.innerHTML = '';
   if (!lastRide) btns.append(navBtn('Next ride ▶', 'go', () => { $('resOv').hidden = true; startMission(cur.mi + 1); }));
   btns.append(navBtn('🗺 Map', 'blue', () => { $('resOv').hidden = true; show('map'); }));
@@ -3114,7 +3116,7 @@ buildMap = function () {
 };
 function layoutMap(W, H) {
   const r = $('rides').getBoundingClientRect(), pos = mapPos(), R = clamp(Math.min(W, H - r.top) * 0.085, 40, 74);
-  MW.gates = MISSIONS.map((m, i) => ({ i, m, x: r.left + pos[i][0] * r.width, y: r.top + pos[i][1] * r.height, R, locked: i + 1 > save.unlocked }));
+  MW.gates = MISSIONS.map((m, i) => ({ i, m, x: r.left + pos[i][0] * r.width, y: r.top + pos[i][1] * r.height, R, locked: false }));
   MW.R = R; MW.top = r.top; MW.W = W; MW.H = H;
   if (MW.needLayout) {
     let x, y;
@@ -3162,7 +3164,7 @@ function stepKart(dt) {
   }
 }
 function drawGate(c, g, t) {
-  const { x, y, R } = g, icon = mapIcons()[g.i], st = save.stars[g.m.id] || 0, next = !g.locked && !save.done[g.m.id] && g.i + 1 === save.unlocked;
+  const { x, y, R } = g, icon = mapIcons()[g.i], st = save.stars[g.m.id] || 0, next = !g.locked && !save.done[g.m.id] && g.i === nextRide();
   const wob = next ? Math.sin(t * 5) * 0.05 : 0;
   c.save(); c.translate(x, y); c.rotate(wob);
   c.fillStyle = 'rgba(30,20,50,.18)'; ell(c, 0, R * 1.05, R * 1.1, R * 0.22); c.fill();
@@ -3198,7 +3200,7 @@ function mapFrame(dt, ts) {
   drawParkBg(c, W, H, ts, { paths: MW.gates.map(g => [g.x / W, g.y / H]) });
   const k = MW.kart, s = MW.R / 62;
   // ghost arrow demo toward the next ride until the player moves
-  const ng = MW.gates[Math.min(MW.gates.length - 1, save.unlocked - 1)];
+  const ng = MW.gates[nextRide()];
   if (!MW.moved && ng) { c.save(); c.setLineDash([14, 12]); c.lineDashOffset = -ts * 40; c.strokeStyle = 'rgba(255,255,255,.9)'; c.lineWidth = 7; c.beginPath(); c.moveTo(k.x, k.y); c.lineTo(lerp(k.x, ng.x, 0.8), lerp(k.y, ng.y, 0.8)); c.stroke(); c.restore();
     c.font = '44px system-ui'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('👆', lerp(k.x, ng.x, (ts * 0.5) % 1 * 0.8) + 10, lerp(k.y, ng.y, (ts * 0.5) % 1 * 0.8) + 24); }
   for (const g of MW.gates) drawGate(c, g, ts);

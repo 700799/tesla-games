@@ -1484,7 +1484,7 @@ function placePup() {
   else { const port = H > W * 1.05; p.x = W * (port ? .5 : .13); p.y = H * (port ? .97 : .6); }
   p.x = clamp(p.x, pr * 1.3, W - pr * 1.3); p.y = clamp(p.y, MAP.top + pr * 3.6, H - 6);
 }
-const isLocked = n => n.kind === 'level' && n.i >= save.unlocked;
+const isLocked = n => false; // every dojo open from the start
 function updateMap(dt) {
   const p = MAP.pup, pr = mapPR(), sp = Math.min(W, H) * 0.75;
   for (const n of MAP.nodes) { n.shake = Math.max(0, n.shake - dt); n.flash = Math.max(0, n.flash - dt); }
@@ -1602,7 +1602,7 @@ function drawNode(c, n) {
 function drawMapScene(c) {
   const L = MAP.nodes.filter(n => n.kind === 'level');
   for (let i = 0; i < L.length - 1; i++) {   // stepping-stone path
-    const a = L[i], b = L[i + 1], d = Math.hypot(b.x - a.x, b.y - a.y), steps = Math.floor(d / (30 * S)), open = i + 1 < save.unlocked;
+    const a = L[i], b = L[i + 1], d = Math.hypot(b.x - a.x, b.y - a.y), steps = Math.floor(d / (30 * S)), open = true;
     for (let k = 1; k < steps; k++) { const t = k / steps; if (Math.hypot(lerp(a.x, b.x, t) - a.x, lerp(a.y, b.y, t) - a.y) < a.r * 1.2 || Math.hypot(lerp(a.x, b.x, t) - b.x, lerp(a.y, b.y, t) - b.y) < b.r * 1.2) continue;
       c.fillStyle = open ? '#fff3dc' : '#d9c7a3'; c.strokeStyle = 'rgba(29,27,38,.5)'; c.lineWidth = 2; E(c, lerp(a.x, b.x, t), lerp(a.y, b.y, t) + a.r * 0.6, 9 * S, 6 * S); c.fill(); c.stroke(); }
   }
@@ -2263,11 +2263,11 @@ function finishLevel() {
   $('resStars').innerHTML = starsHTML(stars);
   $('resText').innerHTML = st.bossDone
     ? `👹 <b>${Math.round(st.bossAcc * 100)}%</b> · ✔ <b>${st.quiz}/${quiz.qs.length}</b> · ⭐ <b>${G.score}</b>${G.score >= save.best[i] ? ' 🏆' : ''}`
-    : `✔ <b>${st.quiz}/${quiz.qs.length}</b> · Beat the 👹 Boss to unlock more!`;
+    : `✔ <b>${st.quiz}/${quiz.qs.length}</b> · Beat the 👹 Boss for your stars!`;
   if (stars) confettiBurst(stars * 50);
   const fs = FACTS.filter(f => f.lv === i).map(f => f.big).join(' · ');
   $('resFacts').textContent = '📜 ' + fs;
-  const hasNext = i + 1 < LEVELS.length && save.unlocked > i + 1;
+  const hasNext = i + 1 < LEVELS.length;
   $('resNext').hidden = !hasNext && st.bossDone;
   $('resNext').textContent = st.bossDone ? 'Next Level ▶' : '↻ Retry Boss';
 }

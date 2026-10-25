@@ -1629,7 +1629,7 @@ if (!save.done || typeof save.done !== 'object') save.done = {};
 function persist() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) { } }
 const stageDone = s => s.type === 'run' ? !!save.done[s.key] : !!save.boss[s.wing];
 const firstOpen = () => { const i = STAGES.findIndex(s => !stageDone(s)); return i < 0 ? STAGES.length : i; };
-const stageUnlocked = i => i <= firstOpen();
+const stageUnlocked = i => true;   // every stage open from the start; firstOpen() is just the suggested next
 const totalStars = () => Object.values(save.done).reduce((a, b) => a + b, 0) + Object.values(save.boss).reduce((a, b) => a + b, 0);
 const doneCount = () => ORDER.filter(k => save.done[k]).length;
 
@@ -1747,6 +1747,13 @@ function startStage(i) {
   show('game');
   const wingIdx = WINGS.findIndex(w => w.id === st.wing);
   const boss = st.type === 'boss';
+  // jumped ahead of the suggested stage? lend a minimum loadout so banked ammo is never a blocker
+  let loan = false;
+  if (i > firstOpen()) {
+    const min = boss ? { arrow: 6, bomb: 2, grenade: 1 } : { arrow: 3, bomb: 1, grenade: 0 };
+    for (const k in min) if ((save.ammo[k] || 0) < min[k]) { save.ammo[k] = min[k]; loan = true; }
+    if (loan) persist();
+  }
   const W = boss ? 1800 : 3000, H = boss ? 1300 : 1300;
   const R = rng(1234 + i * 77);
   G = { i, st, wingIdx, theme: WING_RUN[st.wing], W, H, t: 0, state: 'play', zoom: 1, cam: { x: 0, y: 0 }, shake: 0, timeScale: 1, slow: 0,
@@ -1789,6 +1796,7 @@ function startStage(i) {
   $('#goalTx').textContent = boss ? `👾 ${G.boss.name}` : `🎯 ${shortName(st.key)}`;
   G.wep = 'basic'; renderWeps(); renderHearts();
   if (G.tut || i === 0) $('#fire').classList.add('glow');
+  if (loan) setTimeout(() => burst('🎁 Loaner gear! 🏹💣🧨', 'good'), 500);
 }
 function sayLine(txt) {
   const s = $('#say'); s.innerHTML = ''; s.appendChild(el('span', '', '🐾')); s.appendChild(el('span', '', esc(txt)));

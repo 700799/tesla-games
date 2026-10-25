@@ -383,7 +383,7 @@ function getStars() { try { return JSON.parse(localStorage.getItem('holecity.sta
 function saveStars(i, n) { const st = getStars(); st[i] = Math.max(st[i] || 0, n); try { localStorage.setItem('holecity.stars', JSON.stringify(st)); } catch (_) {} }
 function getBrains() { try { return JSON.parse(localStorage.getItem('holecity.brains')) || []; } catch (_) { return []; } }
 function saveBrain(i) { const b = getBrains(); b[i] = 1; try { localStorage.setItem('holecity.brains', JSON.stringify(b)); } catch (_) {} }
-const unlocked = i => i === 0 || (getStars()[i - 1] || 0) >= 1;
+const unlocked = i => true; // every level open from the start
 
 const SHIRTS = ['#ef476f','#ffd166','#06d6a0','#118ab2','#f78c6b','#9b5de5','#f15bb5','#00bbf9','#fee440','#ffffff'];
 const CARS = ['#e63946','#f4a261','#2a9d8f','#457b9d','#e9c46a','#f1faee','#8338ec','#3a86ff','#222831','#ff006e'];

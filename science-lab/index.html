@@ -809,7 +809,7 @@ $('#next').onclick = () => {
   if (M.onNext && M.onNext() === false) return;
   M.onNext = null;
   if (M.phase === 3 && !M.bossWon) {
-    modal('Skip the boss?', '<p style="font-size:60px;margin:6px">👾 🔓</p><p>Beat the boss to unlock the next lab!</p>',
+    modal('Skip the boss?', '<p style="font-size:60px;margin:6px">👾 ⭐</p><p>Beat the boss to earn a star!</p>',
       [{ label: 'Keep trying', cls: 'go' }, { label: 'Skip', cls: 'alt', fn: () => gotoPhase(4) }]);
     return;
   }
@@ -916,10 +916,9 @@ function runQuiz(qs, c) {
     box.append(h('h2', null, stars === 3 ? 'Super Scientist!' : stars === 2 ? 'Great work!' : 'Mission done!'),
       h('div', { class: 'bigstars', html: s }),
       h('ul', { html: `<li>${starStr(1, 1)} 🏁 Finished</li><li>${starStr(M.bossWon ? 1 : 0, 1)} 👾 Beat the boss</li><li>${starStr(right === qs.length ? 1 : 0, 1)} 🧠 Quiz ${right}/${qs.length}</li>` }),
-      M.bossWon && nx && !prev ? h('p', { class: 'bigfact' }, '🔓 Unlocked: ' + nx.name + '!') : null,
       h('div', { class: 'ctrls' },
         h('button', { class: 'btn alt', onclick: () => { sfx.tap(); const id = st.id; leaveMission(); startMission(id); } }, '↺ Replay'),
-        nx && save.unlocked[nx.id] ? h('button', { class: 'btn go glow', onclick: () => { sfx.tap(); leaveMission(); startMission(nx.id); } }, nx.name + ' ▶') : null,
+        nx ? h('button', { class: 'btn go glow', onclick: () => { sfx.tap(); leaveMission(); startMission(nx.id); } }, nx.name + ' ▶') : null,
         h('button', { class: 'btn yel', onclick: () => { sfx.tap(); leaveMission(); } }, '🏠 Lab')));
     confetti(stars * 30); sfx.win();
     if (stars === 3) burst('SUPER!', C.green);
@@ -2661,7 +2660,7 @@ function renderTitle() {
   let tot = 0;
   STATIONS.forEach((st, i) => {
     const stars = save.stars[st.id] || 0; tot += stars;
-    const open = !!save.unlocked[st.id];
+    const open = true;   // every lab open from the start
     const el = h('div', { class: 'station panel' + (open ? '' : ' locked'), style: { '--c': st.color } });
     el.innerHTML = st.icon;
     el.append(h('h3', null, (i + 1) + '. ' + st.name), h('p', null, st.short), h('div', { class: 'stars', html: starStr(stars) }));

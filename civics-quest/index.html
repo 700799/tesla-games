@@ -1742,7 +1742,7 @@ function skyline() {
     <g transform="translate(820 34) scale(.82)">${inner(ART.archives())}</g></svg>`;
 }
 function inner(svg) { return svg.replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, ''); }
-function unlocked(i) { return i === 0 || save.done.includes(i - 1); }
+function unlocked(i) { return true; }   // every mission building open from the start
 function renderMap() {
   cur = null; screenName = 'map';
   const total = Object.values(save.stars).reduce((a, b) => a + b, 0);

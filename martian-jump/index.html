@@ -1308,7 +1308,7 @@ function hubLayout(reset) {
   const R = clamp(Math.min(W, H) * 0.1, 42, 120);
   hub.pr = clamp(Math.min(W, H) * 0.028, 11, 28);
   hub.portals = PORTALS.map((p, i) => ({ ...p, x: pos[i][0] * W, y: pos[i][1] * H, r: R,
-    open: i === 0, locked: i === 0 ? false : i === 1 ? !save.region2 : true }));
+    open: i === 0, locked: false }));   // no force fields: craters 2-4 are simply still under construction
   const rk = port ? [[0.8, 0.85], [0.12, 0.52], [0.55, 0.38], [0.9, 0.35]] : [[0.3, 0.86], [0.52, 0.47], [0.76, 0.86], [0.08, 0.25]];
   hub.rocks = rk.map(([fx, fy], i) => ({ x: fx * W, y: fy * H, r: R * (0.35 + 0.12 * (i % 2)) }));
   if (!hub.stars.length) {
@@ -1368,7 +1368,7 @@ function updateHub(dt) {
       if (hub.got === 5) { addBurst('ALL STARS!', W / 2, H * 0.3); confettiBurst(80); sfx.good(); } }
   }
   // Region 2's force field shatters the first time you come back after beating the boss
-  if (save.region2 && !save.r2Shown && hub.time > 0.9) {
+  if (false && save.region2 && !save.r2Shown && hub.time > 0.9) {   // no force field to shatter any more
     save.r2Shown = true; persist();
     const p = hub.portals[1];
     for (let i = 0; i < 24; i++) { const a = rnd(0, TAU), sp = rnd(150, 450); addPart({ type: 'shard', x: p.x + Math.cos(a) * p.r, y: p.y + Math.sin(a) * p.r, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, g: 300, r: rnd(6, 14), rot: rnd(0, 6), vrot: rnd(-10, 10), life: 1.2, max: 1.2 }); }

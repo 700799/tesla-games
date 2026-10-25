@@ -275,7 +275,7 @@ const SKEY = 'timeTravelQuest.v1';
 let save = { stars: [0, 0, 0, 0], played: [0, 0, 0, 0] };
 try { const s = JSON.parse(localStorage.getItem(SKEY) || 'null'); if (s && Array.isArray(s.stars)) save = Object.assign(save, s); } catch (e) { }
 function persist() { try { localStorage.setItem(SKEY, JSON.stringify(save)); } catch (e) { } }
-const unlocked = i => i === 0 || save.stars[i - 1] > 0;
+const unlocked = i => true;   // every time portal open from the start
 
 /* ---------- sound (synthesized) ---------- */
 let AC = null, muted = false;
@@ -610,7 +610,7 @@ function finishEra(right) {
     <p>${right} / ${era.quiz.length} right${stars > before && before ? ' · new best! 🎉' : ''}</p>
     ${lessonHTML(era)}
     <div class="shelf" style="grid-template-columns:1fr;background:none;padding:0"><div><canvas id="souvC" width="220" height="220"></canvas><br>Souvenir: <b>${era.souvenir.name}</b> 🏆</div></div>
-    ${nextName ? `<p class="toon" style="font-size:22px;color:#c9184a">New stop unlocked: ${nextName}!</p>` : ''}
+    ${nextName ? `<p class="toon" style="font-size:22px;color:#c9184a">Next stop: ${nextName}!</p>` : ''}
     <div class="row"><button class="btn alt" id="fAgain">↻ Play again</button><button class="btn go" id="fMap">🗺 Time map</button></div>`, c => {
     era.souvenir.draw(c.querySelector('#souvC').getContext('2d'), 220);
     c.querySelector('#fAgain').onclick = () => { SFX.tap(); closeModal(); startPhase(0); };

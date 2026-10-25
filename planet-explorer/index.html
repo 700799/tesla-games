@@ -306,7 +306,7 @@
     <h2>❓ How to play</h2>
     <div class="helpGrid">
       <div><b>👆</b>Drag to fly</div><div><b>🪐</b>Crash in = enter</div><div><b>🎯</b>Tap to shoot</div>
-      <div><b>🔒</b>Win gear to unlock</div><div><b>🔊</b>Listen</div><div><b>⭐</b>Win stars</div>
+      <div><b>🧰</b>Win gear to keep</div><div><b>🔊</b>Listen</div><div><b>⭐</b>Win stars</div>
     </div>
     <div class="row"><button class="btn go pulse" id="helpClose">👍 Got it!</button></div>
   </div>
@@ -818,9 +818,9 @@ function startTitle() {
 }
 
 // ================= HUB: flyable solar system =================
-function isUnlocked(i) { return i === 0 || !!save.done[PLANETS[i - 1].id]; }
+function isUnlocked(i) { return true; }   // every planet open from the start
 function missingGear(P) { return (P.needs || []).filter(g => !hasGear(g)); }
-function isOpen(i) { return isUnlocked(i) && !missingGear(PLANETS[i]).length; }
+function isOpen(i) { return true; }   // missing gear is lent on entry (see startMission)
 function starStr(n) { let s = ''; for (let i = 0; i < 3; i++) s += i < n ? `<span style="animation-delay:${i * 0.15}s">★</span>` : '<span class="off">★</span>'; return s; }
 const HUB = { ship: null, rocks: [], bolts: [], F: makeFx(), joy: null, last: 0, fireHeld: false, cool: 0, grace: 0, entering: null, msgT: 0, from: -1, handShown: false };
 function hubLayout(W, H) {
@@ -840,7 +840,7 @@ function fieldR(id, r) { return id === 'saturn' ? r * 2.4 : r * 1.55; }
 function renderHub() {
   for (const a of [...anims]) if (a.hub && a.cv !== $('titlePup')) anims.delete(a);
   const n = PLANETS.filter(P => save.done[P.id]).length;
-  const nextIdx = PLANETS.findIndex((P, i) => isUnlocked(i) && !save.done[P.id]);
+  const nextIdx = PLANETS.findIndex(P => !save.done[P.id]);
   HUB.next = nextIdx;
   say('hubCoach', n === 0 ? '👆 Drag to fly! Tap ☄️ to blast! Fly to 🔴'
     : n < PLANETS.length ? `🚀 Next: ${PLANETS[nextIdx].name}!` : '🏆 All done! Blast ☄️ or replay!');
@@ -1037,6 +1037,9 @@ function startMission(i) {
   $('pname').textContent = cur.P.name;
   sfx.whoosh();
   goPhase(0);
+  // jumped ahead without the gear? lend it for this trip (not saved) so nothing is blocked
+  const loan = missingGear(cur.P);
+  if (loan.length) setTimeout(() => toast('🎁 Loaner gear! ' + loan.map(g => GEAR[g].emoji + ' ' + GEAR[g].name).join(' + ') + ' for this trip'), 300);
 }
 function cleanupPhase() {
   for (const a of [...anims]) if (!a.hub) anims.delete(a);

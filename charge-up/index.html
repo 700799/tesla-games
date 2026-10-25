@@ -311,7 +311,7 @@ const KEY = 'chargeUp.v1';
 let save = { done:{}, stars:{}, mute:false };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && typeof s === 'object') save = Object.assign(save, s); } catch (e) {}
 function persist() { try { localStorage.setItem(KEY, JSON.stringify(save)); } catch (e) {} }
-function unlocked(id) { return id === 1 || !!save.done[id - 1]; }
+function unlocked(id) { return true; }   // every stop open from the start
 
 /* ================= sound ================= */
 let AC = null;
@@ -842,7 +842,7 @@ function runQuiz(P, qs) {
       const nextM = MISSIONS[m.id];
       const c = showOverlay(`<h2>Mission Complete!</h2><div class="stars">${'&#9733;'.repeat(stars)}<span class="off">${'&#9733;'.repeat(3 - stars)}</span></div>
         <div class="badgeWin">${badgeSVG(m, 130)}</div><p><b class="toon" style="font-size:28px">${m.badge}</b><br>${m.badgeText}</p>
-        ${!wasDone && nextM ? `<p style="color:#078a63">${icon('lock', 26)} &#10140; <b>${nextM.stop}</b> unlocked!</p>` : ''}
+        ${!wasDone && nextM ? `<p style="color:#078a63">&#10140; Next stop: <b>${nextM.stop}</b></p>` : ''}
         <div class="row">${nextM ? `<button class="btn go" id="rNext">Next: ${nextM.stop} &#9654;</button>` : ''}<button class="btn yel" id="rAgain">&#8635; Replay</button><button class="btn alt" id="rMap">Map</button></div>`);
       $('#rNext', c) && ($('#rNext', c).onclick = () => { sfx.whoosh(); openMission(nextM.id); });
       $('#rAgain', c).onclick = () => { sfx.tap(); openMission(m.id); };
